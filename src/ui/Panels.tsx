@@ -8,6 +8,8 @@ import { BLOCK_STEPS } from '../scene/blockGeom'
 import { meanAttnLast } from '../scene/Journey'
 import { stepName } from './Timeline'
 import { BLOCK_PIECE, Fiche, JOURNEY_PIECE } from './Fiche'
+import { TryPanel } from './TryPanel'
+import { useOutputProbs } from '../data/useOutputProbs'
 
 export function LangToggle() {
   const { lang, setLang } = useStore()
@@ -63,10 +65,24 @@ export function Probs({ items, highlight }: { items: { t: string; p: number }[];
   )
 }
 
+function Tabs() {
+  const { t } = useT()
+  const { tab, setTab } = useStore()
+  return (
+    <div className="tabs" role="tablist">
+      {(['journey', 'try'] as const).map((k) => (
+        <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{k === 'journey' ? t.tabs.journey : t.tabs.tryit}</button>
+      ))}
+    </div>
+  )
+}
+
 /** Panneau du trajet : explication de l'étape en cours, avec les vrais nombres de la trace. */
 export function JourneyPanel({ trace, lay }: { trace: Trace; lay: JourneyLayout }) {
   const { t, num, pct } = useT()
   const progress = useStore((s) => s.progress)
+  const tab = useStore((s) => s.tab)
+  const out = useOutputProbs(trace)
   const seek = useStore((s) => s.seek)
   const setCam = useStore((s) => s.setCam)
   const c = trace.config
@@ -123,17 +139,27 @@ export function JourneyPanel({ trace, lay }: { trace: Trace; lay: JourneyLayout 
     body = (
       <>
         <p>{t.step.probs}</p>
-        <p>{t.step.chosen} : <b className="mono chosen">{showTok(trace.output.top10[0].t)}</b></p>
+        <p>{t.step.chosen} : <b className="mono chosen">{showTok(out.top10[0].t)}</b></p>
         <h2>{t.top10}</h2>
-        <Probs items={trace.output.top10} highlight={0} />
+        <Probs items={out.top10} highlight={0} />
+        {!out.exact && <p className="small muted">{t.tryit.srcTraceApprox}</p>}
       </>
     )
   }
 
   const cur = Math.floor(progress)
+  if (tab === 'try') return (
+    <aside className="panel">
+      <Header trace={trace} />
+      <Tabs />
+      <TryPanel trace={trace} />
+      <Footer trace={trace} />
+    </aside>
+  )
   return (
     <aside className="panel">
       <Header trace={trace} />
+      <Tabs />
       <h2 className="step-title">{stepName(t, s, lay.L)}</h2>
       <div className="step-body">{body}</div>
       <Fiche id={JOURNEY_PIECE[s.kind]} />

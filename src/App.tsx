@@ -16,7 +16,6 @@ import { Timeline } from './ui/Timeline'
 import { BlockPanel, JourneyPanel } from './ui/Panels'
 import { EnquetePage, useRoute } from './ui/EnquetePage'
 
-const TRACE_ID = new URLSearchParams(location.search).get('trace') ?? 'dev-1b-satellite'
 
 export default function App() {
   const route = useRoute()
@@ -29,7 +28,8 @@ function Schema() {
   const [err, setErr] = useState<string | null>(null)
   const view = useStore((s) => s.view)
   const lang = useStore((s) => s.lang)
-  useEffect(() => { loadTrace(TRACE_ID).then(setTrace).catch((e) => setErr(String(e))) }, [])
+  const traceId = useStore((s) => s.traceId)
+  useEffect(() => { loadTrace(traceId).then(setTrace).catch((e) => setErr(String(e))) }, [traceId])
   useEffect(() => { document.documentElement.lang = lang }, [lang])
   const lay = useMemo(() => (trace ? journeyLayout(trace) : null), [trace])
   const geo = useMemo(() => (trace ? blockGeom(trace) : null), [trace])

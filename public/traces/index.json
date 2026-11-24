@@ -1,0 +1,9 @@
+[
+ {
+  "id": "dev-1b-satellite",
+  "prompt": "The satellite lost its antenna because it",
+  "model": "unsloth/Llama-3.2-1B-Instruct",
+  "n_layers": 16,
+  "dtype": "bfloat16"
+ }
+]

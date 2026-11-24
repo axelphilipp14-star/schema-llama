@@ -9,8 +9,10 @@
     "preview": "vite preview",
     "test": "vitest run",
     "e2e": "playwright test",
-    "content": "node scripts/build-content.mjs",
-    "content:check": "node scripts/build-content.mjs --check"
+    "content": "node scripts/build-content.mjs && node scripts/index-traces.mjs",
+    "content:check": "node scripts/build-content.mjs --check",
+    "traces:index": "node scripts/index-traces.mjs",
+    "prebuild": "node scripts/index-traces.mjs"
   },
   "dependencies": {
     "@huggingface/transformers": "^4.3.2",

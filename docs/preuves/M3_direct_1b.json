@@ -1,0 +1,105 @@
+{
+ "date": "2026-11-24T17:00:42.398Z",
+ "machine": "MacBook A18 Pro, 8 Go",
+ "model": "1b",
+ "first_result_wall_s": 25.125,
+ "status": "ready",
+ "error": null,
+ "loadS": 19.1,
+ "warmS": 5,
+ "firstResultS": 25,
+ "forwardMs": 504,
+ "top10": [
+  [
+   " was",
+   0.5186
+  ],
+  [
+   " had",
+   0.0747
+  ],
+  [
+   " is",
+   0.049
+  ],
+  [
+   " got",
+   0.0364
+  ],
+  [
+   " has",
+   0.0189
+  ],
+  [
+   "'s",
+   0.0159
+  ],
+  [
+   " failed",
+   0.0136
+  ],
+  [
+   " fell",
+   0.0113
+  ],
+  [
+   " went",
+   0.0086
+  ],
+  [
+   " hit",
+   0.0074
+  ]
+ ],
+ "compare": [
+  "Même phrase et même modèle que la trace : top-1 identique ✓ · 8/10 tokens en commun (quantification q4 contre bf16).",
+  "Llama 3.2 1B prêt · chargement 19,1 s · préparation 5 s · 1er résultat 25 s après le clic."
+ ],
+ "t05_top3": [
+  [
+   " was",
+   0.961
+  ],
+  [
+   " had",
+   0.0199
+  ],
+  [
+   " is",
+   0.0086
+  ]
+ ],
+ "sampled": {
+  "id": 574,
+  "t": " was",
+  "p": 0.9610369205474854,
+  "rank": 0
+ },
+ "french": {
+  "forwardMs": 697,
+  "tokens": 12,
+  "top5": [
+   [
+    " a",
+    0.2852
+   ],
+   [
+    " était",
+    0.2597
+   ],
+   [
+    " s",
+    0.1527
+   ],
+   [
+    " n",
+    0.0817
+   ],
+   [
+    " est",
+    0.0651
+   ]
+  ]
+ },
+ "errors": []
+}

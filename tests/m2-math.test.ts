@@ -6,7 +6,7 @@ import type { Trace } from '../src/data/trace'
 import { softmaxRow, silu, mixV, rmsApply } from '../src/data/math'
 
 const dir = 'public/traces'
-const files = readdirSync(dir).filter((f) => f.endsWith('.json') && !f.startsWith('_'))
+const files = readdirSync(dir).filter((f) => f.endsWith('.json') && !f.startsWith('_') && f !== 'index.json')
 const rel = (a: number, b: number, scale: number) => Math.abs(a - b) / (Math.abs(scale) + 1e-2)
 
 describe.each(files)('calculs M2 — %s', (f) => {

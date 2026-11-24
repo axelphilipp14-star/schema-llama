@@ -12,6 +12,10 @@ import { C, div } from './colors'
 import { Cells } from './Cells'
 import { Label } from './labels'
 import { BLOCK_W, LANE, TABLE_H, pulseX, stepAt, type JourneyLayout } from './journeyLayout'
+import { useOutputProbs } from '../data/useOutputProbs'
+
+/** Longueur d'une barre à 100 % (échelle absolue : la température change vraiment la longueur des barres). */
+const PROB_W = 4.2
 
 /** Poids d'attention moyen (sur les têtes) du dernier token vers chaque token, pour un bloc. */
 export function meanAttnLast(trace: Trace, layer: number) {
@@ -64,13 +68,14 @@ export function Journey({ trace, lay }: { trace: Trace; lay: JourneyLayout }) {
     colors: trace.layers.map((l) => new Color(l.lens[0].id === trace.output.greedy_id ? C.out : C.muted)),
   }), [trace])
 
-  const top10 = trace.output.top10
+  const out = useOutputProbs(trace)
+  const top10 = out.top10
   const barY = (i: number) => TABLE_H - 0.1 - i * 0.46
   const probs = useMemo(() => ({
-    pos: top10.map((x, i) => [lay.xProbs + ((x.p / top10[0].p) * 3.4) / 2, barY(i), laneZ(n - 1)] as [number, number, number]),
-    scales: top10.map((x) => [Math.max(0.02, (x.p / top10[0].p) * 3.4), 1, 1] as [number, number, number]),
+    pos: top10.map((x, i) => [lay.xProbs + (x.p * PROB_W) / 2, barY(i), laneZ(n - 1)] as [number, number, number]),
+    scales: top10.map((x) => [Math.max(0.02, x.p * PROB_W), 1, 1] as [number, number, number]),
     colors: top10.map((_, i) => new Color(i === 0 ? C.out : '#2f6f57')),
-  }), [trace])
+  }), [top10])
 
   const attnW = activeLayer >= 0 ? meanAttnLast(trace, activeLayer) : null
   // ⟨début⟩ (k = 0) sert de « puits » : on le dessine à part, et on met les autres arcs à l'échelle entre eux.
@@ -170,7 +175,7 @@ export function Journey({ trace, lay }: { trace: Trace; lay: JourneyLayout }) {
       <Cells pos={probs.pos} scales={probs.scales} colors={probs.colors} size={[1, 0.28, 0.28]}
         info={(i) => ({ label: showTok(top10[i].t), value: pct(top10[i].p, 2) })} />
       {top10.map((x, i) => (
-        <Label key={i} p={[lay.xProbs + (x.p / top10[0].p) * 3.4 + 0.15, barY(i), laneZ(n - 1)]} color={i === 0 ? C.out : C.muted} small align="left" priority={i === 0 ? 8 : 2}>
+        <Label key={i} p={[lay.xProbs + Math.max(0.02, x.p * PROB_W) + 0.15, barY(i), laneZ(n - 1)]} color={i === 0 ? C.out : C.muted} small align="left" priority={i === 0 ? 8 : 2}>
           {showTok(x.t)} {pct(x.p)}
         </Label>
       ))}

@@ -173,3 +173,27 @@ html, body, #root { margin: 0; height: 100%; background: var(--bg); color: var(-
 .reader-src { margin-top: 40px; border-top: 1px solid var(--grid); padding-top: 12px; }
 .prose .mermaid-fig { margin: 18px 0; padding: 16px; background: var(--surface); border: 1px solid var(--grid); border-radius: 10px; overflow-x: auto; text-align: center; }
 .prose .mermaid-fig svg { max-width: 100%; height: auto; }
+
+/* M3 — onglets et « À toi » */
+.tabs { display: flex; gap: 4px; margin-top: 14px; border-bottom: 1px solid var(--grid); }
+.tabs button { background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted); font: 600 13px Inter, sans-serif; padding: 8px 10px; cursor: pointer; }
+.tabs button.on { color: var(--text); border-bottom-color: var(--emb); }
+.try h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 18px 0 6px; font-weight: 600; }
+.try-input { width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 8px; resize: vertical; }
+.try-input:focus { outline: none; border-color: var(--emb); }
+.small-chips { margin-top: 8px; gap: 4px; }
+.small-chips .chip { padding: 2px 6px; }
+.temp { width: 100%; accent-color: var(--out); }
+.temp-val { color: var(--out); text-transform: none; letter-spacing: 0; margin-left: 6px; }
+.temp-scale { display: flex; justify-content: space-between; }
+.src-live { color: var(--out); }
+.src-trace { color: var(--emb); }
+.ok { color: var(--out); }
+.row-btns { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.btn.primary { border-color: var(--out); color: var(--out); }
+.btn:disabled { opacity: 0.5; cursor: default; }
+.pbar.wide { width: 100%; height: 8px; }
+.pbar.wide span { background: var(--out); }
+.trace-list { list-style: none; margin: 0; padding: 0; }
+.linkish { background: none; border: 0; color: var(--text); text-align: left; padding: 4px 0; cursor: pointer; font: inherit; }
+.linkish.on .mono { color: var(--emb); }

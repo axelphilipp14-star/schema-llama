@@ -5,7 +5,7 @@ import type { Trace } from '../src/data/trace'
 
 const EPS: Record<string, number> = { float32: 2 ** -23, float16: 2 ** -10, bfloat16: 2 ** -7 }
 const dir = 'public/traces'
-const files = readdirSync(dir).filter((f) => f.endsWith('.json') && !f.startsWith('_'))
+const files = readdirSync(dir).filter((f) => f.endsWith('.json') && !f.startsWith('_') && f !== 'index.json')
 
 describe.each(files)('trace %s', (f) => {
   const tr: Trace = JSON.parse(readFileSync(`${dir}/${f}`, 'utf8'))

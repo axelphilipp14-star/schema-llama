@@ -73,3 +73,15 @@
 - Bug trouvé par le test : les titres des encadrés disparaissaient (marqueur HTML avalé par le parseur) → corrigé.
 - Tests : `tests/content.test.ts` (pages : sections personnelles absentes, liens, Lexique, HTML neutralisé), `tests/e2e/pages.spec.ts` (fiche → page → Mermaid → retour). 14 unitaires + 3 e2e verts.
 - Preuve : `docs/preuves/M5_page_enquete13.png`, `docs/preuves/M5_mermaid14.png`.
+
+## 2026-11-25 00:40 — M3 · exemple modifiable : ta phrase, la température, le modèle en direct
+- Onglet **« À toi »** dans le panneau : phrase libre ; **tokenizer en direct** (Llama 3, dans un Web Worker, sans GPU) avec numéros des tokens — mêmes numéros que la trace pour la phrase tracée (128000, 791, 24088…) ; **température** 0–2 ; **token suivant** ; **tirage au hasard** + « ajouter à la phrase » ; liste des **phrases tracées** (`public/traces/index.json`, `npm run traces:index`).
+- **Température sur la trace** (sans modèle) : exacte à T = 1 (log Z = logit₁ − ln p₁, déduit de la trace) et à T → 0 ; approximation signalée ailleurs (renormalisée sur les 50 meilleurs tokens gardés). Les barres 3D de la sortie suivent la température (échelle absolue). `tests/temperature.test.ts` : T = 1 redonne le top-10 de la trace, T → 0 glouton, entropie croissante avec T (sur les 50 — sur le seul top-10 elle n'a pas à l'être : mon test initial était faux, corrigé).
+- **Direct** (`src/live/worker.ts`, Transformers.js + WebGPU, Web Worker) : 1B par défaut, 3B en option « lent » (A_TRANCHER Q4 appliqué). **Passe de chauffe** au chargement (leçon AN-002).
+- **Mesures via l'interface réelle** (`scripts/measure-m3.mjs`, Mac d'Axel, modèle en cache) :
+  - **1B** : chargement 19,1 s + chauffe 5,0 s → **1er résultat 25 s après le clic** (M0 : 38 s) → **E5 ✅** ; passe avant 0,5–0,7 s. **E6 ✅** : même phrase que la trace → top-1 identique, 8/10 en commun. T = 0,5 → « was » 96 %. Phrase FR nouvelle (12 tokens) : « a » 28,5 %, « était » 26,0 %.
+  - **3B** : 63 s + 33 s → 1er résultat **107 s** (E5 non tenu, cohérent avec AN-002 : d'où « lent ») ; 4–11 s par phrase. E6 3B en attente de la trace Kaggle.
+- Régressions attrapées par les tests et corrigées : `location` lu au démarrage du store (cassait les tests Node), `index.json` lu comme une trace.
+- Tests : 17 unitaires + 3 e2e verts ; build OK (worker séparé, 546 Ko).
+- Preuve : `docs/preuves/M3_direct_1b.json`, `docs/preuves/M3_direct_3b.json`, `docs/preuves/M3_*.png`.
+- Suivant : M4 (fabriquer) puis M6 (en ligne).

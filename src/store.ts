@@ -27,6 +27,12 @@ interface State {
   /** Saute à une progression (met aussi à jour l'animation). */
   seek: (p: number) => void
   // Vue « dans un bloc » (M2)
+  traceId: string
+  setTraceId: (id: string) => void
+  tab: 'journey' | 'try'
+  setTab: (t: 'journey' | 'try') => void
+  temperature: number
+  setTemperature: (t: number) => void
   blockStep: number
   setBlockStep: (s: number) => void
   head: number
@@ -60,6 +66,12 @@ export const useStore = create<State>((set) => ({
   cam: 'overview',
   setCam: (cam) => set({ cam }),
   seek: (progress) => { anim.progress = progress; set({ progress }) },
+  traceId: (typeof location !== 'undefined' && new URLSearchParams(location.search).get('trace')) || 'dev-1b-satellite',
+  setTraceId: (traceId) => { anim.progress = 0; set({ traceId, progress: 0, playing: false, view: 'journey' }) },
+  tab: 'journey',
+  setTab: (tab) => set({ tab }),
+  temperature: 1,
+  setTemperature: (temperature) => set({ temperature }),
   blockStep: 0,
   setBlockStep: (blockStep) => set({ blockStep }),
   head: 0,
