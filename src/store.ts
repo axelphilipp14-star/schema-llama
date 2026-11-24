@@ -33,6 +33,12 @@ interface State {
   setTab: (t: 'journey' | 'try') => void
   temperature: number
   setTemperature: (t: number) => void
+  phase: 'make' | 'respond'
+  setPhase: (p: 'make' | 'respond') => void
+  makeStep: number
+  setMakeStep: (s: number) => void
+  makeSentence: string
+  setMakeSentence: (s: string) => void
   blockStep: number
   setBlockStep: (s: number) => void
   head: number
@@ -72,6 +78,12 @@ export const useStore = create<State>((set) => ({
   setTab: (tab) => set({ tab }),
   temperature: 1,
   setTemperature: (temperature) => set({ temperature }),
+  phase: (typeof location !== 'undefined' && new URLSearchParams(location.search).get('phase') === 'make') ? 'make' : 'respond',
+  setPhase: (phase) => set({ phase, hover: null, playing: false, view: 'journey' }),
+  makeStep: 0,
+  setMakeStep: (makeStep) => set({ makeStep }),
+  makeSentence: 'en-capital',
+  setMakeSentence: (makeSentence) => set({ makeSentence }),
   blockStep: 0,
   setBlockStep: (blockStep) => set({ blockStep }),
   head: 0,

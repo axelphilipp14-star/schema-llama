@@ -15,6 +15,8 @@ import { LabelOverlay, LabelProjector } from './scene/labels'
 import { Timeline } from './ui/Timeline'
 import { BlockPanel, JourneyPanel } from './ui/Panels'
 import { EnquetePage, useRoute } from './ui/EnquetePage'
+import { MakeRig, MakeScene, type TraceSummary } from './scene/MakeScene'
+import { MakePanel, MakeSteps } from './ui/MakePanel'
 
 
 export default function App() {
@@ -27,6 +29,10 @@ function Schema() {
   const [trace, setTrace] = useState<Trace | null>(null)
   const [err, setErr] = useState<string | null>(null)
   const view = useStore((s) => s.view)
+  const phase = useStore((s) => s.phase)
+  const makeSentence = useStore((s) => s.makeSentence)
+  const [summaries, setSummaries] = useState<TraceSummary[]>([])
+  useEffect(() => { fetch(`${import.meta.env.BASE_URL}traces/index.json`).then((r) => r.json()).then(setSummaries).catch(() => {}) }, [])
   const lang = useStore((s) => s.lang)
   const traceId = useStore((s) => s.traceId)
   useEffect(() => { loadTrace(traceId).then(setTrace).catch((e) => setErr(String(e))) }, [traceId])
@@ -44,7 +50,12 @@ function Schema() {
           <ambientLight intensity={0.7} />
           <directionalLight position={[5, 10, 8]} intensity={1.2} />
           <OrbitControls enableDamping makeDefault />
-          {view === 'journey' ? (
+          {phase === 'make' ? (
+            <group key="make">
+              <MakeScene traces={summaries} sentence={makeSentence} />
+              <MakeRig />
+            </group>
+          ) : view === 'journey' ? (
             <group key="journey">
               <Journey trace={trace} lay={lay} />
               <Ticker lay={lay} />
@@ -61,9 +72,9 @@ function Schema() {
         <LabelOverlay />
         <HoverBox />
         <Fps />
-        {view === 'journey' ? <Timeline lay={lay} /> : <><BlockCalc trace={trace} /><BlockSteps /></>}
+        {phase === 'make' ? <MakeSteps /> : view === 'journey' ? <Timeline lay={lay} /> : <><BlockCalc trace={trace} /><BlockSteps /></>}
       </div>
-      {view === 'journey' ? <JourneyPanel trace={trace} lay={lay} /> : <BlockPanel trace={trace} />}
+      {phase === 'make' ? <MakePanel traces={summaries} /> : view === 'journey' ? <JourneyPanel trace={trace} lay={lay} /> : <BlockPanel trace={trace} />}
     </div>
   )
 }

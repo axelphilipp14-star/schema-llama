@@ -4,104 +4,1298 @@
   "prompt": "The capital of France is",
   "model": "unsloth/Llama-3.2-1B-Instruct",
   "n_layers": 16,
-  "dtype": "bfloat16"
+  "dtype": "bfloat16",
+  "tokens": [
+   {
+    "id": 128000,
+    "t": "<|begin_of_text|>"
+   },
+   {
+    "id": 791,
+    "t": "The"
+   },
+   {
+    "id": 6864,
+    "t": " capital"
+   },
+   {
+    "id": 315,
+    "t": " of"
+   },
+   {
+    "id": 9822,
+    "t": " France"
+   },
+   {
+    "id": 374,
+    "t": " is"
+   }
+  ],
+  "top5": [
+   {
+    "id": 12366,
+    "t": " Paris",
+    "p": 0.6881
+   },
+   {
+    "id": 264,
+    "t": " a",
+    "p": 0.0498
+   },
+   {
+    "id": 539,
+    "t": " not",
+    "p": 0.0322
+   },
+   {
+    "id": 1131,
+    "t": "...",
+    "p": 0.0172
+   },
+   {
+    "id": 1101,
+    "t": " also",
+    "p": 0.0104
+   }
+  ],
+  "config": {
+   "n_layers": 16,
+   "d_model": 2048,
+   "n_heads": 32,
+   "n_kv_heads": 8,
+   "head_dim": 64,
+   "d_mlp": 8192,
+   "vocab": 128256,
+   "max_ctx": 131072,
+   "rope_theta": 500000,
+   "rms_eps": 0.00001,
+   "tie_embeddings": true
+  }
  },
  {
   "id": "1b-instruct-en-orbit",
   "prompt": "To cool a data center in orbit, engineers use",
   "model": "unsloth/Llama-3.2-1B-Instruct",
   "n_layers": 16,
-  "dtype": "bfloat16"
+  "dtype": "bfloat16",
+  "tokens": [
+   {
+    "id": 128000,
+    "t": "<|begin_of_text|>"
+   },
+   {
+    "id": 1271,
+    "t": "To"
+   },
+   {
+    "id": 7155,
+    "t": " cool"
+   },
+   {
+    "id": 264,
+    "t": " a"
+   },
+   {
+    "id": 828,
+    "t": " data"
+   },
+   {
+    "id": 4219,
+    "t": " center"
+   },
+   {
+    "id": 304,
+    "t": " in"
+   },
+   {
+    "id": 27605,
+    "t": " orbit"
+   },
+   {
+    "id": 11,
+    "t": ","
+   },
+   {
+    "id": 25175,
+    "t": " engineers"
+   },
+   {
+    "id": 1005,
+    "t": " use"
+   }
+  ],
+  "top5": [
+   {
+    "id": 264,
+    "t": " a",
+    "p": 0.4946
+   },
+   {
+    "id": 279,
+    "t": " the",
+    "p": 0.0669
+   },
+   {
+    "id": 5370,
+    "t": " various",
+    "p": 0.0316
+   },
+   {
+    "id": 14812,
+    "t": " liquid",
+    "p": 0.0231
+   },
+   {
+    "id": 459,
+    "t": " an",
+    "p": 0.0169
+   }
+  ],
+  "config": {
+   "n_layers": 16,
+   "d_model": 2048,
+   "n_heads": 32,
+   "n_kv_heads": 8,
+   "head_dim": 64,
+   "d_mlp": 8192,
+   "vocab": 128256,
+   "max_ctx": 131072,
+   "rope_theta": 500000,
+   "rms_eps": 0.00001,
+   "tie_embeddings": true
+  }
  },
  {
   "id": "1b-instruct-en-satellite",
   "prompt": "The satellite lost its antenna because it",
   "model": "unsloth/Llama-3.2-1B-Instruct",
   "n_layers": 16,
-  "dtype": "bfloat16"
+  "dtype": "bfloat16",
+  "tokens": [
+   {
+    "id": 128000,
+    "t": "<|begin_of_text|>"
+   },
+   {
+    "id": 791,
+    "t": "The"
+   },
+   {
+    "id": 24088,
+    "t": " satellite"
+   },
+   {
+    "id": 5675,
+    "t": " lost"
+   },
+   {
+    "id": 1202,
+    "t": " its"
+   },
+   {
+    "id": 41032,
+    "t": " antenna"
+   },
+   {
+    "id": 1606,
+    "t": " because"
+   },
+   {
+    "id": 433,
+    "t": " it"
+   }
+  ],
+  "top5": [
+   {
+    "id": 574,
+    "t": " was",
+    "p": 0.5325
+   },
+   {
+    "id": 1047,
+    "t": " had",
+    "p": 0.0721
+   },
+   {
+    "id": 374,
+    "t": " is",
+    "p": 0.0495
+   },
+   {
+    "id": 2751,
+    "t": " got",
+    "p": 0.03
+   },
+   {
+    "id": 706,
+    "t": " has",
+    "p": 0.0182
+   }
+  ],
+  "config": {
+   "n_layers": 16,
+   "d_model": 2048,
+   "n_heads": 32,
+   "n_kv_heads": 8,
+   "head_dim": 64,
+   "d_mlp": 8192,
+   "vocab": 128256,
+   "max_ctx": 131072,
+   "rope_theta": 500000,
+   "rms_eps": 0.00001,
+   "tie_embeddings": true
+  }
  },
  {
   "id": "1b-instruct-fr-satellite",
   "prompt": "Le satellite a perdu son antenne parce qu'elle",
   "model": "unsloth/Llama-3.2-1B-Instruct",
   "n_layers": 16,
-  "dtype": "bfloat16"
+  "dtype": "bfloat16",
+  "tokens": [
+   {
+    "id": 128000,
+    "t": "<|begin_of_text|>"
+   },
+   {
+    "id": 2356,
+    "t": "Le"
+   },
+   {
+    "id": 24088,
+    "t": " satellite"
+   },
+   {
+    "id": 264,
+    "t": " a"
+   },
+   {
+    "id": 824,
+    "t": " per"
+   },
+   {
+    "id": 1072,
+    "t": "du"
+   },
+   {
+    "id": 4538,
+    "t": " son"
+   },
+   {
+    "id": 3276,
+    "t": " ant"
+   },
+   {
+    "id": 26193,
+    "t": "enne"
+   },
+   {
+    "id": 66021,
+    "t": " parce"
+   },
+   {
+    "id": 934,
+    "t": " qu"
+   },
+   {
+    "id": 80720,
+    "t": "'elle"
+   }
+  ],
+  "top5": [
+   {
+    "id": 264,
+    "t": " a",
+    "p": 0.3145
+   },
+   {
+    "id": 43989,
+    "t": " était",
+    "p": 0.2161
+   },
+   {
+    "id": 308,
+    "t": " n",
+    "p": 0.1157
+   },
+   {
+    "id": 1826,
+    "t": " est",
+    "p": 0.1021
+   },
+   {
+    "id": 274,
+    "t": " s",
+    "p": 0.0582
+   }
+  ],
+  "config": {
+   "n_layers": 16,
+   "d_model": 2048,
+   "n_heads": 32,
+   "n_kv_heads": 8,
+   "head_dim": 64,
+   "d_mlp": 8192,
+   "vocab": 128256,
+   "max_ctx": 131072,
+   "rope_theta": 500000,
+   "rms_eps": 0.00001,
+   "tie_embeddings": true
+  }
  },
  {
   "id": "1b-instruct-fr-souris",
   "prompt": "La souris a traversé le bureau et",
   "model": "unsloth/Llama-3.2-1B-Instruct",
   "n_layers": 16,
-  "dtype": "bfloat16"
+  "dtype": "bfloat16",
+  "tokens": [
+   {
+    "id": 128000,
+    "t": "<|begin_of_text|>"
+   },
+   {
+    "id": 8921,
+    "t": "La"
+   },
+   {
+    "id": 20897,
+    "t": " sour"
+   },
+   {
+    "id": 285,
+    "t": "is"
+   },
+   {
+    "id": 264,
+    "t": " a"
+   },
+   {
+    "id": 30517,
+    "t": " travers"
+   },
+   {
+    "id": 978,
+    "t": "é"
+   },
+   {
+    "id": 514,
+    "t": " le"
+   },
+   {
+    "id": 44402,
+    "t": " bureau"
+   },
+   {
+    "id": 1880,
+    "t": " et"
+   }
+  ],
+  "top5": [
+   {
+    "id": 264,
+    "t": " a",
+    "p": 0.1036
+   },
+   {
+    "id": 1208,
+    "t": " la",
+    "p": 0.0859
+   },
+   {
+    "id": 274,
+    "t": " s",
+    "p": 0.0758
+   },
+   {
+    "id": 514,
+    "t": " le",
+    "p": 0.049
+   },
+   {
+    "id": 513,
+    "t": " se",
+    "p": 0.0336
+   }
+  ],
+  "config": {
+   "n_layers": 16,
+   "d_model": 2048,
+   "n_heads": 32,
+   "n_kv_heads": 8,
+   "head_dim": 64,
+   "d_mlp": 8192,
+   "vocab": 128256,
+   "max_ctx": 131072,
+   "rope_theta": 500000,
+   "rms_eps": 0.00001,
+   "tie_embeddings": true
+  }
  },
  {
   "id": "3b-base-en-capital",
   "prompt": "The capital of France is",
   "model": "unsloth/Llama-3.2-3B",
   "n_layers": 28,
-  "dtype": "bfloat16"
+  "dtype": "bfloat16",
+  "tokens": [
+   {
+    "id": 128000,
+    "t": "<|begin_of_text|>"
+   },
+   {
+    "id": 791,
+    "t": "The"
+   },
+   {
+    "id": 6864,
+    "t": " capital"
+   },
+   {
+    "id": 315,
+    "t": " of"
+   },
+   {
+    "id": 9822,
+    "t": " France"
+   },
+   {
+    "id": 374,
+    "t": " is"
+   }
+  ],
+  "top5": [
+   {
+    "id": 12366,
+    "t": " Paris",
+    "p": 0.2462
+   },
+   {
+    "id": 279,
+    "t": " the",
+    "p": 0.1318
+   },
+   {
+    "id": 264,
+    "t": " a",
+    "p": 0.1026
+   },
+   {
+    "id": 7559,
+    "t": " located",
+    "p": 0.0705
+   },
+   {
+    "id": 1101,
+    "t": " also",
+    "p": 0.0485
+   }
+  ],
+  "config": {
+   "n_layers": 28,
+   "d_model": 3072,
+   "n_heads": 24,
+   "n_kv_heads": 8,
+   "head_dim": 128,
+   "d_mlp": 8192,
+   "vocab": 128256,
+   "max_ctx": 131072,
+   "rope_theta": 500000,
+   "rms_eps": 0.00001,
+   "tie_embeddings": true
+  }
  },
  {
   "id": "3b-base-en-orbit",
   "prompt": "To cool a data center in orbit, engineers use",
   "model": "unsloth/Llama-3.2-3B",
   "n_layers": 28,
-  "dtype": "bfloat16"
+  "dtype": "bfloat16",
+  "tokens": [
+   {
+    "id": 128000,
+    "t": "<|begin_of_text|>"
+   },
+   {
+    "id": 1271,
+    "t": "To"
+   },
+   {
+    "id": 7155,
+    "t": " cool"
+   },
+   {
+    "id": 264,
+    "t": " a"
+   },
+   {
+    "id": 828,
+    "t": " data"
+   },
+   {
+    "id": 4219,
+    "t": " center"
+   },
+   {
+    "id": 304,
+    "t": " in"
+   },
+   {
+    "id": 27605,
+    "t": " orbit"
+   },
+   {
+    "id": 11,
+    "t": ","
+   },
+   {
+    "id": 25175,
+    "t": " engineers"
+   },
+   {
+    "id": 1005,
+    "t": " use"
+   }
+  ],
+  "top5": [
+   {
+    "id": 264,
+    "t": " a",
+    "p": 0.2609
+   },
+   {
+    "id": 279,
+    "t": " the",
+    "p": 0.066
+   },
+   {
+    "id": 459,
+    "t": " an",
+    "p": 0.0426
+   },
+   {
+    "id": 14812,
+    "t": " liquid",
+    "p": 0.0332
+   },
+   {
+    "id": 8798,
+    "t": " heat",
+    "p": 0.0167
+   }
+  ],
+  "config": {
+   "n_layers": 28,
+   "d_model": 3072,
+   "n_heads": 24,
+   "n_kv_heads": 8,
+   "head_dim": 128,
+   "d_mlp": 8192,
+   "vocab": 128256,
+   "max_ctx": 131072,
+   "rope_theta": 500000,
+   "rms_eps": 0.00001,
+   "tie_embeddings": true
+  }
  },
  {
   "id": "3b-base-en-satellite",
   "prompt": "The satellite lost its antenna because it",
   "model": "unsloth/Llama-3.2-3B",
   "n_layers": 28,
-  "dtype": "bfloat16"
+  "dtype": "bfloat16",
+  "tokens": [
+   {
+    "id": 128000,
+    "t": "<|begin_of_text|>"
+   },
+   {
+    "id": 791,
+    "t": "The"
+   },
+   {
+    "id": 24088,
+    "t": " satellite"
+   },
+   {
+    "id": 5675,
+    "t": " lost"
+   },
+   {
+    "id": 1202,
+    "t": " its"
+   },
+   {
+    "id": 41032,
+    "t": " antenna"
+   },
+   {
+    "id": 1606,
+    "t": " because"
+   },
+   {
+    "id": 433,
+    "t": " it"
+   }
+  ],
+  "top5": [
+   {
+    "id": 574,
+    "t": " was",
+    "p": 0.4081
+   },
+   {
+    "id": 1047,
+    "t": " had",
+    "p": 0.0626
+   },
+   {
+    "id": 374,
+    "t": " is",
+    "p": 0.0335
+   },
+   {
+    "id": 10837,
+    "t": " ran",
+    "p": 0.0335
+   },
+   {
+    "id": 2751,
+    "t": " got",
+    "p": 0.0296
+   }
+  ],
+  "config": {
+   "n_layers": 28,
+   "d_model": 3072,
+   "n_heads": 24,
+   "n_kv_heads": 8,
+   "head_dim": 128,
+   "d_mlp": 8192,
+   "vocab": 128256,
+   "max_ctx": 131072,
+   "rope_theta": 500000,
+   "rms_eps": 0.00001,
+   "tie_embeddings": true
+  }
  },
  {
   "id": "3b-base-fr-satellite",
   "prompt": "Le satellite a perdu son antenne parce qu'elle",
   "model": "unsloth/Llama-3.2-3B",
   "n_layers": 28,
-  "dtype": "bfloat16"
+  "dtype": "bfloat16",
+  "tokens": [
+   {
+    "id": 128000,
+    "t": "<|begin_of_text|>"
+   },
+   {
+    "id": 2356,
+    "t": "Le"
+   },
+   {
+    "id": 24088,
+    "t": " satellite"
+   },
+   {
+    "id": 264,
+    "t": " a"
+   },
+   {
+    "id": 824,
+    "t": " per"
+   },
+   {
+    "id": 1072,
+    "t": "du"
+   },
+   {
+    "id": 4538,
+    "t": " son"
+   },
+   {
+    "id": 3276,
+    "t": " ant"
+   },
+   {
+    "id": 26193,
+    "t": "enne"
+   },
+   {
+    "id": 66021,
+    "t": " parce"
+   },
+   {
+    "id": 934,
+    "t": " qu"
+   },
+   {
+    "id": 80720,
+    "t": "'elle"
+   }
+  ],
+  "top5": [
+   {
+    "id": 264,
+    "t": " a",
+    "p": 0.2939
+   },
+   {
+    "id": 274,
+    "t": " s",
+    "p": 0.202
+   },
+   {
+    "id": 43989,
+    "t": " était",
+    "p": 0.1783
+   },
+   {
+    "id": 1826,
+    "t": " est",
+    "p": 0.0743
+   },
+   {
+    "id": 50590,
+    "t": " avait",
+    "p": 0.0579
+   }
+  ],
+  "config": {
+   "n_layers": 28,
+   "d_model": 3072,
+   "n_heads": 24,
+   "n_kv_heads": 8,
+   "head_dim": 128,
+   "d_mlp": 8192,
+   "vocab": 128256,
+   "max_ctx": 131072,
+   "rope_theta": 500000,
+   "rms_eps": 0.00001,
+   "tie_embeddings": true
+  }
  },
  {
   "id": "3b-base-fr-souris",
   "prompt": "La souris a traversé le bureau et",
   "model": "unsloth/Llama-3.2-3B",
   "n_layers": 28,
-  "dtype": "bfloat16"
+  "dtype": "bfloat16",
+  "tokens": [
+   {
+    "id": 128000,
+    "t": "<|begin_of_text|>"
+   },
+   {
+    "id": 8921,
+    "t": "La"
+   },
+   {
+    "id": 20897,
+    "t": " sour"
+   },
+   {
+    "id": 285,
+    "t": "is"
+   },
+   {
+    "id": 264,
+    "t": " a"
+   },
+   {
+    "id": 30517,
+    "t": " travers"
+   },
+   {
+    "id": 978,
+    "t": "é"
+   },
+   {
+    "id": 514,
+    "t": " le"
+   },
+   {
+    "id": 44402,
+    "t": " bureau"
+   },
+   {
+    "id": 1880,
+    "t": " et"
+   }
+  ],
+  "top5": [
+   {
+    "id": 274,
+    "t": " s",
+    "p": 0.1766
+   },
+   {
+    "id": 264,
+    "t": " a",
+    "p": 0.1464
+   },
+   {
+    "id": 1826,
+    "t": " est",
+    "p": 0.0539
+   },
+   {
+    "id": 513,
+    "t": " se",
+    "p": 0.0447
+   },
+   {
+    "id": 3900,
+    "t": " il",
+    "p": 0.0394
+   }
+  ],
+  "config": {
+   "n_layers": 28,
+   "d_model": 3072,
+   "n_heads": 24,
+   "n_kv_heads": 8,
+   "head_dim": 128,
+   "d_mlp": 8192,
+   "vocab": 128256,
+   "max_ctx": 131072,
+   "rope_theta": 500000,
+   "rms_eps": 0.00001,
+   "tie_embeddings": true
+  }
  },
  {
   "id": "3b-instruct-en-capital",
   "prompt": "The capital of France is",
   "model": "unsloth/Llama-3.2-3B-Instruct",
   "n_layers": 28,
-  "dtype": "bfloat16"
+  "dtype": "bfloat16",
+  "tokens": [
+   {
+    "id": 128000,
+    "t": "<|begin_of_text|>"
+   },
+   {
+    "id": 791,
+    "t": "The"
+   },
+   {
+    "id": 6864,
+    "t": " capital"
+   },
+   {
+    "id": 315,
+    "t": " of"
+   },
+   {
+    "id": 9822,
+    "t": " France"
+   },
+   {
+    "id": 374,
+    "t": " is"
+   }
+  ],
+  "top5": [
+   {
+    "id": 12366,
+    "t": " Paris",
+    "p": 0.699
+   },
+   {
+    "id": 7559,
+    "t": " located",
+    "p": 0.0611
+   },
+   {
+    "id": 1131,
+    "t": "...",
+    "p": 0.0327
+   },
+   {
+    "id": 264,
+    "t": " a",
+    "p": 0.0255
+   },
+   {
+    "id": 539,
+    "t": " not",
+    "p": 0.0239
+   }
+  ],
+  "config": {
+   "n_layers": 28,
+   "d_model": 3072,
+   "n_heads": 24,
+   "n_kv_heads": 8,
+   "head_dim": 128,
+   "d_mlp": 8192,
+   "vocab": 128256,
+   "max_ctx": 131072,
+   "rope_theta": 500000,
+   "rms_eps": 0.00001,
+   "tie_embeddings": true
+  }
  },
  {
   "id": "3b-instruct-en-orbit",
   "prompt": "To cool a data center in orbit, engineers use",
   "model": "unsloth/Llama-3.2-3B-Instruct",
   "n_layers": 28,
-  "dtype": "bfloat16"
+  "dtype": "bfloat16",
+  "tokens": [
+   {
+    "id": 128000,
+    "t": "<|begin_of_text|>"
+   },
+   {
+    "id": 1271,
+    "t": "To"
+   },
+   {
+    "id": 7155,
+    "t": " cool"
+   },
+   {
+    "id": 264,
+    "t": " a"
+   },
+   {
+    "id": 828,
+    "t": " data"
+   },
+   {
+    "id": 4219,
+    "t": " center"
+   },
+   {
+    "id": 304,
+    "t": " in"
+   },
+   {
+    "id": 27605,
+    "t": " orbit"
+   },
+   {
+    "id": 11,
+    "t": ","
+   },
+   {
+    "id": 25175,
+    "t": " engineers"
+   },
+   {
+    "id": 1005,
+    "t": " use"
+   }
+  ],
+  "top5": [
+   {
+    "id": 264,
+    "t": " a",
+    "p": 0.464
+   },
+   {
+    "id": 279,
+    "t": " the",
+    "p": 0.0489
+   },
+   {
+    "id": 459,
+    "t": " an",
+    "p": 0.0358
+   },
+   {
+    "id": 11084,
+    "t": " advanced",
+    "p": 0.0204
+   },
+   {
+    "id": 8798,
+    "t": " heat",
+    "p": 0.0192
+   }
+  ],
+  "config": {
+   "n_layers": 28,
+   "d_model": 3072,
+   "n_heads": 24,
+   "n_kv_heads": 8,
+   "head_dim": 128,
+   "d_mlp": 8192,
+   "vocab": 128256,
+   "max_ctx": 131072,
+   "rope_theta": 500000,
+   "rms_eps": 0.00001,
+   "tie_embeddings": true
+  }
  },
  {
   "id": "3b-instruct-en-satellite",
   "prompt": "The satellite lost its antenna because it",
   "model": "unsloth/Llama-3.2-3B-Instruct",
   "n_layers": 28,
-  "dtype": "bfloat16"
+  "dtype": "bfloat16",
+  "tokens": [
+   {
+    "id": 128000,
+    "t": "<|begin_of_text|>"
+   },
+   {
+    "id": 791,
+    "t": "The"
+   },
+   {
+    "id": 24088,
+    "t": " satellite"
+   },
+   {
+    "id": 5675,
+    "t": " lost"
+   },
+   {
+    "id": 1202,
+    "t": " its"
+   },
+   {
+    "id": 41032,
+    "t": " antenna"
+   },
+   {
+    "id": 1606,
+    "t": " because"
+   },
+   {
+    "id": 433,
+    "t": " it"
+   }
+  ],
+  "top5": [
+   {
+    "id": 574,
+    "t": " was",
+    "p": 0.4659
+   },
+   {
+    "id": 596,
+    "t": "'s",
+    "p": 0.0407
+   },
+   {
+    "id": 72287,
+    "t": " malfunction",
+    "p": 0.0407
+   },
+   {
+    "id": 374,
+    "t": " is",
+    "p": 0.0359
+   },
+   {
+    "id": 1047,
+    "t": " had",
+    "p": 0.0359
+   }
+  ],
+  "config": {
+   "n_layers": 28,
+   "d_model": 3072,
+   "n_heads": 24,
+   "n_kv_heads": 8,
+   "head_dim": 128,
+   "d_mlp": 8192,
+   "vocab": 128256,
+   "max_ctx": 131072,
+   "rope_theta": 500000,
+   "rms_eps": 0.00001,
+   "tie_embeddings": true
+  }
  },
  {
   "id": "3b-instruct-fr-satellite",
   "prompt": "Le satellite a perdu son antenne parce qu'elle",
   "model": "unsloth/Llama-3.2-3B-Instruct",
   "n_layers": 28,
-  "dtype": "bfloat16"
+  "dtype": "bfloat16",
+  "tokens": [
+   {
+    "id": 128000,
+    "t": "<|begin_of_text|>"
+   },
+   {
+    "id": 2356,
+    "t": "Le"
+   },
+   {
+    "id": 24088,
+    "t": " satellite"
+   },
+   {
+    "id": 264,
+    "t": " a"
+   },
+   {
+    "id": 824,
+    "t": " per"
+   },
+   {
+    "id": 1072,
+    "t": "du"
+   },
+   {
+    "id": 4538,
+    "t": " son"
+   },
+   {
+    "id": 3276,
+    "t": " ant"
+   },
+   {
+    "id": 26193,
+    "t": "enne"
+   },
+   {
+    "id": 66021,
+    "t": " parce"
+   },
+   {
+    "id": 934,
+    "t": " qu"
+   },
+   {
+    "id": 80720,
+    "t": "'elle"
+   }
+  ],
+  "top5": [
+   {
+    "id": 264,
+    "t": " a",
+    "p": 0.3094
+   },
+   {
+    "id": 43989,
+    "t": " était",
+    "p": 0.2263
+   },
+   {
+    "id": 1826,
+    "t": " est",
+    "p": 0.1211
+   },
+   {
+    "id": 274,
+    "t": " s",
+    "p": 0.0735
+   },
+   {
+    "id": 308,
+    "t": " n",
+    "p": 0.0609
+   }
+  ],
+  "config": {
+   "n_layers": 28,
+   "d_model": 3072,
+   "n_heads": 24,
+   "n_kv_heads": 8,
+   "head_dim": 128,
+   "d_mlp": 8192,
+   "vocab": 128256,
+   "max_ctx": 131072,
+   "rope_theta": 500000,
+   "rms_eps": 0.00001,
+   "tie_embeddings": true
+  }
  },
  {
   "id": "3b-instruct-fr-souris",
   "prompt": "La souris a traversé le bureau et",
   "model": "unsloth/Llama-3.2-3B-Instruct",
   "n_layers": 28,
-  "dtype": "bfloat16"
+  "dtype": "bfloat16",
+  "tokens": [
+   {
+    "id": 128000,
+    "t": "<|begin_of_text|>"
+   },
+   {
+    "id": 8921,
+    "t": "La"
+   },
+   {
+    "id": 20897,
+    "t": " sour"
+   },
+   {
+    "id": 285,
+    "t": "is"
+   },
+   {
+    "id": 264,
+    "t": " a"
+   },
+   {
+    "id": 30517,
+    "t": " travers"
+   },
+   {
+    "id": 978,
+    "t": "é"
+   },
+   {
+    "id": 514,
+    "t": " le"
+   },
+   {
+    "id": 44402,
+    "t": " bureau"
+   },
+   {
+    "id": 1880,
+    "t": " et"
+   }
+  ],
+  "top5": [
+   {
+    "id": 274,
+    "t": " s",
+    "p": 0.3501
+   },
+   {
+    "id": 264,
+    "t": " a",
+    "p": 0.2726
+   },
+   {
+    "id": 513,
+    "t": " se",
+    "p": 0.0474
+   },
+   {
+    "id": 1826,
+    "t": " est",
+    "p": 0.0393
+   },
+   {
+    "id": 1153,
+    "t": " pos",
+    "p": 0.0287
+   }
+  ],
+  "config": {
+   "n_layers": 28,
+   "d_model": 3072,
+   "n_heads": 24,
+   "n_kv_heads": 8,
+   "head_dim": 128,
+   "d_mlp": 8192,
+   "vocab": 128256,
+   "max_ctx": 131072,
+   "rope_theta": 500000,
+   "rms_eps": 0.00001,
+   "tie_embeddings": true
+  }
  }
 ]

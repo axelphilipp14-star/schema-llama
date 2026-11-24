@@ -46,3 +46,14 @@ export function traceTemperature(top50: { id: number; t: string; logit: number }
   }
   return { top10: all.slice(0, 10), all, exact }
 }
+
+/** Nombre de paramètres d'un Llama, recalculé depuis sa config (table d'embedding partagée si tie_embeddings). */
+export function llamaParams(c: { n_layers: number; d_model: number; n_heads: number; n_kv_heads: number; head_dim: number; d_mlp: number; vocab: number; tie_embeddings: boolean }) {
+  const emb = c.vocab * c.d_model
+  const attn = c.d_model * c.n_heads * c.head_dim * 2 + c.d_model * c.n_kv_heads * c.head_dim * 2 // Q, O + K, V
+  const mlp = 3 * c.d_model * c.d_mlp // gate, up, down
+  const norms = 2 * c.d_model
+  const perLayer = attn + mlp + norms
+  const total = emb * (c.tie_embeddings ? 1 : 2) + c.n_layers * perLayer + c.d_model
+  return { emb, perLayer, attn, mlp, total }
+}

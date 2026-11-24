@@ -22,29 +22,44 @@ export function LangToggle() {
   )
 }
 
-function Header({ trace }: { trace: Trace }) {
+/** Fabriquer | Répondre : les deux phases du schéma. */
+export function PhaseToggle() {
   const { t } = useT()
-  const c = trace.config
+  const { phase, setPhase } = useStore()
+  return (
+    <div className="phase" role="tablist" aria-label={t.phase.label}>
+      {(['make', 'respond'] as const).map((k, i) => (
+        <button key={k} role="tab" aria-selected={phase === k} className={phase === k ? 'on' : ''} onClick={() => setPhase(k)}>
+          <span className="mono">{i + 1}</span> {t.phase[k]}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+export function Header({ trace, traceHidden }: { trace?: Trace; traceHidden?: boolean }) {
+  const { t } = useT()
   return (
     <>
       <div className="panel-head">
         <h1>{t.title}</h1>
         <LangToggle />
       </div>
-      {c.n_layers !== 28 && <p className="warn">{t.devTrace(c.n_layers)}</p>}
+      <PhaseToggle />
+      {trace && !traceHidden && trace.config.n_layers !== 28 && <p className="warn">{t.devTrace(trace.config.n_layers)}</p>}
       <p className="small muted">{t.hint}</p>
-      <p className="muted">{t.sentence} : <span className="mono">{t.q(trace.prompt)}</span> · {t.tokensCount(trace.tokens.length)}</p>
+      {trace && !traceHidden && <p className="muted">{t.sentence} : <span className="mono">{t.q(trace.prompt)}</span> · {t.tokensCount(trace.tokens.length)}</p>}
     </>
   )
 }
 
-function Footer({ trace }: { trace: Trace }) {
+export function Footer({ trace }: { trace?: Trace }) {
   const { t, num } = useT()
-  const c = trace.config
+  const c = trace?.config
   return (
     <p className="small muted foot">
-      {t.dims(num(c.d_model, 0), c.n_heads, c.n_kv_heads, num(c.d_mlp, 0), num(c.vocab, 0))} {t.source(trace.meta.dtype, trace.meta.date.slice(0, 10))}
-      <br /><a href="#/enquetes">{t.pages.all}</a> · <span className="built">{t.builtWith}</span>
+      {c && trace && <>{t.dims(num(c.d_model, 0), c.n_heads, c.n_kv_heads, num(c.d_mlp, 0), num(c.vocab, 0))} {t.source(trace.meta.dtype, trace.meta.date.slice(0, 10))}<br /></>}
+      <a href="#/enquetes">{t.pages.all}</a> · <a href="#/a-propos">{t.about.link}</a> · <span className="built">{t.builtWith}</span>
     </p>
   )
 }

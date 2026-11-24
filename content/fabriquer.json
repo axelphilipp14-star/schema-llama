@@ -1,0 +1,14 @@
+{
+  "_doc": "Chiffres officiels de Llama 3.2 3B pour la scène « fabriquer » (M4). Chaque valeur a sa source et sa date de vérification. Les valeurs calculées (paramètres, perte, ratio) le sont dans le navigateur à partir des traces, pas ici.",
+  "source": { "url": "https://huggingface.co/meta-llama/Llama-3.2-3B", "titre": "Fiche du modèle Llama 3.2 3B (Meta, Hugging Face)", "verifie": "2026-11-24" },
+  "donnees": { "tokens_max": 9e12, "cutoff": { "fr": "décembre 2023", "en": "December 2023" } },
+  "pretraining": {
+    "gpu_hours_3b": 460000, "gpu_hours_1b": 370000, "gpu_hours_logits": 86000, "gpu_hours_total_texte": 916000, "gpu": "H100-80GB (700 W)",
+    "co2_tonnes_3b": 133,
+    "distillation": { "fr": "Logits de Llama 3.1 8B et 70B utilisés comme cibles pendant le pré-entraînement ; distillation après élagage (pruning).", "en": "Logits from Llama 3.1 8B and 70B used as targets during pre-training; distillation after pruning." }
+  },
+  "finetuning": {
+    "etapes": { "fr": "Plusieurs tours d'alignement. Chaque tour : fine-tuning supervisé (SFT), échantillonnage par rejet (RS), optimisation directe des préférences (DPO).", "en": "Several rounds of alignment. Each round: supervised fine-tuning (SFT), rejection sampling (RS), direct preference optimization (DPO)." }
+  },
+  "langues": "English, German, French, Italian, Portuguese, Hindi, Spanish, Thai"
+}

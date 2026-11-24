@@ -103,3 +103,13 @@
 - **Mesures sur le 3B** : E8 = **43,3 s** ✅ ; E3 trajet min 59 i/s, bloc min 57 i/s ✅ (écran à 60 Hz) ; **E6 3B** ✅ top-1 identique, 8/10 ; E5 3B 118,9 s ✗ (attendu, AN-002, option « lent »). Tests : **129 unitaires** (invariants et recalculs sur les 15 traces) + 3 e2e verts.
 - Observation pour M4 : « The capital of France is » → « Paris » **69,9 %** (Instruct) contre **24,6 %** (base) : l'effet du fine-tuning, chiffré.
 - Preuve : `docs/preuves/3B_*.png`, `docs/preuves/M1_mesure_3b.json`, `docs/preuves/M2_mesure_fps_3b.json`, `docs/preuves/M3_direct_3b.json`.
+
+## (heure du commit, voir git) — M4 · fabriquer : données → tokenizer → pré-entraînement → fine-tuning
+- Sélecteur **1 Fabriquer / 2 Répondre** en tête du panneau. Scène 3D à 4 stations (caméra qui vole d'une station à l'autre, vue d'ensemble), panneau avec les **chiffres et leur source** (étiquettes Meta / calculé / trace) et les fiches tirées des enquêtes (données, tokenizer, pré-entraînement + lois d'échelle, fine-tuning).
+- Chiffres officiels vérifiés sur la fiche Meta de Llama 3.2 3B (24/11/2026) → `content/fabriquer.json` : jusqu'à 9 000 milliards de tokens, données jusqu'à déc. 2023, 460 000 h de GPU H100 pour le 3B, 133 t CO₂eq, distillation depuis Llama 3.1 8B/70B après élagage, tours SFT + RS + DPO. **Incohérence de la source signalée** (916 000 h annoncées en texte, tableau 370 000 + 460 000 + 86 000) : on affiche le tableau et on le dit.
+- **Calculé dans le navigateur, à partir des traces** : paramètres recalculés depuis la config = **3,21 Md** (Meta : 3,21 B ; 1B : 1,24 Md) — `tests/fabriquer.test.ts` ; tokens par paramètre ≈ 2 801 (Chinchilla ≈ 20) ; 6·N·D ≈ 1,7 × 10²³ FLOP ; tokens par mot sur nos 5 phrases : 1,05 (EN) contre 1,33 (FR) ; perte −ln p du modèle de base sur « The capital of France is » → « Paris » (24,6 %) = 1,40.
+- **Station fine-tuning** : base contre Instruct sur les 5 phrases (vraies traces) — le premier choix de l'Instruct gagne à chaque fois : Paris 24,6 → 69,9 %, souris 17,7 → 35,0 %…
+- Station tokenizer : les 128 256 tokens en 36 × 36 cubes (1 cube = 99 tokens), les tokens de la phrase s'allument à leur vraie place. Entonnoir des données signalé « schéma, pas à l'échelle » (Meta ne publie pas les volumes par étage).
+- Boucle visuelle : 10 captures ; corrigé : vocabulaire invisible, tableau écrasé, notation scientifique, somme d'heures recalculée à tort (je remplaçais une valeur publiée par mon addition de valeurs arrondies).
+- Tests : 131 unitaires + 4 e2e (`tests/e2e/make.spec.ts` : pourcentages base/Instruct affichés = traces) verts.
+- Preuve : `docs/preuves/M4_*.png`.

@@ -198,3 +198,23 @@ html, body, #root { margin: 0; height: 100%; background: var(--bg); color: var(-
 .linkish { background: none; border: 0; color: var(--text); text-align: left; padding: 4px 0; cursor: pointer; font: inherit; }
 .linkish.on .mono { color: var(--emb); }
 .rope { color: var(--attn); border-left: 2px solid var(--attn); padding-left: 8px; margin-top: 8px; }
+
+/* M4 — phases et « fabriquer » */
+.phase { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 12px 0 8px; }
+.phase button { background: var(--bg); border: 1px solid var(--grid); color: var(--muted); border-radius: 8px; padding: 8px; font: 600 13px Inter, sans-serif; cursor: pointer; }
+.phase button.on { color: var(--text); border-color: var(--make); background: color-mix(in srgb, var(--make) 12%, var(--bg)); }
+.phase button .mono { color: var(--make); margin-right: 4px; }
+.facts td:first-child { color: var(--muted); }
+.facts td.mono { text-align: right; white-space: nowrap; }
+.tag.src-meta { color: var(--make); border-color: color-mix(in srgb, var(--make) 50%, var(--grid)); }
+.tag.src-calc { color: var(--emb); }
+.tag.src-trace { color: var(--out); }
+.loss { margin-top: 10px; padding: 8px 10px; border-left: 2px solid var(--make); background: var(--bg); }
+.loss h3 { margin: 0 0 4px; font-size: 12px; }
+.tl-seg.bs.make.done { background: color-mix(in srgb, var(--make) 35%, var(--grid)); }
+.sent-pick select { background: var(--bg); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 4px; max-width: 100%; }
+.sent-pick { grid-template-columns: 70px 1fr 0; }
+.facts td:first-child { width: 52%; }
+.nowrap { white-space: nowrap; text-align: right; }
+.sent-pick { grid-template-columns: 70px minmax(0, 1fr) !important; }
+.sent-pick select { width: 100%; }

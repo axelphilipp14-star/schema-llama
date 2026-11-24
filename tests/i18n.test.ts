@@ -7,7 +7,7 @@ function flat(o: Any, p = ''): Record<string, unknown> {
   return Object.entries(o).reduce((acc, [k, v]) => (v && typeof v === 'object' ? { ...acc, ...flat(v as Any, p + k + '.') } : { ...acc, [p + k]: v }), {})
 }
 // Mots identiques dans les deux langues (termes techniques) : autorisés.
-const SAME_OK = new Set('tokensCount pause title finalNorm builtWith blk.stepName.norm1 blk.stepName.qkv blk.stepName.softmax blk.stepName.add1 blk.stepName.mlp blk.stepName.add2 blk.fromTrace blk.rowRms blk.rowXr blk.colTok blk.colScore blk.colExp blk.mixRow blk.normMid blk.gate blk.siluGate blk.up blk.act blk.normLbl'.split(' '))
+const SAME_OK = new Set('tokensCount pause title finalNorm builtWith blk.stepName.norm1 blk.stepName.qkv blk.stepName.softmax blk.stepName.add1 blk.stepName.mlp blk.stepName.add2 blk.fromTrace blk.rowRms blk.rowXr blk.colTok blk.colScore blk.colExp blk.mixRow blk.normMid blk.gate blk.siluGate blk.up blk.act blk.normLbl make.vocabTitle make.src.meta make.src.trace'.split(' '))
 const sample = (v: unknown) => (typeof v === 'function' ? (v as (...a: unknown[]) => string)(1, 2, 'x', 3) : v)
 
 describe('i18n', () => {
