@@ -129,3 +129,10 @@
 
 ## 2026-11-24 22:43 (commit) — Annonce du premier téléchargement (demande d'Axel)
 - Sous les boutons du direct : la première fois ≈ 5 min (1B), ≈ 7 min (3B) ; ensuite en cache ≈ 30 s / ≈ 2 min ; durées mesurées sur un MacBook 8 Go, selon la connexion. Pendant le téléchargement : Mo reçus / Mo total. Sources : `docs/preuves/M3_direct_1b_site_publie_telechargement.json` (310 s), `M3_direct_1b_site_publie.json` (30,4 s), `M0c_Llama-3.2-3B-Instruct-ONNX.json` (418 s puis 152 s), `M3_direct_3b.json` (119 s).
+
+## 2026-11-24 23:11 (commit) — Les 3 idées tirées de bbycroft (demande d'Axel)
+- **Poids ≠ activations** : poids (table d'embedding, tête de sortie, gains RMSNorm, matrices MLP) en fil de fer translucide (`src/scene/WeightSlab.tsx`), activations en volumes pleins ; légende dans la scène ; ligne « × poids w » marquée « poids » dans la carte RMSNorm ; règle 8 de DESIGN.md.
+- **Onglet 1B ↔ 3B** (`src/ui/CompareTab.tsx`) : dimensions, paramètres recalculés (3,21 / 1,24 Md), premier choix de chaque modèle, bande du logit lens par bloc à profondeur relative. Ex. « was » s'installe au bloc 26/28 (93 %) dans le 3B, 11/16 (69 %) dans le 1B ; sur « La souris… », les deux modèles divergent (« s » contre « a »). Données : logit lens ajouté au résumé `public/traces/index.json` (test : recopié à l'identique des traces).
+- **Mini-carte 2D** (`src/ui/MiniMap.tsx`) en haut de la scène, synchronisée et cliquable : trajet (avec une jauge des 28 blocs), bloc (RMSNorm → attention → + → RMSNorm → MLP → +), fabrication.
+- Fausse piste tracée : la caméra « suivre » repassait en « libre » → pile d'appels : événement **molette réel** sur la fenêtre de test visible à l'écran (comportement voulu : l'utilisateur reprend la main). Fenêtres de test désormais hors écran (`--window-position=-3000,0`).
+- Mesures inchangées : E8 43,3 s, E3 min 59 / 57 i/s. Tests : 132 unitaires + 6 e2e (`tests/e2e/extras.spec.ts`).
