@@ -1,0 +1,8 @@
+{
+  "_doc": "Phrases tracées (tâche 2 de POUR_AXEL, faite par Claude à la demande d'Axel le 24/11/2026). ≤ 16 tokens, ⟨début⟩ compris. Lues par le notebook Kaggle et par .github/workflows/trace.yml.",
+  "en-satellite": "The satellite lost its antenna because it",
+  "fr-satellite": "Le satellite a perdu son antenne parce qu'elle",
+  "en-capital": "The capital of France is",
+  "fr-souris": "La souris a traversé le bureau et",
+  "en-orbit": "To cool a data center in orbit, engineers use"
+}

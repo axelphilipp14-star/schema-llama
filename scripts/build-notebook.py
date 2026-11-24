@@ -23,12 +23,7 @@ Puis *Run All*. Durée attendue : 10 à 20 min (surtout le téléchargement, ≈
 
 **Ce que tu peux observer en passant** : la cellule 3 affiche la mémoire GPU utilisée. 3,2 milliards de paramètres × 2 octets (fp16) ≈ 6,4 Go."""),
     md("## 1. Les phrases à tracer\nModifie librement cette liste (phrases courtes, ≤ 16 tokens)."),
-    code("""SENTENCES = {
-    "en-satellite": "The satellite lost its antenna because it",
-    "fr-satellite": "Le satellite a perdu son antenne parce qu'elle",
-    "en-capital": "The capital of France is",
-    "fr-capitale": "La capitale de la France est",
-}
+    code("SENTENCES = " + json.dumps({k: v for k, v in json.load(open(root / "scripts" / "sentences.json")).items() if not k.startswith("_")}, ensure_ascii=False, indent=4) + """
 MODELS = {
     "3b-instruct": "meta-llama/Llama-3.2-3B-Instruct",   # modèle de référence du schéma
     "3b-base": "meta-llama/Llama-3.2-3B",                # pour montrer ce que change le fine-tuning
