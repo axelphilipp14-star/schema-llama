@@ -17,6 +17,7 @@ Vite · React · TypeScript · React Three Fiber + drei · zustand · `@huggingf
 | `npm run content` | lit le coffre (lecture seule) → `content/fr.json`, `content/en.json`, `content/a-traduire.json` |
 | `npm run content:check` | vérifie que le contenu publié est à jour (code 1 sinon) |
 | `npm run build` | build de production dans `dist/` |
+| `npm run obsidian` | régénère la note « Schéma du modèle — Suivi » dans le coffre |
 | `uv run scripts/trace_local.py` | trace de dev (Llama 3.2 1B, CPU du Mac) |
 
 ## Chiffres du modèle (config.json officiel, vérifié 24/11/2026)
@@ -38,7 +39,8 @@ Le code ne met **jamais** ces nombres en dur : tout vient de `trace.config`.
 - **Vrais nombres** : tout nombre affiché vient d'une trace (`public/traces/`) ou du modèle en direct, et l'interface dit lequel. Aucun nombre inventé, aucune maquette.
 - **bbycroft.net/llm** : référence visuelle seulement, aucun code copié.
 - **Licence Llama** : afficher « Built with Llama » sur le site.
-- À chaque étape finie : tests verts → commit + push → `docs/PROGRESS.md` → ligne dans le Journal du projet du coffre.
+- À chaque étape finie : tests verts → commit + push → `docs/PROGRESS.md` → ligne dans le Journal du projet du coffre → `npm run obsidian` (note « Schéma du modèle — Suivi » dans le coffre, autorisée par Axel le 24/11).
+- **Heures et dates** : toujours lues avec `date` ou `git log` (AN-004), jamais estimées.
 - Une étape n'est montrée à Axel que propre en capture (boucle Playwright).
 - Tout échec → `docs/anomalies/AN-XXX.md` (5 pourquoi). Traces brutes → `docs/preuves/`.
 - Design : voir `DESIGN.md`.

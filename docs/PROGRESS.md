@@ -1,24 +1,26 @@
 # Journal de progression
 
-## 2026-11-24 16:30 — Phase A · cadrage
+> Heures = heure du commit git de l'étape (corrigées le 24/11 à 18:20, voir AN-004).
+
+## 2026-11-24 16:46 (commit) — Phase A · cadrage
 - Fait : plan approuvé par Axel ; dépôt initialisé ; `CLAUDE.md`, `DESIGN.md`, `REPRISE.md`, `docs/00_CADRAGE.md` (exigences E1–E9, hypothèses H1–H6), `POUR_AXEL.md` (4 tâches), `A_TRANCHER.md` (Q1–Q3). Playwright MCP ajouté au projet (`.mcp.json`, actif au prochain démarrage de Claude Code).
 - Preuve : fichiers dans le dépôt.
 - Suivant : M0.
 
-## 2026-11-24 16:40 — M0-a · trace de dev (1B, Mac)
+## 2026-11-24 16:46 (commit) — M0-a · trace de dev (1B, Mac)
 - Fait : `scripts/trace_core.py` (trace + contrôles E1), `scripts/trace_local.py`. Trace `public/traces/dev-1b-satellite.json` (Llama 3.2 1B-Instruct, miroir unsloth sans jeton, bf16, CPU) : 8 tokens, 0,09 Mo gzip, chargement 2 s, trace 10 s.
 - Écart : E1 en échec sur la somme des lignes d'attention (2,9e-3 > 1e-3) → **AN-001** : seuil mal posé (arrondi bf16), corrigé par calcul : eps(dtype)/2 + n·5e-5. Relance : E1 OK (somme 2,9e-3 ≤ 4,3e-3 ; recalcul softmax(QKᵀ) à 9,7e-3 ; top-1 = génération gloutonne).
 - Résultat : top-1 « was » 53 %, puis « had » 7,2 %, « is » 4,9 %.
 - Preuve : `docs/preuves/trace_local_run2.log`, `docs/preuves/AN-001_arrondi.txt`, `tests/trace.test.ts` (4 tests verts).
 - Notebook Kaggle `notebooks/trace_llama32.ipynb` généré depuis `trace_core.py` (`scripts/build-notebook.py`) : 3 modèles × 4 phrases. À lancer par Axel (tâche 1).
 
-## 2026-11-24 17:05 — M0-b · un bloc en 3D depuis la trace
+## 2026-11-24 16:46 (commit) — M0-b · un bloc en 3D depuis la trace
 - Fait : Vite + React + R3F. Un bloc : flux résiduel (un couloir par token, normes réelles en entrée/sortie), ① RMSNorm, ② attention (toutes les têtes, rangées par groupe K/V partagé), ③ addition, ④ RMSNorm, ⑤ MLP 2 048 → 8 192 → 2 048 avec les 16 neurones les plus actifs, ⑥ addition. Curseur de bloc, logit lens, top-10, survol = valeur exacte.
 - Boucle visuelle : 6 captures. Corrigé : cadrage (cadrage automatique selon la fenêtre), panneau qui recouvrait la scène, libellés `<Html>` de drei qui provoquaient des erreurs React 19 (remplacés par une couche de libellés unique), couloirs écrasés (vue de trois quarts).
 - Mesure : 144 i/s dans Chromium (Metal) à 1440×900 ; 0 erreur console. Survol vérifié : « tête 6, it → its : 2,37 % » = 0,0237 dans la trace.
 - Preuve : `docs/preuves/m0b_bloc1.png`.
 
-## 2026-11-24 17:50 — M0-c · direct dans le navigateur (WebGPU, Mac d'Axel)
+## 2026-11-24 16:59 (commit) — M0-c · direct dans le navigateur (WebGPU, Mac d'Axel)
 - Fait : `live-test.html` + `scripts/live-run.mjs` (Chromium, GPU réel Metal, 2 passages : téléchargement puis cache). Écart au plan : Chromium piloté par Playwright au lieu du Chrome d'Axel ; même machine, même GPU.
 - **1B-Instruct q4f16** : chargement 134 s (téléchargement) / **23 s** (cache), 1er passage avant 15 s (compilation des shaders), **18,6 tokens/s**. Top-10 : « was » 51,9 % (trace bf16 : 53,0 %), 8/10 en commun → E5 OK, E6 OK (à la limite).
 - **3B-Instruct q4f16** : pas de plantage, 9,7–12,5 tokens/s, mais 117 s (cache) + 30 s = **147 s** avant le 1er résultat → E5 échoue → **AN-002**. Proposition : 1B par défaut, 3B en option (A_TRANCHER Q4).
@@ -31,7 +33,7 @@
 - c) direct : **1B marche** (E5 OK) ; **3B tient mais trop lent** (AN-002) ; attention en direct impossible avec les exports standard.
 - Suivant : M1 (le trajet d'un token, 28 blocs) sur la trace 1B, bascule sur la trace 3B dès réception.
 
-## 2026-11-24 19:30 — M1 · le trajet d'un token
+## 2026-11-24 17:19 (commit) — M1 · le trajet d'un token
 - Fait : scène « trajet » (`src/scene/Journey.tsx`) : tokens et leurs numéros → **vraie ligne de chaque token** dans la table d'embedding (position = id / 128 256) → 16 premières valeurs réelles du vecteur → L blocs (attention orange | MLP violet) → RMSNorm finale → tête de sortie, reliée à la table d'entrée par un arc « même table » (`tie_embeddings`) → top-10. Impulsion animée par token ; seule celle du dernier token va jusqu'à la sortie.
 - À chaque bloc, avec les vrais nombres : arcs d'attention du dernier token (moyenne des têtes ; ⟨début⟩, le « puits », dessiné à part), **logit lens** (barre verte = top-1 lu à la sortie du bloc, vert si c'est le token final). Panneau synchronisé, liste « la prédiction se forme » (cliquable). Clic sur un bloc → vue détaillée de M0 ; retour au même bloc.
 - Frise : lecture/pause, pas à pas (← → espace), vitesse, « suivre le token » / « vue d'ensemble » (cadrage calculé sur les coins projetés de la scène). FR/EN pour toute la vue trajet (`src/i18n.ts`). Libellés : masquage automatique des chevauchements par priorité.
@@ -42,7 +44,7 @@
 - Preuve : `docs/preuves/M1_*.png`, `docs/preuves/M1_mesure_1b.json`, `docs/preuves/M1_mesure_charge28.json`.
 - Suivant : M2 (zoom attention et MLP).
 
-## 2026-11-24 21:30 — M2 · zoom dans le bloc : attention et MLP, avec les vrais nombres
+## 2026-11-24 17:34 (commit) — M2 · zoom dans le bloc : attention et MLP, avec les vrais nombres
 - **Trace enrichie (schéma 2)** : V et sortie de chaque tête (8 dims), détail des deux RMSNorm (x, RMS, poids, y), norme du flux après l'attention. Nouveaux contrôles dans le script de trace : RMSNorm recalculée (1,0 %), Σ p·V recalculé (0,3 %), silu(gate)·up recalculé (0,6 %) — tolérance 5 % **dérivée** de l'arrondi bf16 (leçon AN-001). Trace 1B régénérée (0,13 Mo gzip), notebook Kaggle régénéré (même code).
 - **Vue « dans un bloc »** : 9 étapes (① RMSNorm, ② Q K V, ③ scores Q·K, ④ softmax + masque, ⑤ mélange des V, ⑥ toutes les têtes / GQA, ⑦ addition, ⑧ MLP SwiGLU, ⑨ addition). Caméra qui vole vers la partie de l'étape (cadrage dans la moitié haute de l'écran, la carte occupe le bas). Partie active en avant, reste atténué. Tête sélectionnable (clic sur une grille ou curseur) ; groupe K/V partagé en pointillés ; ligne du dernier token en vert.
 - **Carte de calcul** (nombres en HTML, révélés ligne par ligne) avec les vrais nombres et l'étiquette « trace » ou « calculé ici ». Exemple réel (bloc 10, tête 1) : « it » regarde « satellite » à **32,03 %** (⟨début⟩ 24,41 %) — le pronom va chercher son antécédent.
@@ -53,7 +55,7 @@
 - Preuve : `docs/preuves/M2_*.png`, `docs/preuves/M2_mesure_fps.json`.
 - Suivant : M3 (exemple modifiable : ta phrase, la température, modèle en direct).
 
-## 2026-11-24 23:00 — M5 · le coffre alimente le schéma, FR/EN (M3 et M4 laissés pour plus tard, à la demande d'Axel)
+## 2026-11-24 17:48 (commit) — M5 · le coffre alimente le schéma, FR/EN (M3 et M4 laissés pour plus tard, à la demande d'Axel)
 - **Extracteur** `scripts/build-content.mjs` (lecture seule du coffre) + repères `content/pieces.json` : 12 fiches (7 « répondre » : tokens, embeddings, attention, flux résiduel, RMSNorm, MLP, sortie ; 5 « fabriquer » : données, tokenizer, pré-entraînement, lois d'échelle, fine-tuning). Chaque fiche : question, en clair, image, piège, mots à retenir (définitions de `Lexique/`), liens vers les enquêtes (Obsidian + artifact s'il existe). Texte **recopié tel quel** ; seules retouches : syntaxe Obsidian retirée, étiquette « → La réponse. » retirée, majuscule initiale. « Mes notes » jamais lu.
 - Fine-tuning : l'enquête #18 n'existe pas encore → fiche « en attente », qui se remplira seule. Les 5 fiches « fabriquer » sont prêtes pour M4.
 - 3 itérations sur les repères (passages coupés au milieu d'un gras, mauvais paragraphe choisi, définitions absentes du Lexique → remplacées par des termes définis : « GELU - SwiGLU », « Ratio Chinchilla », « Fenêtre de contexte » ; aucune définition inventée).
@@ -65,7 +67,7 @@
 - Preuve : `docs/preuves/M5_fiche_fr.png`, `docs/preuves/M5_fiche_en.png`.
 - Suivant : selon Axel — M3 (exemple modifiable), M4 (fabriquer) ou M6 (en ligne).
 
-## 2026-11-24 23:50 — Pages « enquête » (décision Axel, A_TRANCHER Q5)
+## 2026-11-24 17:56 (commit) — Pages « enquête » (décision Axel, A_TRANCHER Q5)
 - `npm run content` génère aussi **une page par enquête** (18) depuis le coffre : `public/enquetes/<n>.html` + index `content/enquetes.json`. Route `#/enquete/13`, sommaire `#/enquetes`, lien depuis chaque fiche et depuis le pied du panneau.
 - Conversion Obsidian → web : liens entre enquêtes → liens internes ; termes du `Lexique/` → soulignés, définition au survol ; liens vers des notes non publiées (Prospection, projets) → texte simple ; encadrés → citations titrées ; intégrations `![[…]]` retirées ; **aucun HTML brut des notes interprété**.
 - **Suivi personnel non publié** (liste modifiable `content/pages.json`) : « Mon/Ton hypothèse », « Bilan », « Questions de vérification », quiz, « Page de carnet », « Ce que tu me renvoies », mode d'emploi, corrigés, « Mes notes ».
@@ -74,7 +76,7 @@
 - Tests : `tests/content.test.ts` (pages : sections personnelles absentes, liens, Lexique, HTML neutralisé), `tests/e2e/pages.spec.ts` (fiche → page → Mermaid → retour). 14 unitaires + 3 e2e verts.
 - Preuve : `docs/preuves/M5_page_enquete13.png`, `docs/preuves/M5_mermaid14.png`.
 
-## 2026-11-25 00:40 — M3 · exemple modifiable : ta phrase, la température, le modèle en direct
+## 2026-11-24 18:03 (commit) — M3 · exemple modifiable : ta phrase, la température, le modèle en direct
 - Onglet **« À toi »** dans le panneau : phrase libre ; **tokenizer en direct** (Llama 3, dans un Web Worker, sans GPU) avec numéros des tokens — mêmes numéros que la trace pour la phrase tracée (128000, 791, 24088…) ; **température** 0–2 ; **token suivant** ; **tirage au hasard** + « ajouter à la phrase » ; liste des **phrases tracées** (`public/traces/index.json`, `npm run traces:index`).
 - **Température sur la trace** (sans modèle) : exacte à T = 1 (log Z = logit₁ − ln p₁, déduit de la trace) et à T → 0 ; approximation signalée ailleurs (renormalisée sur les 50 meilleurs tokens gardés). Les barres 3D de la sortie suivent la température (échelle absolue). `tests/temperature.test.ts` : T = 1 redonne le top-10 de la trace, T → 0 glouton, entropie croissante avec T (sur les 50 — sur le seul top-10 elle n'a pas à l'être : mon test initial était faux, corrigé).
 - **Direct** (`src/live/worker.ts`, Transformers.js + WebGPU, Web Worker) : 1B par défaut, 3B en option « lent » (A_TRANCHER Q4 appliqué). **Passe de chauffe** au chargement (leçon AN-002).
@@ -85,3 +87,8 @@
 - Tests : 17 unitaires + 3 e2e verts ; build OK (worker séparé, 546 Ko).
 - Preuve : `docs/preuves/M3_direct_1b.json`, `docs/preuves/M3_direct_3b.json`, `docs/preuves/M3_*.png`.
 - Suivant : M4 (fabriquer) puis M6 (en ligne).
+
+## 2026-11-24 18:22 (date) — Note de suivi dans Obsidian (autorisation d'Axel)
+- `npm run obsidian` (`scripts/sync-obsidian.mjs`) écrit **« Schéma du modèle — Suivi »** dans le coffre : tâches d'Axel, questions à trancher, étapes faites, dernière étape en détail ; chemins du dépôt → liens GitHub, chemins de rendus → dossier local. Note entièrement générée, à relancer à chaque étape. Lien ajouté en tête du « Journal du projet » de `Schéma du modèle.md`.
+- **AN-004** : heures de ce journal inventées (jusqu'à « 25/11 00:40 » alors qu'il était 18:16 le 24/11) → remplacées par les heures des commits ; date M3 corrigée dans le coffre ; règle « heures lues avec `date`/`git log` » ajoutée à `CLAUDE.md`.
+- Non fait : la ligne de trace dans `Journal.md` du coffre (règle 8 du coffre) — refusée par le contrôle des permissions ; laissée à la décision d'Axel.
