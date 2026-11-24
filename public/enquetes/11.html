@@ -1,0 +1,239 @@
+<p><strong>Branche :</strong> Comment ça marche · Carte de l&#39;IA</p>
+<p>Branche 1 « Comment ça marche » · bloc B (réseaux de neurones) · après #10 (le neurone), avant #12 (la tokenisation).</p>
+<h2>2. La question du jour</h2>
+<p><strong>Un réseau de neurones ne manipule que des nombres. Comment un mot devient-il une liste de nombres qui « contient » son sens, alors que personne n&#39;a écrit ce sens nulle part ?</strong></p>
+<h3>Les 3 appuis</h3>
+<p><strong>Appui 1 — Ton propre modèle.</strong> Dans ton mini-GPT Molière, chacun des 89 caractères devient 128 nombres (l&#39;embedding). Au début de l&#39;entraînement, ces 128 nombres sont tirés au hasard. Personne ne les a réglés à la main. Ils font partie des 832 601 réglages.</p>
+<p><strong>Appui 2 — Le résultat de 2013.</strong> Une équipe de Google (Mikolov et al.) entraîne un petit réseau à une seule tâche : deviner les mots voisins d&#39;un mot dans des milliards de phrases. Rien d&#39;autre. Ensuite, on fait un calcul sur les listes de nombres obtenues : vecteur(roi) − vecteur(homme) + vecteur(femme). Le résultat tombe près de vecteur(reine). Pareil pour Paris − France + Italie ≈ Rome.</p>
+<p><strong>Appui 3 — Mini-exercice.</strong> Le vocabulaire de GPT-3 compte 50 257 tokens. Idée naïve : donner à chaque token son numéro (chat = 1 012, chien = 1 013, voiture = 1 014). Question : avec cette numérotation, « chien » est-il plus proche de « chat » ou de « voiture » ? Est-ce que ça veut dire quelque chose ?</p>
+<h3>Les 3 questions guides</h3>
+<ol>
+<li>Si les 128 nombres partent du hasard, qu&#39;est-ce qui les pousse à changer ? (Pense à #7 et #8.)</li>
+<li>Pourquoi deviner les mots voisins obligerait-il le modèle à « ranger » les mots qui veulent dire des choses proches au même endroit ?</li>
+<li>Le mot « avocat » (le fruit, le juriste) : un seul embedding peut-il suffire ?</li>
+</ol>
+<blockquote>
+<p><strong>STOP. Écris ton hypothèse maintenant. Ne descends pas plus bas avant.</strong></p>
+</blockquote>
+<h2>3. Le sujet en clair</h2>
+<h3>Où on en est dans l&#39;arbre</h3>
+<p>En #10, tu as vu le neurone : il prend des nombres, les multiplie par des poids, additionne, applique une activation. Problème : un mot n&#39;est pas un nombre. Il faut une porte d&#39;entrée qui transforme « chat » en nombres utilisables. C&#39;est l&#39;embedding. C&#39;est la toute première couche de ton mini-GPT, et de Claude. En #12, on verra ce qu&#39;on découpe exactement (les tokens). En #13, comment l&#39;attention modifie ces nombres selon le contexte.</p>
+<h3>L&#39;analogie : la carte d&#39;une ville</h3>
+<p>Imagine une ville où chaque mot a une adresse. Personne n&#39;a dessiné le plan. Les mots ont emménagé tout seuls, en suivant une règle : tu habites près des mots avec qui tu traînes dans les phrases. Résultat : « chat » et « chien » habitent la même rue, « Paris » et « Rome » le même quartier, « voiture » loin des deux.</p>
+<table>
+<thead>
+<tr>
+<th>Dans la ville</th>
+<th>Dans le modèle</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>L&#39;adresse d&#39;un habitant</td>
+<td>L&#39;embedding d&#39;un mot (sa liste de nombres)</td>
+</tr>
+<tr>
+<td>Le nombre de coordonnées de l&#39;adresse (2 sur un plan)</td>
+<td>Le nombre de dimensions (128 chez toi, 12 288 dans GPT-3)</td>
+</tr>
+<tr>
+<td>Voisins = gens qui se fréquentent</td>
+<td>Mots proches = mots qui apparaissent dans les mêmes contextes</td>
+</tr>
+<tr>
+<td>Les gens déménagent au fil du temps</td>
+<td>Les nombres sont ajustés à chaque erreur (rétropropagation)</td>
+</tr>
+<tr>
+<td>Le trajet « de homme à roi »</td>
+<td>Une direction dans l&#39;espace (ici : « royauté »)</td>
+</tr>
+<tr>
+<td>Faire le même trajet en partant de « femme »</td>
+<td>roi − homme + femme ≈ reine</td>
+</tr>
+</tbody></table>
+<p>Limite de l&#39;analogie : une vraie ville a 2 dimensions. Un embedding en a des centaines ou des milliers, et aucune n&#39;a d&#39;étiquette du type « taille » ou « genre ».</p>
+<h3>Les 4 mots à connaître</h3>
+<ul>
+<li><strong>Vecteur</strong> : une liste ordonnée de nombres. [0,9 ; 0,2 est un vecteur à 2 dimensions.</li>
+<li><strong>Embedding</strong> : le vecteur qui représente un token. Le mot anglais veut dire « plongement » : on plonge le mot dans un espace.</li>
+<li><strong>Dimension</strong> : la longueur du vecteur. Plus il y en a, plus il y a de place pour ranger des nuances.</li>
+<li><strong>Similarité cosinus</strong> : la mesure de proximité entre deux vecteurs. 1 = même direction, 0 = rien à voir.</li>
+</ul>
+<h3>Le fil de l&#39;enquête</h3>
+<ol>
+<li>Pourquoi un simple numéro ne marche pas.</li>
+<li>La table d&#39;embeddings : une grande table, une ligne par token.</li>
+<li>Comment cette table s&#39;apprend (sans que personne n&#39;écrive le sens).</li>
+<li>Pourquoi le sens apparaît : « dis-moi qui tu fréquentes ».</li>
+<li>La géométrie du sens : distances et directions.</li>
+<li>La limite : un mot, plusieurs sens. La solution des transformers.</li>
+</ol>
+<h2>4. L&#39;enquête</h2>
+<h3>La question, avec la réponse</h3>
+<p><strong>Comment un mot devient-il une liste de nombres qui a un sens ?</strong></p>
+<p>→ Chaque token reçoit au départ une liste de nombres au hasard. Pendant l&#39;entraînement, ces nombres sont ajustés comme n&#39;importe quel poids, pour mieux prédire les mots autour. Les mots utilisés dans les mêmes contextes finissent avec des nombres proches. Le sens n&#39;est écrit nulle part : il est déduit de la compagnie que fréquente le mot.</p>
+<h3>Le schéma central</h3>
+<p>Exemple jouet à 2 dimensions (les vrais en ont des centaines) :</p>
+<table>
+<thead>
+<tr>
+<th>Mot</th>
+<th>Dimension 1</th>
+<th>Dimension 2</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>chat</td>
+<td>0,9</td>
+<td>0,2</td>
+</tr>
+<tr>
+<td>chien</td>
+<td>0,8</td>
+<td>0,3</td>
+</tr>
+<tr>
+<td>voiture</td>
+<td>0,1</td>
+<td>0,9</td>
+</tr>
+</tbody></table>
+<p>Place ces 3 points sur un repère. chat et chien sont presque superposés, voiture est loin.</p>
+<p>Similarité cosinus (calculée) :</p>
+<ul>
+<li>chat / chien = <strong>0,99</strong> (presque la même direction)</li>
+<li>chat / voiture = <strong>0,32</strong></li>
+</ul>
+<p>Deuxième schéma, l&#39;analogie (dimensions jouets, nommées pour l&#39;exemple seulement : « royauté » et « masculin ») :</p>
+<table>
+<thead>
+<tr>
+<th>Mot</th>
+<th>Royauté</th>
+<th>Masculin</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>roi</td>
+<td>0,9</td>
+<td>0,9</td>
+</tr>
+<tr>
+<td>homme</td>
+<td>0,1</td>
+<td>0,9</td>
+</tr>
+<tr>
+<td>femme</td>
+<td>0,1</td>
+<td>0,1</td>
+</tr>
+<tr>
+<td>reine</td>
+<td>0,9</td>
+<td>0,1</td>
+</tr>
+</tbody></table>
+<p>roi − homme + femme = (0,9 − 0,1 + 0,1 ; 0,9 − 0,9 + 0,1) = (0,9 ; 0,1) = reine. Sur le dessin : les flèches homme → roi et femme → reine sont parallèles et de même longueur.</p>
+<h3>Le mécanisme, étape par étape</h3>
+<p><strong>Étape 1 — Pourquoi un numéro ne marche pas.</strong> Si chat = 1 012, chien = 1 013, voiture = 1 014, le réseau croit que chien est « entre » chat et voiture, et que voiture vaut un peu plus que chat. C&#39;est absurde : l&#39;ordre alphabétique ou l&#39;ordre d&#39;arrivée dans le vocabulaire n&#39;a aucun sens. Réponse à l&#39;appui 3 : la numérotation fabrique des relations fausses.</p>
+<p>Autre idée : le <strong>one-hot</strong>. Un vecteur de 50 257 cases, que des 0 et un seul 1 à la place du mot. Plus de faux ordre, mais deux nouveaux problèmes : c&#39;est énorme, et tous les mots sont à la même distance les uns des autres. « chat » est aussi loin de « chien » que de « fiscalité ». Le modèle ne peut rien généraliser : ce qu&#39;il apprend sur « chat » ne sert jamais pour « chien ».</p>
+<p><strong>Étape 2 — La table d&#39;embeddings.</strong> La vraie solution : une grande table. Une ligne par token, d&#39;une largeur fixe (la dimension). Pour lire un mot, le modèle va chercher sa ligne. C&#39;est tout : aucun calcul, une simple recherche dans une table.</p>
+<ul>
+<li>Ton mini-GPT : 89 lignes × 128 colonnes = <strong>11 392 nombres</strong>, soit environ 1,4 % de tes 832 601 réglages.</li>
+<li>GPT-3 (2020) : 50 257 lignes × 12 288 colonnes ≈ <strong>618 millions</strong> de nombres, soit environ 0,35 % de ses 175 milliards de paramètres.</li>
+</ul>
+<p><strong>Étape 3 — Comment la table s&#39;apprend.</strong> Au départ, tout est aléatoire. Le modèle fait une prédiction, se trompe, et la rétropropagation (#8) calcule dans quel sens bouger chaque réglage pour réduire l&#39;erreur. Les lignes de la table d&#39;embeddings sont des réglages comme les autres : elles bougent aussi. À chaque fois qu&#39;un mot est utilisé, sa ligne est un peu corrigée. Après des milliards de corrections, chaque mot a une position utile pour prédire. Réponse à la question guide 1.</p>
+<p><strong>Étape 4 — Pourquoi le sens apparaît.</strong> Idée formulée par le linguiste J.R. Firth en 1957 (hypothèse distributionnelle) : on connaît un mot à ses fréquentations. « chat » et « chien » apparaissent devant les mêmes mots : « nourrir le …», « le … dort », « le … du voisin ». Pour bien prédire la suite, le modèle a intérêt à donner des vecteurs proches à des mots qui ont des suites proches. Il ne range pas par sens, il range par usage. Mais l&#39;usage contient énormément de sens. Réponse à la question guide 2.</p>
+<p><strong>Étape 5 — La géométrie du sens.</strong> Deux choses apparaissent sans qu&#39;on les demande :</p>
+<ul>
+<li><strong>Des distances</strong> : les mots proches en usage sont proches dans l&#39;espace (on le mesure avec la similarité cosinus).</li>
+<li><strong>Des directions</strong> : certaines relations deviennent des déplacements réguliers. Le trajet homme → roi ressemble au trajet femme → reine. Le trajet France → Paris ressemble au trajet Italie → Rome. C&#39;est ce que Mikolov et al. ont montré en 2013 avec word2vec (vecteurs de 300 dimensions).</li>
+</ul>
+<p>Pourquoi des centaines de dimensions ? Parce qu&#39;un mot a des centaines de façons d&#39;être proche d&#39;un autre (sens, registre, genre grammatical, singulier/pluriel, domaine…). En 2 dimensions, tout serait écrasé.</p>
+<p>Piège : les dimensions n&#39;ont pas d&#39;étiquette. Il n&#39;y a pas une case « genre » et une case « taille ». Les notions sont des directions mélangées entre toutes les cases. Mes tableaux avec « royauté » et « masculin » sont une simplification pédagogique.</p>
+<p><strong>Étape 6 — La limite et la solution des transformers.</strong> word2vec donne un seul vecteur par mot. « avocat » (le fruit) et « avocat » (le juriste) partagent donc la même adresse, une moyenne bancale des deux. Les transformers gardent la table d&#39;embeddings comme point d&#39;entrée, mais c&#39;est seulement le début. Ensuite :</p>
+<ol>
+<li>On ajoute au vecteur du mot une information de position (c&#39;est le « + position » de ton mini-GPT).</li>
+<li>Les couches d&#39;attention modifient le vecteur selon les mots autour. Après quelques couches, « avocat » dans « l&#39;avocat plaide » et dans « l&#39;avocat est mûr » ne sont plus du tout les mêmes vecteurs. On parle d&#39;<strong>embedding contextuel</strong>. On verra comment en #13.</li>
+</ol>
+<p>Réponse à la question guide 3 : à l&#39;entrée, un seul embedding. Au milieu du modèle, autant de versions que de contextes.</p>
+<h3>Ce que ça révèle</h3>
+<ul>
+<li>Le sens, pour une machine, c&#39;est une position relative. Un mot n&#39;a pas de sens seul, il a un sens par rapport à tous les autres.</li>
+<li>On n&#39;a jamais programmé le sens. Il est sorti d&#39;un objectif bête (prédire le voisin) poussé à très grande échelle. C&#39;est le même schéma que tout le reste du deep learning : un objectif simple + beaucoup de données = des propriétés qu&#39;on n&#39;a pas demandées.</li>
+<li>Les embeddings sont aussi une technologie à part : on s&#39;en sert hors des chatbots pour la recherche par sens (pas par mot-clé), la recommandation, le classement de documents. C&#39;est la base des systèmes qui vont chercher des documents avant de répondre (on y reviendra en #23).</li>
+</ul>
+<p><strong>L&#39;anomalie (pour ton carnet d&#39;anomalies).</strong> Le fameux roi − homme + femme = reine est en partie un tour de passe-passe. Dans le calcul standard, on exclut d&#39;office les mots de départ (roi, homme, femme) des réponses possibles. Si on ne les exclut pas, le point le plus proche du résultat est souvent… « roi » lui-même. Nissim, van Noord et van der Goot l&#39;ont montré en 2019. La structure existe, mais elle est moins nette que la démo célèbre. Leçon : une démo spectaculaire cache souvent un réglage qu&#39;on ne montre pas. Confiance : élevée sur le fait, moyenne sur son ampleur selon les modèles.</p>
+<p><strong>Deuxième anomalie.</strong> Les contraires (chaud/froid, acheter/vendre) ont souvent des embeddings très proches. Logique : ils apparaissent dans les mêmes phrases (« il fait … aujourd&#39;hui »). Proche en usage ne veut pas dire proche en sens.</p>
+<p><strong>Troisième point qui dérange.</strong> Les embeddings recopient les préjugés du texte. Bolukbasi et al. (2016) trouvent que homme est à programmeur ce que femme est à « femme au foyer » dans des vecteurs entraînés sur des articles de presse. Le modèle n&#39;invente pas ce biais : il le mesure dans nos textes, puis le reproduit.</p>
+<h3>Signaux à surveiller (à ce jour, 8 nov. 2026)</h3>
+<ul>
+<li>La taille des embeddings des grands modèles : elle grandit avec les modèles (128 chez toi, 12 288 pour GPT-3 en 2020). Les labos ne publient plus ce chiffre pour leurs modèles fermés : à vérifier sur les modèles ouverts.</li>
+<li>Les embeddings « emboîtés » (Matryoshka, Kusupati et al., 2022) : un seul vecteur qu&#39;on peut couper plus court en perdant peu de qualité. Intérêt : moins de stockage, donc moins cher. À relier à la branche Économie.</li>
+<li>L&#39;interprétabilité (#26) : retrouver des directions précises (vérité, émotion, sujet) dans ces espaces, et les modifier.</li>
+</ul>
+<h3>Lexique</h3>
+<ul>
+<li><strong>Embedding</strong> : vecteur de nombres qui représente un token, appris pendant l&#39;entraînement.</li>
+<li><strong>Vecteur</strong> : liste ordonnée de nombres.</li>
+<li><strong>Dimension</strong> : nombre de cases du vecteur.</li>
+<li><strong>One-hot</strong> : vecteur de 0 avec un seul 1 à la place du mot. Gros et sans notion de proximité.</li>
+<li><strong>Table (ou matrice) d&#39;embeddings</strong> : une ligne par token du vocabulaire. Lire un mot = aller chercher sa ligne.</li>
+<li><strong>Similarité cosinus</strong> : mesure de proximité entre deux vecteurs, selon leur direction (1 = même direction, 0 = sans rapport).</li>
+<li><strong>Hypothèse distributionnelle</strong> : le sens d&#39;un mot se déduit des contextes où il apparaît (Firth, 1957).</li>
+<li><strong>word2vec</strong> : méthode de Google (2013) qui apprend des embeddings en prédisant les mots voisins.</li>
+<li><strong>Embedding contextuel</strong> : le vecteur d&#39;un mot après passage dans l&#39;attention, qui dépend des mots autour.</li>
+<li><strong>Espace latent</strong> : l&#39;espace à N dimensions où vivent ces vecteurs.</li>
+</ul>
+<h3>Questions ouvertes</h3>
+<ul>
+<li>Si le sens est une position relative, que se passe-t-il pour un mot très rare, vu 3 fois en tout ?</li>
+<li>Deux modèles entraînés séparément rangent-ils les mots de la même façon ? (Indice : la forme globale se ressemble souvent, l&#39;orientation non. C&#39;est ce qui permet en partie de traduire entre langues sans dictionnaire.)</li>
+<li>Une image ou un son peuvent-ils vivre dans le même espace que les mots ? (Réponse : oui, c&#39;est la base du multimodal, #22.)</li>
+</ul>
+<h3>Prochaines enquêtes</h3>
+<ul>
+<li><strong>#12 La tokenisation, et pourquoi le français coûte plus cher</strong> : ce qu&#39;on met exactement dans la table d&#39;embeddings.</li>
+<li><strong>#13 L&#39;attention en détail</strong> : comment le vecteur de « avocat » change selon la phrase.</li>
+</ul>
+<p><strong>Croisement (branche Économie)</strong> : la recherche par embeddings est l&#39;un des usages commerciaux les plus répandus de l&#39;IA, bien moins cher qu&#39;un appel à un grand modèle. Question à garder : qui gagne de l&#39;argent sur cette couche, les modèles d&#39;embedding ou les bases de données qui stockent les vecteurs ?</p>
+<h3>Sources (ouvertes et citées)</h3>
+<ul>
+<li>Mikolov et al., « Efficient Estimation of Word Representations in Vector Space », 2013 — <a href="https://arxiv.org/abs/1301.3781" target="_blank" rel="noreferrer">https://arxiv.org/abs/1301.3781</a> (word2vec)</li>
+<li>Mikolov et al., « Distributed Representations of Words and Phrases and their Compositionality », 2013 — <a href="https://arxiv.org/abs/1310.4546" target="_blank" rel="noreferrer">https://arxiv.org/abs/1310.4546</a> (analogies, Paris/France)</li>
+<li>Brown et al., « Language Models are Few-Shot Learners » (GPT-3), 2020 — <a href="https://arxiv.org/abs/2005.14165" target="_blank" rel="noreferrer">https://arxiv.org/abs/2005.14165</a> (dimension 12 288, tableau 2.1)</li>
+<li>Nissim, van Noord, van der Goot, « Fair is Better than Sensational », 2019 — <a href="https://arxiv.org/abs/1905.09866" target="_blank" rel="noreferrer">https://arxiv.org/abs/1905.09866</a> (l&#39;anomalie roi/reine)</li>
+<li>Bolukbasi et al., « Man is to Computer Programmer as Woman is to Homemaker? », 2016 — <a href="https://arxiv.org/abs/1607.06520" target="_blank" rel="noreferrer">https://arxiv.org/abs/1607.06520</a> (biais)</li>
+<li>Kusupati et al., « Matryoshka Representation Learning », 2022 — <a href="https://arxiv.org/abs/2205.13147" target="_blank" rel="noreferrer">https://arxiv.org/abs/2205.13147</a></li>
+<li>Ton mini-GPT Molière (89 × 128, 832 601 réglages) : tes propres fichiers model.py.</li>
+</ul>
+<p>Note de confiance : chiffres word2vec, GPT-3 et mini-GPT = élevée (papiers et ton code). Le vocabulaire de GPT-3 (50 257) vient de GPT-2, repris en 2020 : élevée. Je n&#39;ai pas fait de recherche web aujourd&#39;hui (limite de la semaine) : rien de ce doc ne dépend d&#39;un chiffre récent, sauf les signaux à surveiller.</p>
+<h2>7. Approfondissement</h2>
+<ol>
+<li><strong>Exercice papier (20 min)</strong> : calcule toi-même les deux cosinus du schéma. Formule : (a1×b1 + a2×b2) ÷ (longueur de a × longueur de b), avec longueur = √(x² + y²). Tu dois retrouver 0,99 et 0,32. Ça te fait aussi réviser les racines pour la licence.</li>
+<li><strong>2e source primaire</strong> : le papier word2vec de 2013 (lien en sources). Lis seulement l&#39;introduction et la section des analogies. Repère une phrase où les auteurs exagèrent par rapport à ce que montre l&#39;anomalie de 2019.</li>
+<li><strong>Question bonus</strong> : dans ton mini-GPT, chaque caractère a 128 nombres. Penses-tu que « a » et « à » soient proches ? Et « e » et « é » ? Écris ta prédiction. On pourra la tester en 10 lignes de code dans ton projet quand ta limite sera revenue.</li>
+</ol>
+<h2>Termes vus</h2>
+<ul>
+<li><span class="lex" tabindex="0" title="Embedding — Le vecteur de départ d'un token, le même quel que soit le contexte (il code le mot et sa position).">Embedding</span></li>
+<li><span class="lex" tabindex="0" title="Vecteur — Liste de nombres qui représente le sens d'un token.">Vecteur</span></li>
+<li><span class="lex" tabindex="0" title="Dimension — Nombre de cases d'un vecteur. Un embedding de Llama 3 en a 4 096.">Dimension</span></li>
+<li><span class="lex" tabindex="0" title="One-hot — Vecteur de 0 avec un seul 1 à la place du mot. Gros, et sans aucune notion de proximité entre mots.">One-hot</span></li>
+<li><span class="lex" tabindex="0" title="Table d'embeddings — Une ligne par token du vocabulaire. Lire un mot = aller chercher sa ligne. Chez Llama 3 : 128 256 lignes × 4 096 nombres ≈ 525 millions de paramètres.">Table d&#39;embeddings</span></li>
+<li><span class="lex" tabindex="0" title="Similarité cosinus — Mesure de proximité entre deux vecteurs selon leur direction. 1 = même direction, 0 = sans rapport.">Similarité cosinus</span></li>
+<li><span class="lex" tabindex="0" title="Hypothèse distributionnelle — Le sens d'un mot se déduit des contextes où il apparaît (Firth, 1957). C'est le pari sur lequel repose tout l'apprentissage des embeddings.">Hypothèse distributionnelle</span></li>
+<li><span class="lex" tabindex="0" title="word2vec — Méthode de Google (2013) qui apprend des embeddings en prédisant les mots voisins.">word2vec</span></li>
+<li><span class="lex" tabindex="0" title="Embedding contextuel — Le vecteur d'un mot après passage dans l'attention : il dépend des mots autour, contrairement à l'embedding de départ.">Embedding contextuel</span></li>
+<li><span class="lex" tabindex="0" title="Espace latent — L'espace à N dimensions où vivent les vecteurs d'un modèle.">Espace latent</span></li>
+</ul>
+<h2>Anomalies relevées</h2>
+<ul>
+<li></li>
+</ul>
+<h2>Croisements avec d&#39;autres branches</h2>
+<ul>
+<li>Suite directe : <a href="#/enquete/12">#12</a> — d&#39;où sort le token qui reçoit ce vecteur.</li>
+</ul>

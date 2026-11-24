@@ -12,6 +12,8 @@ export type FicheData = {
   question?: string | null; clair?: string | null; analogie?: string | null; piege?: string | null
   enAttente?: string; aTraduire?: number
 }
+/** Le lien Obsidian ne sert que sur le Mac d'Axel (serveur local). */
+const LOCAL = typeof location !== 'undefined' && /^(localhost|127\.0\.0\.1)$/.test(location.hostname)
 const CONTENT = { fr: fr.pieces, en: en.pieces } as unknown as Record<'fr' | 'en', Record<string, FicheData>>
 
 /** **gras** et puces « • » → éléments React (aucun HTML injecté). */
@@ -59,9 +61,8 @@ export function Fiche({ id }: { id: string }) {
           <h3>{t.fiche.lire}</h3>
           {f.enquetes.map((e, i) => (
             <div key={e.numero}>
-              <span className="mono">#{e.numero}</span> {e.titre ?? base.enquetes[i].titre}
-              {' · '}<a href={e.obsidian}>{t.fiche.obsidian}</a>
-              {e.artifact && <>{' · '}<a href={e.artifact} target="_blank" rel="noreferrer">{t.fiche.artifact}</a></>}
+              <a href={`#/enquete/${e.numero.replace(/^0+(\d)/, '$1').replace(/\s+/g, '-')}`}><span className="mono">#{e.numero}</span> {e.titre ?? base.enquetes[i].titre}</a>
+              {LOCAL && <>{' · '}<a href={e.obsidian} className="muted">{t.fiche.obsidian}</a></>}
             </div>
           ))}
         </section>

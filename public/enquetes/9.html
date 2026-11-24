@@ -1,0 +1,282 @@
+<p><strong>Branche :</strong> Comment ça marche · Carte de l&#39;IA</p>
+<h2>Avant de commencer : le sujet en clair</h2>
+<p><em>À lire en premier. 3 minutes, sans jargon. La partie sérieuse commence à « La question ».</em></p>
+<h3>Où on en est</h3>
+<ul>
+<li><strong>#7</strong> : apprendre, pour une machine, c&#39;est faire baisser un chiffre qui mesure ses erreurs (la perte).</li>
+<li><strong>#8</strong> : on sait comment elle calcule, pour chaque réglage, dans quel sens le bouger.</li>
+<li><strong>#9, aujourd&#39;hui</strong> : faire baisser ce chiffre, est-ce que ça suffit pour être bon ? Réponse courte : non.</li>
+</ul>
+<h3>L&#39;histoire en une image : l&#39;élève qui bachote</h3>
+<p>Deux élèves préparent un examen de maths avec les annales des 10 dernières années.</p>
+<ul>
+<li><strong>Élève A</strong> apprend les corrigés par cœur. Aux annales, il a 20/20.</li>
+<li><strong>Élève B</strong> apprend la méthode. Aux annales, il a 16/20, il fait encore quelques erreurs.</li>
+</ul>
+<p>Le jour de l&#39;examen, les questions sont <strong>nouvelles</strong>. A s&#39;écroule : il n&#39;a rien compris, il a juste retenu. B a 16 : sa méthode marche sur du neuf.</p>
+<p>Pire : les corrigés des annales contiennent quelques fautes de frappe. A les a apprises aussi. B, non, puisqu&#39;elles ne suivent aucune méthode.</p>
+<p>Un réseau de neurones peut être l&#39;élève A. C&#39;est tout le sujet de l&#39;enquête.</p>
+<table>
+<thead>
+<tr>
+<th>Dans l&#39;histoire</th>
+<th>Dans l&#39;IA</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Les annales</td>
+<td>Les données d&#39;entraînement</td>
+</tr>
+<tr>
+<td>La note aux annales</td>
+<td>La perte d&#39;entraînement</td>
+</tr>
+<tr>
+<td>Les fautes de frappe dans les corrigés</td>
+<td>Le <strong>bruit</strong> : les erreurs et le hasard dans les données</td>
+</tr>
+<tr>
+<td>Apprendre les corrigés par cœur</td>
+<td>Le <strong>surapprentissage</strong></td>
+</tr>
+<tr>
+<td>Les sujets que le prof garde secrets</td>
+<td>Le <strong>jeu de test</strong> : des exemples jamais montrés au modèle</td>
+</tr>
+<tr>
+<td>La note à l&#39;examen</td>
+<td>La perte de test : la seule qui dit si le modèle est bon</td>
+</tr>
+</tbody></table>
+<h3>Les 4 mots à avoir en tête</h3>
+<ul>
+<li><strong>Perte</strong> : le chiffre qui mesure les erreurs. Plus bas = moins d&#39;erreurs (#7).</li>
+<li><strong>Paramètres</strong> : les réglages du modèle. Plus il en a, plus il peut retenir de choses par cœur.</li>
+<li><strong>Bruit</strong> : la part des données qui est du hasard ou une erreur. Rien à comprendre dedans.</li>
+<li><strong>Jeu de test</strong> : des exemples cachés pendant l&#39;apprentissage, pour juger le modèle à la fin.</li>
+</ul>
+<h3>Le fil de l&#39;enquête, en 4 étapes</h3>
+<ol>
+<li><strong>Le problème</strong> : un modèle peut avoir une perte de 0 en ayant tout appris par cœur (le graphique).</li>
+<li><strong>La preuve</strong> : des chercheurs ont fait apprendre à un réseau des étiquettes tirées au hasard. Il a eu 100 % aux « annales » et le hasard à « l&#39;examen ».</li>
+<li><strong>La parade</strong> : garder des exemples secrets et surveiller la note dessus.</li>
+<li><strong>La surprise</strong> : les très gros modèles devraient tout réciter, et pourtant ils généralisent bien. Personne ne sait vraiment pourquoi.</li>
+</ol>
+<h2>La question</h2>
+<p><strong>Un réseau peut faire descendre sa perte presque à 0 sur ses exemples d&#39;entraînement. Pourquoi est-ce parfois une mauvaise nouvelle, et comment on s&#39;en rend compte ?</strong></p>
+<p><strong>Réponse :</strong> la perte d&#39;entraînement ne mesure l&#39;erreur que sur les exemples <strong>déjà vus</strong>. Un réseau assez gros peut les apprendre par cœur, bruit et erreurs compris, sans avoir trouvé la règle. Preuve : entraîné sur des images aux étiquettes <strong>tirées au hasard</strong>, un réseau atteint 100 % de bonnes réponses à l&#39;entraînement et ~10 % sur des images nouvelles, soit le hasard pur. Une perte à 0 ne distingue donc pas « compris » de « récité ». On s&#39;en rend compte en gardant des exemples <strong>de côté</strong>, jamais montrés : si la perte d&#39;entraînement continue de baisser pendant que celle de ces exemples remonte, le modèle apprend le bruit. C&#39;est le <strong>surapprentissage</strong>.</p>
+<p>Nuance importante : chez les très gros réseaux et les LLM, cette histoire classique est incomplète. Ils ont souvent plus de paramètres que d&#39;exemples et généralisent quand même. On verra pourquoi c&#39;est encore une question ouverte.</p>
+<h2>Graphique</h2>
+<blockquote>
+<p><strong>Schéma de l&#39;artifact d&#39;origine</strong>
+ expérience refaite en code le 1er nov. 2026 · 10 points y = 2x + 1 + bruit, modèles de 1 à 10 paramètres (polynômes)</p>
+</blockquote>
+<p>La courbe grise (entraînement) descend toujours. La bleue (test, sur 200 points jamais vus) touche le plancher à 2 paramètres, puis remonte : à partir de là, chaque paramètre en plus sert à apprendre le bruit.</p>
+<h2>Le mécanisme, pas à pas</h2>
+<h3>1. Des données = une règle + du bruit</h3>
+<p>L&#39;expérience du graphique ci-dessus (refaite en code) : 10 points suivent la règle y = 2x + 1, plus un bruit aléatoire. Ce bruit vaut 0,09 en moyenne : aucun modèle, même parfait, ne peut faire mieux sur des points nouveaux, puisque le bruit n&#39;a pas de règle.</p>
+<p>Pour faire baisser la perte d&#39;entraînement, un modèle a deux chemins :</p>
+<ul>
+<li><strong>Trouver la règle.</strong> La droite (2 paramètres) passe près des points. Perte d&#39;entraînement 0,24, perte de test 0,09 : elle colle au plancher.</li>
+<li><strong>Retenir chaque point, bruit compris.</strong> La courbe à 10 paramètres passe exactement par les 10 points. Perte d&#39;entraînement 0, perte de test 0,39 : <strong>4 fois pire</strong> que la droite.</li>
+</ul>
+<p>La descente de gradient (#7) ne choisit pas entre les deux. Elle baisse la perte, point. Si le modèle a assez de paramètres pour retenir, il retient.</p>
+<h3>2. La capacité : assez de paramètres pour tout retenir</h3>
+<p>La <strong>capacité</strong> d&#39;un modèle, c&#39;est la quantité de choses différentes qu&#39;il peut représenter. 10 paramètres pour 10 points : il peut passer par tous. Zhang et al. (2017) le prouvent pour les réseaux de neurones : dès qu&#39;un réseau à 2 couches a plus de paramètres que d&#39;exemples, il peut tout retenir.</p>
+<p>Leur expérience décisive, sur 50 000 images de 10 classes (CIFAR-10) :</p>
+<table>
+<thead>
+<tr>
+<th>Étiquettes</th>
+<th>Réussite à l&#39;entraînement</th>
+<th>Réussite sur images nouvelles</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Vraies</td>
+<td>~100 %</td>
+<td>~86 à 89 % (réseau Inception)</td>
+</tr>
+<tr>
+<td>Tirées au hasard</td>
+<td>99,3 à 100 %</td>
+<td>~10 % (le hasard sur 10 classes)</td>
+</tr>
+</tbody></table>
+<p>Avec des étiquettes aléatoires, il n&#39;y a <strong>aucune règle</strong> à trouver. Le réseau a donc tout appris par cœur. Et la perte d&#39;entraînement est quasi la même dans les deux cas. Même résultat sur ImageNet : 95,2 % à l&#39;entraînement sur 1 million d&#39;images aux étiquettes aléatoires. Confiance : haute (chiffres lus dans le papier).</p>
+<p><strong>Conclusion : la perte d&#39;entraînement ne peut pas, à elle seule, dire si le modèle a compris.</strong></p>
+<h3>3. Comment on le détecte : couper les données en trois</h3>
+<table>
+<thead>
+<tr>
+<th>Jeu</th>
+<th>À quoi il sert</th>
+<th>Le modèle le voit ?</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Entraînement</td>
+<td>Calculer les gradients et ajuster les paramètres (#7, #8)</td>
+<td>Oui, en boucle</td>
+</tr>
+<tr>
+<td>Validation</td>
+<td>Choisir les réglages (taille, taux d&#39;apprentissage) et décider quand arrêter</td>
+<td>Jamais pour apprendre, mais on le consulte souvent</td>
+</tr>
+<tr>
+<td>Test</td>
+<td>La note finale</td>
+<td>Une seule fois, à la fin</td>
+</tr>
+</tbody></table>
+<p>Le signal à surveiller : l&#39;<strong>écart de généralisation</strong>, la différence entre perte d&#39;entraînement et perte de validation. Les deux baissent ensemble au début. Si celle d&#39;entraînement continue de baisser et celle de validation remonte, le modèle commence à apprendre le bruit. On arrête là : c&#39;est l&#39;<strong>arrêt précoce</strong>.</p>
+<p>Pourquoi trois jeux et pas deux ? Si on choisit les réglages en regardant le jeu de test, on finit par sur-apprendre… le test. Il faut un juge qu&#39;on n&#39;a jamais consulté.</p>
+<h3>4. Les remèdes classiques</h3>
+<ul>
+<li><strong>Plus de données</strong> : plus il y a d&#39;exemples, plus il est dur de tout retenir, et le bruit se moyenne.</li>
+<li><strong>Un modèle plus petit</strong> : moins de capacité, moins de place pour le bruit.</li>
+<li><strong>La régularisation</strong> : pénaliser les paramètres trop grands (<em>weight decay</em>), ou éteindre des neurones au hasard pendant l&#39;entraînement (<em>dropout</em>), pour forcer des solutions plus simples.</li>
+<li><strong>L&#39;arrêt précoce</strong> (ci-dessus).</li>
+</ul>
+<p>Attention : Zhang et al. montrent que la régularisation <strong>n&#39;empêche pas</strong> le réseau d&#39;apprendre les étiquettes aléatoires. Elle aide un peu, elle n&#39;explique pas pourquoi les réseaux généralisent.</p>
+<h3>5. Les gros réseaux cassent l&#39;histoire classique</h3>
+<p>La théorie classique dit : plus de paramètres = plus de surapprentissage. Or les réseaux modernes ont souvent bien plus de paramètres que d&#39;exemples, et ils généralisent très bien sur de vraies données. C&#39;est exactement le paradoxe que soulève Zhang et al.</p>
+<p>Nakkiran et al. (OpenAI, 2019) observent la <strong>double descente</strong> sur des CNN, des ResNet et des transformers. En augmentant la taille du modèle, l&#39;erreur de test baisse, puis remonte jusqu&#39;au <strong>seuil d&#39;interpolation</strong> (le modèle est tout juste assez grand pour tout retenir), puis <strong>redescend</strong> quand on grossit encore. Leur explication intuitive : au seuil, une seule solution colle aux données et elle est tordue par le bruit ; un modèle plus grand a beaucoup de solutions possibles, dont certaines simples. Pourquoi la descente de gradient trouve ces solutions simples ? Les auteurs le disent eux-mêmes : on ne sait pas encore. Confiance : haute sur l&#39;observation, le mécanisme reste ouvert.</p>
+<p>Détail qui choque : dans une de leurs expériences de traduction, <strong>4,5 fois plus de données a dégradé le résultat</strong> pour une taille de modèle intermédiaire, parce que plus de données déplace le seuil.</p>
+<h3>6. Et les LLM ?</h3>
+<p>Deux phénomènes distincts :</p>
+<ul>
+<li><strong>Le surapprentissage global est rare au pré-entraînement.</strong> Llama 3 lit ~15 000 milliards de tokens pour 405 milliards de paramètres (#7) : le corpus est énorme par rapport au modèle. Muennighoff et al. (2023) mesurent qu&#39;on peut relire les mêmes données jusqu&#39;à 4 fois sans perte notable par rapport à des données neuves ; au-delà, chaque relecture vaut de moins en moins.</li>
+<li><strong>La mémorisation locale, elle, existe.</strong> Carlini et al. (2022) montrent que les LLM recrachent mot pour mot certains passages de leur entraînement. Trois facteurs l&#39;augmentent, chacun de façon log-linéaire : un modèle plus grand, un passage <strong>dupliqué</strong> plus souvent dans les données, et un début de texte (prompt) plus long. C&#39;est pour ça que le nettoyage des données (#15) supprime les doublons.</li>
+</ul>
+<h2>Ce que ça révèle</h2>
+<p><em>Écris ta ligne dans ton carnet avant de lire celle-ci.</em></p>
+<p><strong>Un score ne vaut quelque chose que sur des données que le modèle n&#39;a jamais vues.</strong> Tout le reste est de la récitation possible.</p>
+<p>Trois conséquences qui sortent directement du mécanisme :</p>
+<ol>
+<li><strong>Les benchmarks peuvent mentir.</strong> Les questions des tests publics finissent souvent sur le web, donc dans les données d&#39;entraînement. Le score mesure alors en partie de la mémoire, pas de la compréhension. C&#39;est la <strong>contamination</strong> : on la creuse à l&#39;enquête #25.</li>
+<li><strong>La mémorisation est un risque juridique.</strong> Si un modèle peut recracher mot pour mot un texte dupliqué, il peut recracher un article de presse ou un livre. C&#39;est un des cœurs des procès sur le droit d&#39;auteur contre les labos (branche Pouvoir, régulation).</li>
+<li><strong>Le nettoyage des données est aussi une arme contre la mémorisation.</strong> Supprimer les doublons réduit directement ce que le modèle récite (Carlini). Lien avec #15.</li>
+</ol>
+<h2>Anomalie pour ton carnet</h2>
+<p><strong>Le grokking</strong> (Power et al., OpenAI, 2022). Sur de petits problèmes de calcul (des additions « modulo » un nombre), des réseaux apprennent d&#39;abord tout par cœur : 100 % à l&#39;entraînement, le hasard sur les exemples nouveaux. Selon la règle classique, il faudrait arrêter là. Mais si on continue l&#39;entraînement <strong>très longtemps</strong>, la réussite sur les exemples nouveaux passe soudain du hasard à 100 %. Et moins il y a de données, plus il faut d&#39;entraînement pour que ça arrive.</p>
+<p>Donc l&#39;arrêt précoce, le remède de base, aurait tué la généralisation. Avec la double descente, c&#39;est le deuxième fait qui ne colle pas à la règle « plus de capacité ou plus d&#39;entraînement = plus de surapprentissage ».</p>
+<h2>Signaux à surveiller</h2>
+<ul>
+<li><strong>Une vraie explication de la généralisation des gros réseaux.</strong> Zhang (2017), Nakkiran (2019) et Power (2022) posent tous la même question sans y répondre. Celui qui la résout change la façon de dimensionner les modèles. Confiance : moyenne que ce soit encore ouvert fin 2026 (domaine actif, je n&#39;ai pas tout parcouru).</li>
+<li><strong>Le mur des données.</strong> Si les labos manquent de texte neuf, ils devront relire les mêmes données. Jusqu&#39;à ~4 fois, pas de souci (Muennighoff). Au-delà, le surapprentissage revient dans l&#39;équation.</li>
+<li><strong>Les annonces de scores sans précision sur la contamination</strong> : à lire avec méfiance.</li>
+</ul>
+<h2>Croisement</h2>
+<p><strong>Branche 6, Où elle va.</strong> À l&#39;enquête #5, les « goulots » vers l&#39;AGI incluaient les données. Ici tu vois le mécanisme : un modèle qui relit trop les mêmes données apprend leur bruit. Le manque de données neuves n&#39;est pas qu&#39;un problème de quantité, c&#39;est un plafond à la généralisation. D&#39;où l&#39;intérêt des labos pour les données synthétiques et l&#39;apprentissage par essais sur des problèmes vérifiables (#19).</p>
+<h2>Lexique</h2>
+<table>
+<thead>
+<tr>
+<th>Terme</th>
+<th>Ce que ça veut dire</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Surapprentissage (overfitting)</td>
+<td>Le modèle apprend le bruit de ses exemples au lieu de la règle : très bon à l&#39;entraînement, moins bon sur du neuf</td>
+</tr>
+<tr>
+<td>Sous-apprentissage (underfitting)</td>
+<td>L&#39;inverse : modèle trop simple, il rate même ses exemples (la courbe à 1 paramètre du graphique)</td>
+</tr>
+<tr>
+<td>Jeux d&#39;entraînement / validation / test</td>
+<td>Entraînement : pour apprendre. Validation : pour régler et décider quand arrêter. Test : la note finale, ouverte une fois</td>
+</tr>
+<tr>
+<td>Écart de généralisation</td>
+<td>Perte de validation moins perte d&#39;entraînement. S&#39;il grandit, le modèle récite</td>
+</tr>
+<tr>
+<td>Arrêt précoce</td>
+<td>Stopper l&#39;entraînement quand la perte de validation remonte</td>
+</tr>
+<tr>
+<td>Régularisation</td>
+<td>Tout ce qui pousse vers des solutions simples : pénaliser les gros paramètres (weight decay), éteindre des neurones au hasard (dropout)</td>
+</tr>
+<tr>
+<td>Capacité</td>
+<td>Ce qu&#39;un modèle peut représenter. Assez de capacité = assez pour tout retenir</td>
+</tr>
+<tr>
+<td>Double descente</td>
+<td>L&#39;erreur de test baisse, remonte au seuil d&#39;interpolation (tout juste assez gros pour tout retenir), puis rebaisse avec un modèle plus gros</td>
+</tr>
+<tr>
+<td>Grokking</td>
+<td>Généraliser soudainement, longtemps après avoir tout appris par cœur</td>
+</tr>
+<tr>
+<td>Époque (epoch)</td>
+<td>Un passage complet sur les données d&#39;entraînement. Au-delà de ~4 pour un LLM, chaque relecture vaut de moins en moins</td>
+</tr>
+<tr>
+<td>Mémorisation (mot pour mot)</td>
+<td>Le modèle recrache un passage exact de son entraînement. Augmente avec la taille, les doublons et la longueur du prompt</td>
+</tr>
+</tbody></table>
+<h2>Questions ouvertes et prochaines enquêtes</h2>
+<ul>
+<li>Pourquoi un réseau qui <em>peut</em> tout retenir choisit-il, sur de vraies données, une solution qui généralise ? Personne n&#39;a de réponse complète.</li>
+<li>Au fine-tuning (#18), on entraîne un gros modèle sur peu d&#39;exemples. Le surapprentissage revient-il ? Comment les labos l&#39;évitent-ils ?</li>
+<li>Comment prouver qu&#39;un benchmark n&#39;est pas dans les données d&#39;entraînement d&#39;un modèle fermé ? → #25.</li>
+</ul>
+<p><strong>Suite logique :</strong> #10 Un neurone artificiel, des couches, des fonctions d&#39;activation. Tu sais comment un réseau apprend (#7, #8) et quand il apprend mal (#9). Il reste à ouvrir la boîte : de quoi est fait un réseau, brique par brique.</p>
+<h2>Approfondissement (à faire aujourd&#39;hui, ~45 min)</h2>
+<ol>
+<li><strong>Exercice (25 min) : refais l&#39;expérience.</strong> Colle ce code dans un notebook Google Colab. <strong>Avant de lancer</strong>, écris dans ton carnet quel nombre de paramètres donnera la meilleure perte de test. Puis passe de 10 à 30 points d&#39;entraînement (les deux <code>10</code> de la ligne <code>xtr</code>, <code>ytr</code>) et regarde ce qui arrive à la courbe à 10 paramètres. Envoie-moi tes deux tableaux.</li>
+</ol>
+<pre><code class="language-python">import numpy as np
+rng = np.random.default_rng(3)
+f = lambda x: 2*x + 1
+xtr = np.linspace(0, 1, 10); ytr = f(xtr) + rng.normal(0, 0.3, 10)
+xte = rng.uniform(0, 1, 200); yte = f(xte) + rng.normal(0, 0.3, 200)
+for d in range(10):
+    p = np.polyfit(xtr, ytr, d)
+    tr = np.mean((np.polyval(p, xtr) - ytr)**2)
+    te = np.mean((np.polyval(p, xte) - yte)**2)
+    print(d + 1, &#39;params | entraînement&#39;, round(tr, 3), &#39;| test&#39;, round(te, 3))
+</code></pre>
+<ol start="2">
+<li><strong>Source primaire (15 min).</strong> Le billet d&#39;OpenAI sur la double descente (court, avec graphiques). Repère l&#39;expérience où plus de données fait pire, et la phrase qui dit que le mécanisme reste inexpliqué.</li>
+<li><strong>Question bonus.</strong> Dans le graphique, la meilleure perte de test vaut 0,09 et ne descend jamais en dessous, quel que soit le modèle. Pourquoi ? Qu&#39;est-ce que ça dit des données réelles, où le « bruit » est fait d&#39;erreurs d&#39;étiquetage et de textes faux sur le web ?</li>
+</ol>
+<h2>Sources</h2>
+<p>Toutes ouvertes le 1er nov. 2026. L&#39;expérience du graphique est refaite en code (le même que dans l&#39;approfondissement).</p>
+<ul>
+<li><a href="https://arxiv.org/abs/1611.03530v1" target="_blank" rel="noreferrer">Zhang, Bengio, Hardt, Recht, Vinyals — Understanding deep learning requires rethinking generalization, ICLR 2017</a> : étiquettes aléatoires, 99,3-100 % à l&#39;entraînement, ~10 % en test, 95,2 % sur ImageNet (<a href="https://object.cloud.sdsc.edu/v1/AUTH_da4962d3368042ac8337e2dfdd3e7bf3/ml-papers-txt/ICLR/2017/understanding_deep_learning_requires_rethinking_generalization__b4b9c0a6.txt" target="_blank" rel="noreferrer">texte complet</a>)</li>
+<li><a href="https://openai.com/index/deep-double-descent" target="_blank" rel="noreferrer">Nakkiran et al. — Deep Double Descent, billet OpenAI, 2019</a> : seuil d&#39;interpolation, 4,5× plus de données qui dégrade, mécanisme inexpliqué (<a href="https://arxiv.org/abs/1912.02292v1" target="_blank" rel="noreferrer">papier</a>)</li>
+<li><a href="https://arxiv.org/abs/2201.02177" target="_blank" rel="noreferrer">Power et al. — Grokking, 2022</a> : généralisation du hasard à 100 % bien après le surapprentissage</li>
+<li><a href="https://arxiv.org/abs/2202.07646" target="_blank" rel="noreferrer">Carlini et al. — Quantifying Memorization Across Neural Language Models, 2022</a> : taille, doublons, longueur du prompt, relation log-linéaire</li>
+<li><a href="https://arxiv.org/abs/2305.16264" target="_blank" rel="noreferrer">Muennighoff et al. — Scaling Data-Constrained Language Models, 2023</a> : jusqu&#39;à 4 époques ≈ données neuves</li>
+</ul>
+<h2>Termes vus</h2>
+<ul>
+<li><span class="lex" tabindex="0" title="Surapprentissage (overfitting) — Le modèle apprend le bruit de ses exemples au lieu de la règle : très bon à l'entraînement, moins bon sur du neuf.">Surapprentissage (overfitting)</span></li>
+<li><span class="lex" tabindex="0" title="Sous-apprentissage (underfitting) — Modèle trop simple : il rate même ses exemples d'entraînement.">Sous-apprentissage (underfitting)</span></li>
+<li><span class="lex" tabindex="0" title="Jeux d'entraînement - validation - test — Entraînement : pour apprendre. Validation : pour régler et décider quand arrêter. Test : la note finale, ouverte une fois.">Jeux d&#39;entraînement - validation - test</span></li>
+<li><span class="lex" tabindex="0" title="Écart de généralisation — Perte de validation moins perte d'entraînement. S'il grandit, le modèle récite.">Écart de généralisation</span></li>
+<li><span class="lex" tabindex="0" title="Arrêt précoce — Stopper l'entraînement quand la perte de validation remonte.">Arrêt précoce</span></li>
+<li><span class="lex" tabindex="0" title="Régularisation — Pousser vers des solutions simples : pénaliser les gros paramètres (weight decay), éteindre des neurones au hasard (dropout).">Régularisation</span></li>
+<li><span class="lex" tabindex="0" title="Capacité — Ce qu'un modèle peut représenter. Assez de capacité = assez pour tout retenir, même des étiquettes au hasard.">Capacité</span></li>
+<li><span class="lex" tabindex="0" title="Double descente — L'erreur de test baisse, remonte au seuil d'interpolation (tout juste assez gros pour tout retenir), puis rebaisse avec un modèle plus gros.">Double descente</span></li>
+<li><span class="lex" tabindex="0" title="Grokking — Généraliser soudainement, longtemps après avoir tout appris par cœur.">Grokking</span></li>
+<li><span class="lex" tabindex="0" title="Époque (epoch) — Un passage complet sur les données. Au-delà de ~4 pour un LLM, chaque relecture vaut de moins en moins.">Époque (epoch)</span></li>
+<li><span class="lex" tabindex="0" title="Mémorisation (mot pour mot) — Le modèle recrache un passage exact de son entraînement. Augmente avec la taille, les doublons et la longueur du prompt.">Mémorisation (mot pour mot)</span></li>
+</ul>
+<h2>Anomalies relevées</h2>
+<ul>
+<li></li>
+</ul>
+<h2>Croisements avec d&#39;autres branches</h2>
+<ul>
+<li></li>
+</ul>

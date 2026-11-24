@@ -9,9 +9,10 @@
 // L'anglais vient de content/translations.json, indexé par l'empreinte de chaque phrase française :
 // une phrase modifiée dans le coffre perd sa traduction (signalée « à traduire ») au lieu de garder un anglais périmé.
 import { createHash } from 'node:crypto'
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join, resolve } from 'node:path'
+import { Marked } from 'marked'
 
 const ROOT = resolve(import.meta.dirname, '..')
 const VAULT = process.env.VAULT ?? join(homedir(), 'Desktop', 'AI x spatial')
@@ -214,16 +215,91 @@ for (const p of spec.pieces) {
   en.pieces[p.id] = e
 }
 
+
+// ---------- Pages « enquête » (une par enquête, décision d'Axel du 24/11/2026) ----------
+const pagesCfg = JSON.parse(readFileSync(process.env.PAGES ?? join(ROOT, 'content', 'pages.json'), 'utf8'))
+const EXCL = pagesCfg.exclure.map((r) => new RegExp(r))
+const slug = (num) => normNum(num).replace(/\s+/g, '-')
+const lexCache = {}
+const lexOf = (t) => (t in lexCache ? lexCache[t] : (lexCache[t] = lexDef(t)))
+const escAttr = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')
+
+/** Retire les sections exclues (un titre exclu retire aussi ses sous-sections). */
+function stripSections(lines) {
+  const out = []
+  let skipLevel = 0
+  for (const l of lines) {
+    const m = l.match(/^(#{1,6}) (.*)$/)
+    if (m) {
+      const level = m[1].length
+      if (skipLevel && level <= skipLevel) skipLevel = 0
+      if (!skipLevel && EXCL.some((r) => r.test(m[2].trim()))) { skipLevel = level; continue }
+    }
+    if (!skipLevel) out.push(l)
+  }
+  return out
+}
+
+/** Obsidian → Markdown standard : liens internes, termes du Lexique, encadrés, intégrations retirées. */
+function obsidianToMd(md, enqByTitle) {
+  return md
+    .replace(/%%[\s\S]*?%%/g, '')
+    .replace(/!\[\[[^\]]*\]\]/g, '')
+    .replace(/\[\[#[^\]|]*\|([^\]]+)\]\]/g, '$1')
+    .replace(/\[\[#([^\]]+)\]\]/g, '$1')
+    .replace(/\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|([^\]]+))?\]\]/g, (_, target, label) => {
+      const t = target.trim(), text = (label ?? t).replace(/\\$/, '')
+      const e = enqByTitle[t]
+      if (e) return `[${text}](#/enquete/${slug(e.numero)})`
+      if (lexOf(t)) return `[${text}](#lex:${encodeURIComponent(t)})`
+      return text
+    })
+    .replace(/\\\|/g, '|')
+    .replace(/^(\s*>\s*)\[!(\w+)\][+-]?\s*(.*)$/gm, (_, q, type, title) => `${q}**${title || type}**`)
+}
+
+const marked = new Marked({ gfm: true })
+marked.use({
+  renderer: {
+    html({ text }) { return escAttr(text) }, // aucun HTML brut des notes n'est interprété
+    link({ href, tokens }) {
+      const inner = this.parser.parseInline(tokens)
+      if (href.startsWith('#lex:')) {
+        const term = decodeURIComponent(href.slice(5))
+        return `<span class="lex" tabindex="0" title="${escAttr(term + ' — ' + (lexOf(term) ?? ''))}">${inner}</span>`
+      }
+      const ext = /^https?:/.test(href)
+      return `<a href="${escAttr(href)}"${ext ? ' target="_blank" rel="noreferrer"' : ''}>${inner}</a>`
+    },
+  },
+})
+
+const enqByTitle = {}
+for (const e of Object.values(enq)) enqByTitle[e.file.replace(/\.md$/, '')] = e
+const pages = { _genere: fr._genere, enquetes: [] }
+const pageFiles = {}
+for (const e of Object.values(enq).sort((a, b) => parseFloat(normNum(a.numero)) - parseFloat(normNum(b.numero)) || a.numero.localeCompare(b.numero))) {
+  const lines = stripSections(e.lines).filter((l) => !/^# /.test(l))
+  const md = obsidianToMd(lines.join('\n'), enqByTitle)
+  const html = marked.parse(md)
+  const id = slug(e.numero)
+  pageFiles[id] = html
+  pages.enquetes.push({ id, numero: e.numero, titre: e.titre, branche: e.fm.branche ?? null, bloc: e.fm.bloc ?? null, date: e.fm.date ?? null, empreinte: hash(html) })
+}
+
 // ---------- Sortie ----------
 const frStr = JSON.stringify(fr, null, 1) + '\n'
 const enStr = JSON.stringify(en, null, 1) + '\n'
 const pendStr = JSON.stringify(missing, null, 1) + '\n'
 const read = (p) => (existsSync(p) ? readFileSync(p, 'utf8') : '')
-const changed = read(join(OUT, 'fr.json')) !== frStr || read(join(OUT, 'en.json')) !== enStr
+const pagesStr = JSON.stringify(pages, null, 1) + '\n'
+const PAGES_OUT = process.env.PAGES_OUT ?? join(ROOT, 'public', 'enquetes')
+const pagesChanged = read(join(OUT, 'enquetes.json')) !== pagesStr || Object.entries(pageFiles).some(([id, h]) => read(join(PAGES_OUT, `${id}.html`)) !== h)
+const changed = read(join(OUT, 'fr.json')) !== frStr || read(join(OUT, 'en.json')) !== enStr || pagesChanged
 
 const nMissing = Object.keys(missing).length
 console.log(`Coffre : ${VAULT}`)
-console.log(`${Object.keys(fr.pieces).length} fiches · ${Object.keys(enq).length} enquêtes lues · ${nMissing} phrase(s) à traduire · ${problems.length} problème(s)`)
+console.log(`${Object.keys(fr.pieces).length} fiches · ${pages.enquetes.length} pages d'enquête · ${Object.keys(enq).length} enquêtes lues · ${nMissing} phrase(s) à traduire · ${problems.length} problème(s)`)
 for (const p of problems) console.log('  ⚠ ' + p)
 if (nMissing) console.log(`  → phrases à traduire : content/a-traduire.json (${nMissing})`)
 
@@ -234,4 +310,8 @@ if (CHECK) {
 writeFileSync(join(OUT, 'fr.json'), frStr)
 writeFileSync(join(OUT, 'en.json'), enStr)
 writeFileSync(join(OUT, 'a-traduire.json'), pendStr)
+writeFileSync(join(OUT, 'enquetes.json'), pagesStr)
+mkdirSync(PAGES_OUT, { recursive: true })
+for (const f of readdirSync(PAGES_OUT)) if (f.endsWith('.html') && !(f.replace(/\.html$/, '') in pageFiles)) rmSync(join(PAGES_OUT, f))
+for (const [id, h] of Object.entries(pageFiles)) writeFileSync(join(PAGES_OUT, `${id}.html`), h)
 console.log(changed ? 'content/fr.json et content/en.json mis à jour.' : 'Aucun changement.')

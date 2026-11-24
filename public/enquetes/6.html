@@ -1,0 +1,195 @@
+<p><strong>Branche :</strong> Pouvoir · Carte de l&#39;IA</p>
+<p>Oct 26, 2026 · @axel · Branche 4 Pouvoir · enquête d&#39;ouverture</p>
+<h2>La question, et la réponse en tête</h2>
+<p><strong>Les États-Unis bloquent l&#39;export de leurs meilleures puces IA vers la Chine. Est-ce que ça freine vraiment l&#39;IA chinoise ?</strong></p>
+<p><strong>Oui pour le calcul, beaucoup moins pour les capacités.</strong> Les labos américains ont environ 16 fois plus de calcul d&#39;entraînement que les labos chinois. Mais ça ne leur donne qu&#39;environ 6,5 mois d&#39;avance. Deux raisons : les capacités montent avec le <em>logarithme</em> du calcul (il faut 10× plus de calcul pour gagner un cran), et la Chine récupère à peu près la moitié de l&#39;écart en copiant les réponses des modèles américains (distillation). <em>Confiance : moyenne. Les chiffres viennent de modèles d&#39;estimation, avec des fourchettes larges.</em></p>
+<h2>Le schéma</h2>
+<blockquote>
+<p><strong>Schéma de l&#39;artifact d&#39;origine</strong>
+ mécanisme des contrôles · stocks fin 2026, estimations IFP (oct. 2026)</p>
+</blockquote>
+<p>Trois robinets fermés freinent l&#39;entrée. Trois fuites et la distillation rattrapent une bonne partie de l&#39;écart.</p>
+<h2>Le mécanisme</h2>
+<h3>1. Ce que Washington bloque : trois points d&#39;étranglement</h3>
+<p>Une puce IA, c&#39;est trois ingrédients : une puce logique gravée finement, de la mémoire ultra-rapide collée dessus (HBM), et un logiciel qui la fait tourner. Les États-Unis et leurs alliés tiennent les deux premiers.</p>
+<ul>
+<li><strong>Les puces Nvidia de pointe</strong> : interdites depuis octobre 2022, règles durcies en octobre 2023. Les seuils portent sur la puissance de calcul, la densité, la bande passante mémoire et l&#39;interconnexion (rapport annuel Nvidia).</li>
+<li><strong>Les machines de gravure</strong> : la Chine n&#39;a jamais pu acheter les machines EUV d&#39;ASML. Son fondeur SMIC reste coincé à une gravure de classe 5-7 nm, environ deux fois moins dense que TSMC, et ce jusqu&#39;à la fin de la décennie selon Epoch AI.</li>
+<li><strong>La mémoire HBM</strong> : exportation vers la Chine interdite depuis décembre 2024, y compris celle de Samsung et SK Hynix.</li>
+</ul>
+<h3>2. L&#39;effet sur les puces chinoises</h3>
+<p>Le frein est réel. Selon Epoch AI (sept. 2026) :</p>
+<ul>
+<li>La meilleure puce Huawei (Ascend 950) fait environ <strong>la moitié d&#39;un H100</strong>, une puce Nvidia de 2022. Huawei a 3 à 4 ans de retard par puce.</li>
+<li>En 2026, Huawei devrait produire environ 1,5 million de puces contre 5,9 millions pour Nvidia. En calcul total, <strong>moins de 4 % de Nvidia</strong>.</li>
+<li>Le vrai goulot, c&#39;est la <strong>HBM</strong>. Le stock d&#39;avant l&#39;interdiction (environ 13 millions de piles) s&#39;épuise en 2026. Sur les 1,5 million d&#39;Ascend, seulement ~240 000 utilisent de la HBM chinoise. Avec la seule HBM chinoise, Huawei resterait vers 1 % de Nvidia jusqu&#39;en 2028.</li>
+</ul>
+<p><em>Confiance : moyenne. Les volumes Huawei ne sont pas publiés, Epoch les reconstruit.</em></p>
+<h3>3. Mais le calcul arrive quand même : les fuites</h3>
+<p>L&#39;Institute for Progress (IFP, 19 oct. 2026) a estimé d&#39;où vient le calcul accessible aux labos chinois. Total fin 2026 : <strong>environ 4,6 millions d&#39;équivalents H100</strong>, qui devraient presque doubler fin 2027 (8,8 millions).</p>
+<table>
+<thead>
+<tr>
+<th>Chemin</th>
+<th>Stock fin 2026 (équiv. H100)</th>
+<th>Ce que c&#39;est</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Puces chinoises</td>
+<td>≈ 1,7 M</td>
+<td>Huawei, Cambricon et autres, freinés par la HBM</td>
+</tr>
+<tr>
+<td>Contrebande</td>
+<td>≈ 1 M (fourchette 0,4 à 2,9 M)</td>
+<td>Serveurs Nvidia réexpédiés via l&#39;Asie du Sud-Est</td>
+</tr>
+<tr>
+<td>Cloud à l&#39;étranger</td>
+<td>≈ 1 M</td>
+<td>Puces Nvidia louées dans des data centers hors de Chine (Malaisie, Singapour, Oracle…)</td>
+</tr>
+<tr>
+<td>Imports légaux</td>
+<td>≈ 0,85 M</td>
+<td>Puces bridées : H20, H200 sous licence, cartes RTX</td>
+</tr>
+</tbody></table>
+<p>Le point qui surprend : <strong>fin 2027, environ 65 % du calcul chinois serait fait de puces américaines.</strong> Et la moitié de ce que Washington pourrait encore bloquer se trouve dans des data centers à l&#39;étranger, que les règles actuelles ne couvrent pas.</p>
+<p><em>Confiance : faible à moyenne. La contrebande et le cloud sont des estimations indirectes.</em></p>
+<h3>4. Du calcul aux capacités : pourquoi 16× ne fait que 6,5 mois</h3>
+<p>C&#39;est le cœur de l&#39;enquête.</p>
+<ul>
+<li><strong>Les capacités suivent le logarithme du calcul.</strong> Multiplier le calcul par 10 donne toujours à peu près le même gain. IFP calibre ça à environ 10,8 mois d&#39;avance par facteur 10. Une avance de 16× vaut donc environ 13 mois.</li>
+<li><strong>La distillation coupe l&#39;écart en deux.</strong> Des labos chinois entraînent leurs modèles sur les réponses des modèles américains, via des réseaux de centaines de milliers de faux comptes. Selon une estimation d&#39;Anthropic reprise par IFP, ça récupère environ la moitié de l&#39;écart. 13 mois deviennent 6,5.</li>
+</ul>
+<p>Résultat mesuré : Epoch AI trouve un retard moyen de 7 mois depuis 2023 (entre 4 et 14 mois). IFP trouve 6,5 mois. Le Stanford AI Index, sur les préférences humaines, parle d&#39;écart « presque fermé » (2,7 % en mars 2026). La réponse dépend de la mesure.</p>
+<blockquote>
+<p><strong>Schéma de l&#39;artifact d&#39;origine</strong>
+ modèle IFP (oct. 2026) : avance = (1 − 0,5) × 10,8 × log10(ratio de calcul)</p>
+</blockquote>
+<p>Tant que la distillation continue, chaque doublement de l&#39;avance en calcul ne rapporte qu&#39;environ 1,6 mois.</p>
+<h3>5. Une politique qui change sans arrêt</h3>
+<p>Washington hésite lui-même entre bloquer et vendre :</p>
+<ul>
+<li>Avril 2025 : licence exigée pour la H20, la puce bridée pour la Chine. Août 2025 : licences accordées.</li>
+<li>Décembre 2025 : Trump autorise la H200 (deux générations de retard), contre 25 % des ventes pour l&#39;État. Règle publiée le 15 janvier 2026, plafond de 75 000 puces par client.</li>
+<li>Pékin bloque d&#39;abord les imports pour pousser Huawei, puis en laisse passer un peu. Environ 20 000 H200 livrées à la mi-août 2026.</li>
+<li>Juin 2026 : premier contrôle à l&#39;export sur un <strong>modèle</strong> nommé, Claude Fable 5 et Mythos 5, levé le 30 juin. La bataille commence à viser les modèles, plus seulement les puces.</li>
+</ul>
+<p>Effet secondaire : la part de Nvidia sur le marché chinois des puces de data center est tombée à 34 % au premier semestre 2026 (IDC). Huawei récupère le reste.</p>
+<h2>Ce que ça révèle</h2>
+<ul>
+<li><strong>L&#39;anomalie</strong> : un frein énorme sur l&#39;entrée (le calcul) donne un effet petit sur la sortie (les capacités). Pour gagner quelques mois, il faut multiplier l&#39;écart de calcul, pas juste l&#39;augmenter.</li>
+<li><strong>Le point d&#39;étranglement a bougé</strong> : ce n&#39;est plus la puce, c&#39;est la mémoire HBM. Exactement le goulot de ton enquête #4.</li>
+<li><strong>Les contrôles sont une passoire</strong> : trois robinets fermés, mais au moins trois tuyaux ouverts. Le plus gros (le cloud à l&#39;étranger) reste légal.</li>
+<li><strong>Le débat est vraiment ouvert</strong> : pour certains chercheurs (Rakesh Kumar), les contrôles ont accéléré l&#39;indépendance chinoise. Pour Epoch et IFP, ils rendent la course plus lente et plus chère pour la Chine, sans l&#39;arrêter.</li>
+</ul>
+<p><strong>Signaux à surveiller</strong></p>
+<ul>
+<li>Un modèle chinois au niveau de Mythos d&#39;ici fin 2026 : c&#39;est la prédiction d&#39;IFP. Test direct du « 6,5 mois ».</li>
+<li>Une règle américaine sur l&#39;accès à distance aux data centers étrangers.</li>
+<li>La livraison de l&#39;Ascend 950DT (prévue T4 2026) et la montée en HBM du fabricant chinois CXMT.</li>
+<li>Les volumes réels de H200 et de cartes RTX livrés en Chine.</li>
+<li>Des mesures communes des labos américains contre la distillation.</li>
+</ul>
+<p><strong>Croisement → Branche 1 (enquête #4)</strong> : Huawei a coupé son Ascend 950 en deux versions. La 950PR, sans HBM, pour le prefill. La 950DT, avec HBM, pour le decode. C&#39;est la différence prefill / decode que tu as apprise, transformée en choix industriel par la pénurie de mémoire.</p>
+<h2>Lexique</h2>
+<table>
+<thead>
+<tr>
+<th>Terme</th>
+<th>Ce que ça veut dire</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Contrôle à l&#39;export</td>
+<td>Règle qui oblige à demander une licence avant de vendre un produit sensible à certains pays</td>
+</tr>
+<tr>
+<td>BIS</td>
+<td>Bureau of Industry and Security : le service du ministère américain du Commerce qui fixe et applique ces règles</td>
+</tr>
+<tr>
+<td>Point d&#39;étranglement</td>
+<td>Maillon de la chaîne que peu d&#39;acteurs contrôlent, donc qu&#39;on peut couper</td>
+</tr>
+<tr>
+<td>HBM</td>
+<td>Mémoire à haute bande passante, empilée à côté de la puce. Le goulot actuel de la Chine</td>
+</tr>
+<tr>
+<td>Lithographie EUV / DUV</td>
+<td>Machines qui gravent les puces. EUV (ASML seul) grave le plus fin, interdite à la Chine. DUV plafonne vers 5-7 nm</td>
+</tr>
+<tr>
+<td>Équivalent H100</td>
+<td>Unité pour comparer du calcul : une puce comptée en fraction ou multiple d&#39;une Nvidia H100</td>
+</tr>
+<tr>
+<td>Distillation adverse</td>
+<td>Entraîner son modèle sur les réponses d&#39;un modèle concurrent, sans son accord</td>
+</tr>
+<tr>
+<td>Accès à distance</td>
+<td>Louer des puces dans un data center à l&#39;étranger plutôt que les importer</td>
+</tr>
+<tr>
+<td>CUDA / CANN</td>
+<td>Les logiciels qui font tourner les puces Nvidia (CUDA) et Huawei (CANN). CANN a des années de retard</td>
+</tr>
+<tr>
+<td>Rendement logarithmique</td>
+<td>Chaque facteur 10 de ressources donne le même gain : la 10e unité rapporte beaucoup moins que la 1re</td>
+</tr>
+</tbody></table>
+<h2>Questions ouvertes et prochaines enquêtes</h2>
+<ul>
+<li>Pourquoi les capacités suivent-elles le logarithme du calcul ? → enquête #17, les lois d&#39;échelle.</li>
+<li>Comment marche la distillation techniquement, et peut-on vraiment la bloquer ? → enquête #21.</li>
+<li>Pourquoi la HBM est-elle si dure à fabriquer ? → future sous-branche « Puces » de la Branche Pouvoir.</li>
+<li>Vendre des H200 tout en bloquant les Blackwell : l&#39;objectif est-il de freiner la Chine ou de garder Nvidia dominant ? Les deux camps existent à Washington.</li>
+</ul>
+<p><strong>Le tour des 6 branches est fini.</strong> Prochaine enquête : <strong>#7 Qu&#39;est-ce qu&#39;« apprendre » pour une machine</strong>, début de la Branche 1.</p>
+<h2>Pour aller plus loin</h2>
+<ul>
+<li><strong>2e source primaire (20-30 min)</strong> : le rapport d&#39;Epoch AI sur Huawei. Lis les « Key takeaways » et la partie « Decomposing the compute production gap ».</li>
+<li><strong>Exercice</strong> : avec la formule d&#39;IFP, avance = 0,5 × 10,8 × log10(ratio), calcule combien de mois les US gagneraient si l&#39;avance en calcul passait de 16× à 24× (en bloquant le cloud à l&#39;étranger). Ensuite, compare avec ce que coûterait d&#39;arrêter complètement la distillation.</li>
+<li><strong>Question bonus</strong> : pourquoi IFP dit-il que bloquer la distillation rapporte de plus en plus quand l&#39;écart de calcul grandit ?</li>
+</ul>
+<h2>Sources</h2>
+<ul>
+<li><a href="https://ifp.org/how-to-increase-americas-ai-lead-over-china/" target="_blank" rel="noreferrer">IFP — How to Increase America&#39;s AI Lead Over China (19 oct. 2026)</a> : sources du calcul chinois, modèle avance / calcul / distillation.</li>
+<li><a href="https://epoch.ai/publications/huaweis-roadmap-to-2031" target="_blank" rel="noreferrer">Epoch AI — Will Huawei catch up to Nvidia by 2030? (sept. 2026)</a> : performances et volumes Huawei, goulot HBM.</li>
+<li><a href="https://epoch.ai/topics/geopolitics" target="_blank" rel="noreferrer">Epoch AI — Geopolitics of AI</a> : retard moyen de 7 mois depuis 2023.</li>
+<li><a href="https://www.sec.gov/Archives/edgar/data/0001045810/000104581026000075/nvda-20260726.htm" target="_blank" rel="noreferrer">Nvidia — rapport 10-Q (juillet 2026)</a> : seuils des contrôles, exclusion du marché chinois des data centers.</li>
+<li><a href="https://www.cnbc.com/2026/01/14/trump-nvidia-h200-china-ai-chips.html" target="_blank" rel="noreferrer">CNBC — H200 autorisée avec 25 % pour l&#39;État (14 janv. 2026)</a></li>
+<li><a href="https://www.cnbc.com/2026/07/14/nvidia-h200-ai-chips-china.html" target="_blank" rel="noreferrer">CNBC — « très peu » de H200 livrées (14 juil. 2026)</a></li>
+<li><a href="https://finance.yahoo.com/technology/ai/articles/u-export-restrictions-drive-nvidia-124325286.html" target="_blank" rel="noreferrer">Yahoo Finance / IDC — part de Nvidia en Chine à 34 % (13 oct. 2026)</a></li>
+<li><a href="https://fortune.com/2026/10/16/china-chip-export-controls-failed-rakesh-kumar/" target="_blank" rel="noreferrer">Fortune — l&#39;avis de Rakesh Kumar : les contrôles ont échoué (16 oct. 2026)</a></li>
+<li><a href="https://www.bloomberg.com/news/features/2026-10-01/nvidia-faces-questions-over-china-ai-chip-smuggling-cases" target="_blank" rel="noreferrer">Bloomberg — la contrebande de puces Nvidia (1er oct. 2026)</a></li>
+<li><a href="https://digitalpolicyalert.org/event/41240-commerce-department-terminated-export-controls-suspending-anthropics-claude-fable-5-and-mythos-5-models" target="_blank" rel="noreferrer">Digital Policy Alert — contrôle sur Fable 5 et Mythos 5, juin 2026</a></li>
+<li><a href="https://www.anthropic.com/news/fable-mythos-access" target="_blank" rel="noreferrer">Anthropic — déclaration sur l&#39;accès à Fable et Mythos</a></li>
+</ul>
+<h2>Termes vus</h2>
+<ul>
+<li><span class="lex" tabindex="0" title="Contrôle à l'export — Règle qui oblige à demander une licence avant de vendre un produit sensible à certains pays.">Contrôle à l&#39;export</span></li>
+<li><span class="lex" tabindex="0" title="BIS — Bureau of Industry and Security : le service du ministère américain du Commerce qui fixe et applique ces règles.">BIS</span></li>
+<li><span class="lex" tabindex="0" title="Point d'étranglement — Maillon de la chaîne que peu d'acteurs contrôlent, donc qu'on peut couper.">Point d&#39;étranglement</span></li>
+<li><span class="lex" tabindex="0" title="HBM — Mémoire à haute bande passante, empilée à côté de la puce. Indispensable au decode. Le goulot actuel de la Chine (quantité).">HBM</span></li>
+<li><span class="lex" tabindex="0" title="Lithographie EUV - DUV — Machines qui gravent les puces. EUV (ASML seul) grave le plus fin, interdite à la Chine. DUV plafonne vers 5-7 nm, où SMIC est coincé.">Lithographie EUV - DUV</span></li>
+<li><span class="lex" tabindex="0" title="Équivalent H100 — Unité pour comparer du calcul : une puce comptée en fraction ou multiple d'une Nvidia H100.">Équivalent H100</span></li>
+<li><span class="lex" tabindex="0" title="Distillation adverse — Entraîner son modèle sur les réponses d'un modèle concurrent, sans son accord. Permet de suivre, jamais de dépasser.">Distillation adverse</span></li>
+<li><span class="lex" tabindex="0" title="Accès à distance — Louer des puces dans un data center à l'étranger plutôt que les importer. La plus grosse fuite, encore légale.">Accès à distance</span></li>
+<li><span class="lex" tabindex="0" title="CUDA - CANN — Les logiciels qui font tourner les puces Nvidia (CUDA) et Huawei (CANN). CANN a des années de retard.">CUDA - CANN</span></li>
+<li><span class="lex" tabindex="0" title="Rendement logarithmique — Chaque facteur 10 de ressources donne le même gain. 16× plus de calcul ne vaut qu'environ 13 mois d'avance.">Rendement logarithmique</span></li>
+</ul>
+<h2>Anomalies relevées</h2>
+<ul>
+<li></li>
+</ul>
+<h2>Croisements avec d&#39;autres branches</h2>
+<ul>
+<li></li>
+</ul>

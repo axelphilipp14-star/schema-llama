@@ -1,0 +1,668 @@
+<p><strong>Branche :</strong> Comment ça marche · bloc C, le transformer · Carte de l&#39;IA · suite de <a href="#/enquete/13">#13</a></p>
+<blockquote>
+<p><strong>Comment lire cette enquête</strong>
+<strong>Théorie</strong> (sans papier) : la question, le sujet en clair, le schéma, et le texte de chaque étape.
+<strong>Calcul</strong> (avec papier et calculatrice) : les encadrés « À faire à la main ». Les solutions sont repliées. Ne les ouvre qu&#39;après avoir calculé.</p>
+</blockquote>
+<h2>La question</h2>
+<blockquote>
+<p>Dans la formule de l&#39;attention, <strong>softmax(Q·Kᵀ ÷ √d)·V</strong>, pourquoi chaque opération est-elle celle-là et pas une autre ?</p>
+</blockquote>
+<p><strong>→ La réponse.</strong> Aucune n&#39;est la seule possible. Chacune a été choisie parce qu&#39;elle règle un problème précis. Et toutes ont une pente, donc on peut apprendre à travers elles (<a href="#/enquete/8">#8</a>).</p>
+<table>
+<thead>
+<tr>
+<th>Morceau</th>
+<th>Le problème qu&#39;il règle</th>
+<th>Pourquoi lui</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Produit scalaire q · k</td>
+<td>Mesurer à quel point une key répond à une query</td>
+<td>Un seul nombre qui mesure à la fois si les directions s&#39;accordent et avec quelle force. Il se calcule en masse, très vite, sur GPU.</td>
+</tr>
+<tr>
+<td>Exponentielle</td>
+<td>Rendre tous les scores positifs sans perdre l&#39;ordre</td>
+<td>Toujours positive, croissante. Elle amplifie les écarts et ne dépend que des différences entre scores.</td>
+</tr>
+<tr>
+<td>÷ total (fin du softmax)</td>
+<td>Obtenir des parts qui font 100 %</td>
+<td>Une fois que tout est positif, diviser par le total suffit.</td>
+</tr>
+<tr>
+<td>÷ √d</td>
+<td>Garder des scores de taille normale, quelle que soit la taille des vecteurs</td>
+<td>La taille typique d&#39;une somme de d termes pris au hasard grandit comme √d, pas comme d.</td>
+</tr>
+<tr>
+<td>Matrices</td>
+<td>Calculer pour tous les tokens d&#39;un coup</td>
+<td>Une multiplication de matrices, ce sont des milliers de produits scalaires indépendants. C&#39;est exactement ce que les GPU font le mieux.</td>
+</tr>
+</tbody></table>
+<h2>Le sujet en clair</h2>
+<h3>Où on en est</h3>
+<ul>
+<li><a href="#/enquete/13">#13</a> : on a fait tourner l&#39;attention sur 3 tokens. On a utilisé un produit scalaire, une exponentielle, un softmax et une division par √d, sans expliquer d&#39;où sortaient ces outils.</li>
+<li>Aujourd&#39;hui, on ouvre chaque outil : ce qu&#39;il fait, comment le calculer à la main, et pourquoi on l&#39;a choisi.</li>
+<li>Ces 5 outils ne servent pas qu&#39;à l&#39;attention. C&#39;est la boîte à outils de tout le deep learning :<ul>
+<li>le MLP de #14 est une multiplication de matrices ;</li>
+<li>la température de #20 est une division des scores avant le softmax ;</li>
+<li>la rétropropagation de <a href="#/enquete/8">#8</a> exige que chaque opération ait une pente.</li>
+</ul>
+</li>
+</ul>
+<h3>L&#39;analogie : le salon pro, côté organisateur</h3>
+<p>On reprend le salon de #13. Cette fois, on regarde les calculs de l&#39;organisateur.</p>
+<p>Chaque badge porte une liste de critères notés : secteur, taille de l&#39;entreprise, budget, ville… Chaque visiteur a la même liste, remplie avec ce qu&#39;il cherche. Pour juger un badge, le visiteur prend chaque critère et multiplie « à quel point je cherche ça » par « à quel point il l&#39;affiche ». Puis il additionne tout. Un critère qu&#39;il veut éviter (note négative), quand l&#39;autre l&#39;affiche, lui fait perdre des points.</p>
+<p>L&#39;organisateur doit régler trois problèmes.</p>
+<ul>
+<li><strong>Problème 1.</strong> Avec 2 critères, les totaux restent petits. Avec 128, ils deviennent énormes, et le meilleur badge rafle toute l&#39;heure. L&#39;organisateur ramène donc d&#39;abord les totaux à une échelle normale.</li>
+<li><strong>Problème 2.</strong> On ne peut pas passer −10 minutes avec quelqu&#39;un. L&#39;organisateur transforme chaque total en nombre positif, en amplifiant les écarts, puis répartit l&#39;heure au prorata.</li>
+<li><strong>Problème 3.</strong> 1 000 visiteurs × 1 000 badges, un par un, ça prend la journée. L&#39;organisateur remplit un seul grand tableau d&#39;un coup.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Dans le salon</th>
+<th>Dans la formule</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>La liste des critères notés d&#39;un badge</td>
+<td>Un vecteur de d nombres</td>
+</tr>
+<tr>
+<td>Critère par critère, « je cherche » × « il affiche », puis la somme</td>
+<td>Le produit scalaire q · k</td>
+</tr>
+<tr>
+<td>Un critère que je fuis et qu&#39;il affiche : des points en moins</td>
+<td>Un terme négatif dans la somme</td>
+</tr>
+<tr>
+<td>Plus il y a de critères, plus les totaux s&#39;envolent</td>
+<td>La taille des scores grandit avec d</td>
+</tr>
+<tr>
+<td>Ramener les totaux à une échelle normale</td>
+<td>La division par √d</td>
+</tr>
+<tr>
+<td>Rendre chaque total positif en amplifiant les écarts</td>
+<td>L&#39;exponentielle</td>
+</tr>
+<tr>
+<td>Répartir l&#39;heure au prorata</td>
+<td>La division par le total, fin du softmax</td>
+</tr>
+<tr>
+<td>Le grand tableau visiteurs × badges, rempli d&#39;un coup</td>
+<td>Le produit matriciel Q × Kᵀ</td>
+</tr>
+<tr>
+<td>Retourner la liste des badges pour qu&#39;elle colle au tableau</td>
+<td>La transposée Kᵀ</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>Le point exact où ça se joue</strong>
+Chaque outil règle un problème précis. Pour comprendre une formule, ne demande pas « c&#39;est quoi ? », demande « quel problème ça règle ? ».</p>
+</blockquote>
+<h3>Les 4 mots</h3>
+<p><span class="lex" tabindex="0" title="Exponentielle — e^x : le nombre e (≈ 2,718) multiplié par lui-même x fois. Le résultat est toujours positif.">Exponentielle</span> · <span class="lex" tabindex="0" title="Écart-type — La racine de la variance : la taille typique d'un écart à la moyenne.">Écart-type</span>, avec sa cousine la <span class="lex" tabindex="0" title="Variance — Mesure à quel point des valeurs s'écartent de leur moyenne. On met chaque écart au carré, puis on fait la moyenne de ces carrés.">Variance</span> · <span class="lex" tabindex="0" title="Produit matriciel — La multiplication de deux tableaux de nombres. Chaque case du résultat est un produit scalaire entre une ligne du premier tableau et une colonne du second.">Produit matriciel</span> · <span class="lex" tabindex="0" title="Transposée — Un tableau retourné : ses lignes deviennent des colonnes.">Transposée</span></p>
+<p>Déjà vus : <span class="lex" tabindex="0" title="Vecteur — Liste de nombres qui représente le sens d'un token.">Vecteur</span>, <span class="lex" tabindex="0" title="Produit scalaire — La multiplication de deux vecteurs terme à terme, puis la somme. Un seul nombre en sortie : grand si les deux vecteurs pointent dans la même direction. C'est l'opération qui donne le score entre la query d'un token et la key d'un autre.">Produit scalaire</span>, <span class="lex" tabindex="0" title="Softmax — Transforme des scores en pourcentages qui font 100 %. Sert à l'attention et au tirage du token suivant.">Softmax</span>, <span class="lex" tabindex="0" title="Mise à l'échelle (√d) — On divise chaque score par la racine carrée de la taille d'une tête avant le softmax. Sans ça, les scores deviennent trop grands quand d grandit, le softmax sature et les gradients s'écrasent (#8).">Mise à l&#39;échelle (√d)</span>.</p>
+<h3>Le fil de l&#39;enquête</h3>
+<ol>
+<li>Le vecteur et le produit scalaire : comparer.</li>
+<li>L&#39;exponentielle : rendre positif.</li>
+<li>Le softmax : faire 100 %.</li>
+<li>Variance, écart-type, √d : calmer les scores.</li>
+<li>Les matrices : tout calculer d&#39;un coup.</li>
+<li>La formule relue en entier.</li>
+</ol>
+<h2>Le schéma central</h2>
+<pre><code class="language-mermaid">flowchart LR
+  Q[&quot;Q&lt;br/&gt;n lignes × d colonnes&lt;br/&gt;une query par token&quot;] --&gt; M1[&quot;Q × Kᵀ&lt;br/&gt;produit matriciel&quot;]
+  K[&quot;K&lt;br/&gt;n × d&quot;] --&gt;|&quot;transposée&quot;| KT[&quot;Kᵀ&lt;br/&gt;d × n&quot;]
+  KT --&gt; M1
+  M1 --&gt; S[&quot;Scores&lt;br/&gt;tableau n × n&quot;]
+  S --&gt; D[&quot;÷ √d&lt;br/&gt;écart typique ramené à 1&quot;]
+  D --&gt; MA[&quot;Masque&lt;br/&gt;futur = moins l&#39;infini&quot;]
+  MA --&gt; E[&quot;Exponentielle&lt;br/&gt;tout devient positif&quot;]
+  E --&gt; N[&quot;÷ total de la ligne&lt;br/&gt;chaque ligne fait 100 %&quot;]
+  N --&gt; M2[&quot;Pourcentages × V&lt;br/&gt;produit matriciel&quot;]
+  V[&quot;V&lt;br/&gt;n × d&quot;] --&gt; M2
+  M2 --&gt; O[&quot;Sortie n × d&lt;br/&gt;un mélange par token&quot;]
+</code></pre>
+<p>Deux multiplications de matrices encadrent le tout. Entre les deux, tout se passe ligne par ligne, et chaque ligne est un token qui regarde.</p>
+<h2>Le mécanisme</h2>
+<h3>Étape 1 — Le vecteur et le produit scalaire</h3>
+<p><strong>Un vecteur</strong> est une liste de nombres. Avec 2 nombres, on peut le dessiner : (3, 4) est une flèche qui part de l&#39;origine, avance de 3 vers la droite et de 4 vers le haut. Le nombre de cases s&#39;appelle la <span class="lex" tabindex="0" title="Dimension — Nombre de cases d'un vecteur. Un embedding de Llama 3 en a 4 096.">dimension</span> d. Une query de Llama 3 a 128 cases. On ne peut plus la dessiner, mais tout ce qui suit marche pareil.</p>
+<p><strong>La longueur</strong> d&#39;un vecteur se calcule avec Pythagore : √(x² + y²). Pour (3, 4) : √(9 + 16) = √25 = 5. S&#39;il y a plus de cases, on ajoute tous les carrés sous la racine.</p>
+<p><strong>Le produit scalaire</strong> : on multiplie case par case, puis on additionne.
+(3, 4) · (4, 3) = 3×4 + 4×3 = 24.</p>
+<p>Ce nombre a aussi un sens géométrique :</p>
+<p><strong>a · b = longueur de a × longueur de b × cos(angle entre a et b)</strong></p>
+<p>Le cosinus de l&#39;angle vaut :</p>
+<ul>
+<li>1 si les deux flèches pointent dans la même direction ;</li>
+<li>0 si elles sont perpendiculaires (angle droit) ;</li>
+<li>−1 si elles pointent en sens opposés.</li>
+</ul>
+<p>Le <strong>signe</strong> du produit scalaire dit donc si les flèches vont dans le même sens. Sa <strong>taille</strong> dépend en plus de leurs longueurs.</p>
+<p><strong>Différence avec la similarité cosinus de <a href="#/enquete/11">#11</a>.</strong> La <span class="lex" tabindex="0" title="Similarité cosinus — Mesure de proximité entre deux vecteurs selon leur direction. 1 = même direction, 0 = sans rapport.">similarité cosinus</span> divise le produit scalaire par les deux longueurs. Elle ne garde que la direction. L&#39;attention, elle, garde la longueur. Conséquence : une query plus longue donne des scores plus écartés, donc une attention plus tranchée. La longueur de la query sert de bouton « fermeté », que le modèle règle à travers W_Q.</p>
+<p><strong>Pourquoi le produit scalaire et pas autre chose ?</strong> Avant le transformer, l&#39;outil standard était l&#39;<span class="lex" tabindex="0" title="Attention additive — L'ancienne façon de calculer un score d'attention (Bahdanau et al., 2014) : un petit réseau de neurones calcule le score de chaque paire de tokens.">attention additive</span> (Bahdanau et al., 2014) : un petit réseau de neurones calcule le score de chaque paire. Vaswani et al. (2017) notent que les deux ont une complexité théorique similaire. Mais le produit scalaire est beaucoup plus rapide et économe en mémoire en pratique, parce qu&#39;il s&#39;écrit comme une multiplication de matrices, et ce calcul est déjà ultra-optimisé. Le choix est d&#39;abord un choix de <strong>vitesse</strong>.</p>
+<blockquote>
+<p><strong>À faire à la main (appui 1)</strong>
+a = (3, 4), b = (4, 3), c = (−3, −4), e = (4, −3), f = (6, 8).</p>
+<ol>
+<li>Calcule a·b, a·c, a·e, a·f et a·a.</li>
+<li>Calcule la longueur de chacun.</li>
+<li>Dessine-les sur un repère.</li>
+<li>Calcule la similarité cosinus de a avec b, puis de a avec f (produit scalaire ÷ les deux longueurs). Compare au produit scalaire.</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><strong>Solution (à ouvrir après avoir calculé)</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Calcul</th>
+<th>Produit scalaire</th>
+<th>Ce que ça dit</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>a·b</td>
+<td>3×4 + 4×3</td>
+<td>24</td>
+<td>Presque la même direction</td>
+</tr>
+<tr>
+<td>a·c</td>
+<td>3×(−3) + 4×(−4)</td>
+<td>−25</td>
+<td>Sens opposés</td>
+</tr>
+<tr>
+<td>a·e</td>
+<td>3×4 + 4×(−3)</td>
+<td>0</td>
+<td>Perpendiculaires</td>
+</tr>
+<tr>
+<td>a·f</td>
+<td>3×6 + 4×8</td>
+<td>50</td>
+<td>Même direction, f deux fois plus long</td>
+</tr>
+<tr>
+<td>a·a</td>
+<td>3×3 + 4×4</td>
+<td>25</td>
+<td>La longueur au carré</td>
+</tr>
+</tbody></table>
+<p>Longueurs : a, b, c et e font 5 ; f fait 10.
+Cosinus : a avec b = 24 ÷ (5 × 5) = 0,96 ; a avec f = 50 ÷ (5 × 10) = 1.
+<strong>Ce qu&#39;il faut voir :</strong> la similarité cosinus dit que f est « la même chose » que a. Le produit scalaire dit que f compte deux fois plus que b. C&#39;est la longueur qui fait la différence.</p>
+</blockquote>
+<h3>Étape 2 — L&#39;exponentielle</h3>
+<p><strong>Le nombre e</strong> vaut environ 2,718. C&#39;est une constante, comme π.</p>
+<p><strong>e^x</strong>, c&#39;est e multiplié par lui-même x fois : e² = e × e ≈ 7,39 et e³ ≈ 20,09. Ça marche aussi pour les autres nombres :</p>
+<ul>
+<li>e⁰ = 1, comme tout nombre à la puissance 0 ;</li>
+<li>e^−1 = 1 ÷ e ≈ 0,37, car une puissance négative veut dire « 1 divisé par » ;</li>
+<li>e^0,5 ≈ 1,65, entre e⁰ et e¹.</li>
+</ul>
+<p>Quatre propriétés, et chacune sert à l&#39;attention :</p>
+<table>
+<thead>
+<tr>
+<th>Propriété</th>
+<th>Exemple</th>
+<th>À quoi ça sert</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Toujours positive</td>
+<td>e^−10 ≈ 0,000045 : minuscule, mais jamais négatif</td>
+<td>Pas de temps négatif au salon</td>
+</tr>
+<tr>
+<td>Croissante</td>
+<td>Si a &gt; b, alors e^a &gt; e^b</td>
+<td>Le meilleur score reste le meilleur</td>
+</tr>
+<tr>
+<td>+1 sur l&#39;entrée = × 2,72 sur la sortie</td>
+<td>e³ ÷ e² = e</td>
+<td>Un écart entre deux scores devient un rapport entre deux poids : l&#39;exponentielle amplifie</td>
+</tr>
+<tr>
+<td>e^(a + b) = e^a × e^b</td>
+<td>e^(2 + 1) = e² × e¹</td>
+<td>Ajouter la même chose à tous les scores ne change pas les rapports (étape 3)</td>
+</tr>
+</tbody></table>
+<p>Une cinquième, pour <a href="#/enquete/8">#8</a> : la pente de e^x vaut… e^x. C&#39;est la fonction dont la <span class="lex" tabindex="0" title="Dérivée locale — L'effet d'un élément sur l'étape juste après lui (x pour w1, w2 pour h).">dérivée</span> est la plus simple, ce qui facilite la rétropropagation.</p>
+<p><strong>Pourquoi e, et pas 2 ou 10 ?</strong> N&#39;importe quelle base marcherait. 2^x revient à e^(0,69 × x), c&#39;est-à-dire à multiplier tous les scores par 0,69. W_Q peut apprendre ça tout seul. On garde e pour sa dérivée simple.</p>
+<p><strong>Pourquoi pas le carré, ou la valeur absolue ?</strong> Ils rendent tout positif, mais (−3)² = 3² = 9. Un score très négatif deviendrait aussi fort qu&#39;un score très positif : on perdrait l&#39;ordre.</p>
+<h3>Étape 3 — Le softmax</h3>
+<p><strong>softmax(score i) = e^(score i) ÷ (somme des e^score de toute la ligne)</strong></p>
+<p>Ça se fait en deux temps : tout passer à l&#39;exponentielle (tout devient positif), puis diviser par le total (tout fait 100 %).</p>
+<p><strong>D&#39;où vient le nom.</strong> « Prendre le max » donnerait 100 % au meilleur et 0 % aux autres : c&#39;est l&#39;<span class="lex" tabindex="0" title="Argmax — Donner 100 % au plus grand score et 0 % à tous les autres.">argmax</span>. Le problème : si on bouge un peu les scores, le gagnant ne change pas, donc la sortie ne bouge pas. La pente est nulle presque partout, et on ne peut pas apprendre par rétropropagation (<a href="#/enquete/8">#8</a>). Le softmax est la version « douce » (soft) du max. Le meilleur prend le plus, mais tout bouge un peu quand les scores bougent. Il y a une pente.</p>
+<p><strong>Seuls les écarts comptent.</strong> Si tu ajoutes 1 à tous les scores, chaque exponentielle est multipliée par e, le total aussi, et les pourcentages ne bougent pas. Deux conséquences :</p>
+<ul>
+<li>en pratique, les ordinateurs retirent le plus grand score de la ligne avant de calculer, sinon un e^1000 dépasse ce qu&#39;ils savent stocker ;</li>
+<li>le masque marche : un score de « moins l&#39;infini » donne e^(−∞) = 0, donc 0 %.</li>
+</ul>
+<p><strong>L&#39;alternative testée.</strong> Apple a montré en 2024 qu&#39;on peut remplacer le softmax par une <span class="lex" tabindex="0" title="Sigmoïde — Activation en S, entre 0 et 1. Pente max 0,25 : étouffe le gradient dans un réseau profond.">sigmoïde</span> : chaque poids est entre 0 et 1, sans obligation de faire 100 %. La qualité est la même sur plusieurs tâches (langue, vision, parole), et le calcul est 17 % plus rapide sur H100. Les grands modèles restent pourtant au softmax (voir les signaux).</p>
+<blockquote>
+<p><strong>À faire à la main (appui 2)</strong>
+Scores de « elle » : (2, 0, −1).</p>
+<ol>
+<li>Méthode A : divise chaque score par la somme des scores.</li>
+<li>Méthode B (softmax) : calcule e^score pour chacun, puis divise par le total.</li>
+<li>Refais B avec (3, 1, 0), c&#39;est-à-dire tous les scores + 1.</li>
+<li>Essaie A avec (1, −1).</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><strong>Solution</strong>
+<strong>A :</strong> somme = 2 + 0 − 1 = 1. Résultat : 200 %, 0 %, −100 %. Des parts négatives, ou au-dessus de 100 % : absurde. Avec (1, −1), la somme vaut 0 : division par zéro, impossible.
+<strong>B :</strong> e² ≈ 7,389 · e⁰ = 1 · e^−1 ≈ 0,368. Total ≈ 8,757. Parts : <strong>84,4 % · 11,4 % · 4,2 %</strong>.
+<strong>B avec +1 :</strong> e³ ≈ 20,09 · e¹ ≈ 2,718 · e⁰ = 1. Total ≈ 23,80. Parts : <strong>84,4 % · 11,4 % · 4,2 %</strong>. Identique.
+<strong>Ce qu&#39;il faut voir :</strong> diviser par la somme ne marche que si tout est déjà positif. L&#39;exponentielle règle ce problème, et elle ne regarde que les écarts entre les scores.</p>
+</blockquote>
+<h3>Étape 4 — Variance, écart-type, et la division par √d</h3>
+<p><strong>La moyenne</strong> : la somme des valeurs, divisée par leur nombre.</p>
+<p><strong>La <span class="lex" tabindex="0" title="Variance — Mesure à quel point des valeurs s'écartent de leur moyenne. On met chaque écart au carré, puis on fait la moyenne de ces carrés.">variance</span></strong> mesure à quel point les valeurs s&#39;écartent de la moyenne. On prend l&#39;écart de chaque valeur à la moyenne, on le met au carré pour que les écarts négatifs comptent aussi, puis on fait la moyenne de ces carrés.</p>
+<p><strong>L&#39;<span class="lex" tabindex="0" title="Écart-type — La racine de la variance : la taille typique d'un écart à la moyenne.">écart-type</span></strong> est la racine de la variance. Elle ramène dans la même unité que les valeurs. C&#39;est la taille « typique » d&#39;un écart.</p>
+<p>Exemple avec 2, 4 et 6. La moyenne vaut 4. Les écarts sont −2, 0 et 2, leurs carrés 4, 0 et 4. Variance = 8 ÷ 3 ≈ 2,67. Écart-type ≈ 1,63.</p>
+<p><strong>Le lien avec l&#39;attention.</strong> Imagine une query et une key remplies de +1 et de −1 au hasard. Chaque produit case par case vaut alors +1 ou −1 au hasard : c&#39;est un lancer de pièce. Le produit scalaire est la somme de d lancers.</p>
+<p>Une somme de d lancers ne grandit pas comme d, parce que les +1 et les −1 se compensent en partie. La règle : <strong>quand on additionne des termes indépendants, ce sont les variances qui s&#39;additionnent</strong>, pas les écarts-types. Un lancer a une variance de 1. Donc d lancers ont une variance de d, et un écart-type de <strong>√d</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>d (taille des vecteurs)</th>
+<th>Écart-type des scores sans division</th>
+<th>Après ÷ √d</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>4</td>
+<td>2</td>
+<td>1</td>
+</tr>
+<tr>
+<td>16</td>
+<td>4</td>
+<td>1</td>
+</tr>
+<tr>
+<td>64 (transformer de 2017)</td>
+<td>8</td>
+<td>1</td>
+</tr>
+<tr>
+<td>128 (Llama 3)</td>
+<td>≈ 11,3</td>
+<td>1</td>
+</tr>
+</tbody></table>
+<p>C&#39;est exactement la note de bas de page de Vaswani et al. : si les nombres de q et de k sont indépendants, de moyenne 0 et de variance 1, leur produit scalaire a une moyenne de 0 et une variance de d.</p>
+<p><strong>Pourquoi ça compte : trois choix de diviseur, à d = 128.</strong> Prends deux scores séparés d&#39;un écart-type. Rappel de l&#39;étape 2 : un écart de scores devient un rapport de poids, égal à e^écart.</p>
+<table>
+<thead>
+<tr>
+<th>Diviseur</th>
+<th>Écart entre les deux scores</th>
+<th>Rapport des poids</th>
+<th>Effet</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Aucun</td>
+<td>≈ 11,3</td>
+<td>e^11,3 ≈ 81 000</td>
+<td>Le meilleur rafle tout. Le softmax sature, la pente s&#39;écrase : gradient qui disparaît</td>
+</tr>
+<tr>
+<td>√d ≈ 11,3</td>
+<td>1</td>
+<td>e¹ ≈ 2,7</td>
+<td>Le meilleur domine sans écraser les autres. Le modèle apprend.</td>
+</tr>
+<tr>
+<td>d = 128</td>
+<td>≈ 0,09</td>
+<td>e^0,09 ≈ 1,09</td>
+<td>Tout le monde a presque la même part : l&#39;attention ne choisit plus rien. Plus le modèle grossit, pire c&#39;est.</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p>Diviser par √d, c&#39;est fixer l&#39;écart-type des scores à 1, quelle que soit la taille de la tête.</p>
+<p><strong>La limite.</strong> L&#39;argument suppose des nombres indépendants, tirés au hasard. C&#39;est vrai au début de l&#39;entraînement, plus ensuite : dans un modèle entraîné, les queries et les keys sont alignées exprès. √d est une <strong>calibration de départ</strong>, pas une loi. La preuve : la méthode μP (Yang et al., 2022) divise par d, pas par √d (voir les anomalies).</p>
+<blockquote>
+<p><strong>Lien avec la température</strong>
+Diviser les scores avant le softmax, c&#39;est régler une <span class="lex" tabindex="0" title="Température — Le réglage du hasard dans le tirage du token suivant.">température</span>. √d est une température fixe, choisie pour que les scores aient un écart-type de 1. On retrouvera le même bouton en #20, pour le tirage du token suivant.</p>
+</blockquote>
+<blockquote>
+<p><strong>À faire à la main (appui 3)</strong></p>
+<ol>
+<li><strong>Toutes les combinaisons de 4 lancers.</strong> Il y a 16 suites possibles de 4 pièces (2 × 2 × 2 × 2). Pour chaque nombre de « pile », de 0 à 4, écris la somme et le nombre de suites qui la donnent. La moyenne des sommes vaut 0, donc la variance est la moyenne des sommes au carré. Calcule-la, puis prends la racine.</li>
+<li><strong>Pour de vrai.</strong> Lance une pièce 4 fois et fais la somme, 5 fois de suite. Puis 16 lancers, 5 fois. Compare la taille typique des sommes.</li>
+<li>Calcule e^11,3 et e^0,09 à la calculatrice.</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><strong>Solution</strong></p>
+<table>
+<thead>
+<tr>
+<th>Nombre de pile</th>
+<th>Somme</th>
+<th>Nombre de suites</th>
+<th>Somme au carré</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>−4</td>
+<td>1</td>
+<td>16</td>
+</tr>
+<tr>
+<td>1</td>
+<td>−2</td>
+<td>4</td>
+<td>4</td>
+</tr>
+<tr>
+<td>2</td>
+<td>0</td>
+<td>6</td>
+<td>0</td>
+</tr>
+<tr>
+<td>3</td>
+<td>+2</td>
+<td>4</td>
+<td>4</td>
+</tr>
+<tr>
+<td>4</td>
+<td>+4</td>
+<td>1</td>
+<td>16</td>
+</tr>
+</tbody></table>
+<p>Moyenne des carrés = (1×16 + 4×4 + 6×0 + 4×4 + 1×16) ÷ 16 = 64 ÷ 16 = <strong>4</strong>. Variance = 4 = d. Écart-type = √4 = <strong>2</strong> = √d.
+Avec 16 lancers : variance 16, écart-type 4. Le nombre de lancers est multiplié par 4, la taille typique de la somme seulement par 2.
+e^11,3 ≈ 81 000 · e^0,09 ≈ 1,09.
+<strong>Ce qu&#39;il faut voir :</strong> la taille typique grandit comme la racine du nombre de termes. Le bon diviseur est donc √d.</p>
+</blockquote>
+<h3>Étape 5 — Les matrices</h3>
+<p><strong>Une matrice</strong> est un tableau de nombres : n lignes × d colonnes. Q est une matrice : une ligne par token, et chaque ligne est la query de ce token. Pareil pour K et V.</p>
+<p><strong>La <span class="lex" tabindex="0" title="Transposée — Un tableau retourné : ses lignes deviennent des colonnes.">transposée</span></strong> Kᵀ : on retourne le tableau, les lignes deviennent des colonnes. K fait n × d, Kᵀ fait d × n. Chaque key devient une colonne.</p>
+<p><strong>Le <span class="lex" tabindex="0" title="Produit matriciel — La multiplication de deux tableaux de nombres. Chaque case du résultat est un produit scalaire entre une ligne du premier tableau et une colonne du second.">produit matriciel</span></strong> A × B : la case (ligne i, colonne j) du résultat = la ligne i de A · la colonne j de B. Chaque case est un produit scalaire. Condition : A doit avoir autant de colonnes que B a de lignes.</p>
+<p>Donc Q × Kᵀ : (n × d) × (d × n) donne un tableau n × n. La case (i, j) = query du token i · key du token j. C&#39;est la <span class="lex" tabindex="0" title="Matrice d'attention — Le tableau des scores : une ligne par token qui regarde, une colonne par token regardé. Il n'est pas symétrique, puisque la query d'un token n'est pas sa key. Tout se calcule en une seule multiplication de matrices, ce que les GPU font très vite.">matrice d&#39;attention</span> de #13. On retourne K pour que chaque ligne de Q rencontre chaque key en colonne. C&#39;est pour ça qu&#39;il faut Kᵀ et pas K.</p>
+<p>Ensuite : softmax ligne par ligne, puis × V. (n × n) × (n × d) donne n × d. La ligne i du résultat est la somme des values, pondérées par les pourcentages de la ligne i. C&#39;est le mélange de #13, pour tous les tokens à la fois.</p>
+<p><strong>Pourquoi des matrices.</strong> Le calcul est le même qu&#39;à la main, posé en un seul bloc. Toutes les cases sont indépendantes. Un <span class="lex" tabindex="0" title="GPU — Puce de calcul parallèle, quasi-monopole de Nvidia pour l'IA.">GPU</span> contient des milliers de petits calculateurs et peut toutes les faire en même temps. C&#39;est ce qu&#39;il fait le mieux.</p>
+<p><strong>Le prix.</strong> Q × Kᵀ demande n × n cases de d multiplications chacune, soit n² × d. Pour une tête de Llama 3 à 128 000 tokens : 128 000² × 128 ≈ 2 100 milliards de multiplications, par tête et par couche (environ la moitié avec le masque). C&#39;est le O(n²·d) de #13.</p>
+<blockquote>
+<p><strong>À faire à la main (version complète, 3 tokens)</strong>
+On reprend les 3 tokens de #13 dans l&#39;ordre de la phrase : sonde, planète, elle. Les queries de sonde et planète sont inventées pour l&#39;exercice.</p>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Query</th>
+<th>Key</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>sonde</td>
+<td>(1, 0)</td>
+<td>(1, 1)</td>
+<td>(1, 0)</td>
+</tr>
+<tr>
+<td>planète</td>
+<td>(0, 1)</td>
+<td>(1, −1)</td>
+<td>(0, 1)</td>
+</tr>
+<tr>
+<td>elle</td>
+<td>(1, 1)</td>
+<td>(0, 1)</td>
+<td>(0 ; 0,5)</td>
+</tr>
+</tbody></table>
+<ol>
+<li>Écris Q (3 × 2) et Kᵀ (2 × 3).</li>
+<li>Calcule Q × Kᵀ (3 × 3). On saute √d, comme en #13.</li>
+<li>Applique le masque : chaque token ne voit que lui-même et ceux d&#39;avant.</li>
+<li>Fais le softmax ligne par ligne.</li>
+<li>Multiplie par V.</li>
+<li>Compte les multiplications de l&#39;étape 2.</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><strong>Solution</strong>
+Kᵀ : ligne 1 = (1, 1, 0), ligne 2 = (1, −1, 1).</p>
+<p><strong>Q × Kᵀ</strong></p>
+<table>
+<thead>
+<tr>
+<th>Qui regarde ↓ / qui est regardé →</th>
+<th>sonde</th>
+<th>planète</th>
+<th>elle</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>sonde</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>planète</td>
+<td>1</td>
+<td>−1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>elle</td>
+<td>2</td>
+<td>0</td>
+<td>1</td>
+</tr>
+</tbody></table>
+<p><strong>Masque + softmax</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>sonde</th>
+<th>planète</th>
+<th>elle</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>sonde</td>
+<td>100 %</td>
+<td>0 %</td>
+<td>0 %</td>
+</tr>
+<tr>
+<td>planète</td>
+<td>88,1 %</td>
+<td>11,9 %</td>
+<td>0 %</td>
+</tr>
+<tr>
+<td>elle</td>
+<td>66,5 %</td>
+<td>9 %</td>
+<td>24,5 %</td>
+</tr>
+</tbody></table>
+<p>Pour planète : e¹ ≈ 2,718 et e^−1 ≈ 0,368, total 3,086.
+<strong>× V :</strong> sonde → (1 ; 0) · planète → (0,881 ; 0,119) · elle → (0,665 ; 0,21). C&#39;est le même résultat qu&#39;en #13.
+<strong>Multiplications :</strong> 9 cases × 2 = 18. La formule donne n² × d = 3² × 2 = 18.
+<strong>Ce qu&#39;il faut voir :</strong> sans le masque, sonde donnerait autant de poids à planète qu&#39;à lui-même (scores 1 et 1). Il lirait l&#39;avenir.</p>
+</blockquote>
+<h3>Étape 6 — La formule relue</h3>
+<p>$$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^\top}{\sqrt{d}}\right)V$$</p>
+<p>Vaswani et al. écrivent d_k pour la taille des queries et des keys. C&#39;est notre d. On la lit de l&#39;intérieur vers l&#39;extérieur :</p>
+<ol>
+<li><strong>Q Kᵀ</strong> : tous les produits scalaires query · key d&#39;un coup. Un tableau n × n.</li>
+<li><strong>÷ √d</strong> : chaque score est ramené à un écart-type d&#39;environ 1.</li>
+<li><strong>Masque</strong> (absent de la formule, ajouté dans la partie qui génère) : le futur passe à moins l&#39;infini.</li>
+<li><strong>softmax</strong> : exponentielle, puis division par le total, ligne par ligne. Chaque ligne fait 100 %.</li>
+<li><strong>× V</strong> : chaque token reçoit son mélange de values.</li>
+</ol>
+<h2>Ce que ça révèle</h2>
+<ol>
+<li><strong>Chaque outil est d&#39;abord choisi pour qu&#39;on puisse apprendre à travers lui.</strong> Le max a été remplacé par le softmax parce que le max n&#39;a pas de pente. Dans le deep learning, un outil sans pente est inutilisable, même s&#39;il est plus simple.</li>
+<li><strong>Le matériel choisit les maths.</strong> Vaswani et al. ne prennent pas le produit scalaire parce qu&#39;il serait plus juste, mais parce qu&#39;il tourne plus vite sur les puces existantes. La formule de l&#39;attention est taillée pour les GPU.</li>
+<li><strong>√d est un réglage, pas une loi.</strong> Il vient d&#39;un raisonnement sur des nombres tirés au hasard, ce que ne sont plus les queries et les keys d&#39;un modèle entraîné. Il marche, mais une autre école (μP) prend 1/d.</li>
+<li><strong>Une bonne propriété a un effet secondaire.</strong> L&#39;obligation de faire 100 % force chaque tête à mettre son attention quelque part, même quand rien n&#39;est utile. Résultat : le <span class="lex" tabindex="0" title="Puits d'attention — Le token, souvent le tout premier, sur lequel une tête « gare » son attention quand aucun token n'est utile.">puits d&#39;attention</span> (voir les anomalies). Les labos le corrigent en 2025, huit ans après la formule.</li>
+</ol>
+<h3>Signaux à surveiller</h3>
+<table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Où on en est (dernier point vérifié : 2025)</th>
+<th>Ce qui le ferait bouger</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Sortir du softmax</td>
+<td>Apple : la sigmoïde fait aussi bien, avec un calcul 17 % plus rapide sur H100 (sept. 2024, ICLR 2025). Aucun modèle de frontière ne l&#39;a adoptée à ma connaissance.</td>
+<td>Un grand modèle publié en attention sigmoïde</td>
+</tr>
+<tr>
+<td>Réparer le puits d&#39;attention</td>
+<td>OpenAI gpt-oss (5 août 2025) : chaque tête a un biais appris dans le dénominateur du softmax, ce qui lui permet de ne regarder aucun token. Qwen (meilleur papier NeurIPS 2025) : une porte sigmoïde après l&#39;attention, intégrée à Qwen3-Next (sept. 2025).</td>
+<td>D&#39;autres labos qui adoptent l&#39;une des deux corrections</td>
+</tr>
+<tr>
+<td>√d contre 1/d</td>
+<td>μP (Yang et al., 2022) divise par d. Son code utilise 8/d pour retomber sur la même valeur que 1/√d à d = 64.</td>
+<td>Les fiches techniques des nouveaux modèles ouverts qui indiquent leur facteur</td>
+</tr>
+</tbody></table>
+<p>Confiance : élevée sur les faits (sources primaires). Rien de vérifié pour 2026.</p>
+<h2>Termes vus</h2>
+<ul>
+<li><span class="lex" tabindex="0" title="Vecteur — Liste de nombres qui représente le sens d'un token.">Vecteur</span> · <span class="lex" tabindex="0" title="Produit scalaire — La multiplication de deux vecteurs terme à terme, puis la somme. Un seul nombre en sortie : grand si les deux vecteurs pointent dans la même direction. C'est l'opération qui donne le score entre la query d'un token et la key d'un autre.">Produit scalaire</span> · <span class="lex" tabindex="0" title="Softmax — Transforme des scores en pourcentages qui font 100 %. Sert à l'attention et au tirage du token suivant.">Softmax</span> · <span class="lex" tabindex="0" title="Mise à l'échelle (√d) — On divise chaque score par la racine carrée de la taille d'une tête avant le softmax. Sans ça, les scores deviennent trop grands quand d grandit, le softmax sature et les gradients s'écrasent (#8).">Mise à l&#39;échelle (√d)</span> (déjà vus, approfondis ici)</li>
+<li><span class="lex" tabindex="0" title="Exponentielle — e^x : le nombre e (≈ 2,718) multiplié par lui-même x fois. Le résultat est toujours positif.">Exponentielle</span></li>
+<li><span class="lex" tabindex="0" title="Variance — Mesure à quel point des valeurs s'écartent de leur moyenne. On met chaque écart au carré, puis on fait la moyenne de ces carrés.">Variance</span></li>
+<li><span class="lex" tabindex="0" title="Écart-type — La racine de la variance : la taille typique d'un écart à la moyenne.">Écart-type</span></li>
+<li><span class="lex" tabindex="0" title="Produit matriciel — La multiplication de deux tableaux de nombres. Chaque case du résultat est un produit scalaire entre une ligne du premier tableau et une colonne du second.">Produit matriciel</span></li>
+<li><span class="lex" tabindex="0" title="Transposée — Un tableau retourné : ses lignes deviennent des colonnes.">Transposée</span></li>
+<li><span class="lex" tabindex="0" title="Argmax — Donner 100 % au plus grand score et 0 % à tous les autres.">Argmax</span></li>
+<li><span class="lex" tabindex="0" title="Attention additive — L'ancienne façon de calculer un score d'attention (Bahdanau et al., 2014) : un petit réseau de neurones calcule le score de chaque paire de tokens.">Attention additive</span></li>
+<li><span class="lex" tabindex="0" title="Puits d'attention — Le token, souvent le tout premier, sur lequel une tête « gare » son attention quand aucun token n'est utile.">Puits d&#39;attention</span></li>
+<li><span class="lex" tabindex="0" title="Similarité cosinus — Mesure de proximité entre deux vecteurs selon leur direction. 1 = même direction, 0 = sans rapport.">Similarité cosinus</span> · <span class="lex" tabindex="0" title="Sigmoïde — Activation en S, entre 0 et 1. Pente max 0,25 : étouffe le gradient dans un réseau profond.">Sigmoïde</span> · <span class="lex" tabindex="0" title="Température — Le réglage du hasard dans le tirage du token suivant.">Température</span> (vus ailleurs, reliés ici)</li>
+</ul>
+<h2>Anomalies relevées</h2>
+<ul>
+<li><strong>Le token le plus regardé est souvent le plus vide de sens.</strong> Xiao et al. (2023) observent que les modèles donnent une part d&#39;attention démesurée aux tout premiers tokens, même quand ils ne veulent rien dire. Quand on les retire de la mémoire, le modèle déraille. En les gardant, une fenêtre glissante reste stable. L&#39;explication : le softmax oblige à distribuer 100 %. Quand aucun token n&#39;est utile, il faut bien mettre l&#39;attention quelque part. Ça contredit la règle de #13 : l&#39;attention ne mesure pas toujours la pertinence.</li>
+<li><strong>Le diviseur « prouvé » n&#39;est pas le seul qui marche.</strong> √d est justifié par un calcul sur des nombres au hasard, et la méthode μP prend 1/d. Les deux entraînent de bons modèles. Si la formule était dictée par les maths, il n&#39;y aurait qu&#39;un seul bon diviseur.</li>
+</ul>
+<h2>Croisements avec d&#39;autres branches</h2>
+<ul>
+<li><strong>Grands enjeux, spatial (projet 9, inversions de bits).</strong> L&#39;exponentielle amplifie. Dans l&#39;espace, un rayonnement peut inverser un bit de l&#39;exposant d&#39;un nombre stocké, et multiplier un score par un nombre astronomique. Passé à l&#39;exponentielle, ce score donne 100 % à un token au hasard, ou dépasse ce que la machine sait stocker. Résultat : un calcul invalide (NaN). <em>Déduit, pas mesuré.</em> C&#39;est testable dans <code>projet gpu kaggle/</code> (voir l&#39;approfondissement).</li>
+<li><strong>Pouvoir et économie.</strong> La formule est taillée pour les multiplications de matrices, donc pour les GPU. Contrôler ces puces, c&#39;est contrôler le moteur de l&#39;attention (<a href="#/enquete/6">#6</a>).</li>
+<li><strong>Comment ça marche, suite.</strong> La division avant le softmax réapparaîtra en #20 : c&#39;est la température du tirage.</li>
+</ul>
+<h2>Questions ouvertes</h2>
+<ol>
+<li>Si la sigmoïde fait aussi bien et plus vite, pourquoi aucun modèle de frontière ne l&#39;a adoptée ?</li>
+<li>Dans un modèle entraîné, où les queries et les keys ne sont plus au hasard, quel est le bon diviseur : √d, d, ou un facteur appris ?</li>
+<li>Réparer le puits d&#39;attention aide-t-il contre le <span class="lex" tabindex="0" title="Context rot — La baisse de précision quand le contexte devient très long.">context rot</span> ?</li>
+<li>Puisque la longueur de la query règle la fermeté de l&#39;attention, des modèles mesurent-ils cette longueur pour voir quelles têtes « tranchent » et lesquelles « hésitent » ?</li>
+</ol>
+<h2>Prochaine enquête</h2>
+<ul>
+<li><strong>#14 — Le reste du bloc : MLP, normalisation, connexions résiduelles.</strong> On ressort les matrices : le MLP en est une, appliquée à chaque token seul. Pourquoi le mélange est-il ajouté au vecteur au lieu de le remplacer ?</li>
+</ul>
+<h2>Approfondissement</h2>
+<ul>
+<li><strong>Source primaire.</strong> Vaswani et al. 2017, section 3.2.1 et note de bas de page 4. Recopier la note et refaire à la main l&#39;argument de la variance pour d = 4 (c&#39;est l&#39;appui 3). PDF à déposer dans <code>Bibliothèque/PDF/</code> sous le nom <code>2017 Vaswani - Attention is all you need.pdf</code>.</li>
+<li><strong>Exercice, 20 min sur Kaggle.</strong> Avec numpy, tirer 10 000 paires de vecteurs au hasard pour d = 4, 16, 64 et 128. Mesurer l&#39;écart-type des produits scalaires et vérifier qu&#39;il vaut √d. Puis faire un softmax sur 128 scores, avec et sans division par √d, et noter le plus gros pourcentage.</li>
+<li><strong>Question bonus (projet 9).</strong> Inverser un bit de l&#39;exposant d&#39;un score juste avant le softmax. Le pari d&#39;abord : NaN, 100 % sur un mauvais token, ou rien de visible ?</li>
+</ul>
+<h2>Sources</h2>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Ce qu&#39;elle apporte</th>
+<th>Confiance</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Vaswani et al., <a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noreferrer">Attention Is All You Need</a>, juin 2017</td>
+<td>La formule, le choix du produit scalaire contre l&#39;additive (vitesse), la division par √d_k et son argument de variance</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Bahdanau et al., <a href="https://arxiv.org/abs/1409.0473" target="_blank" rel="noreferrer">Neural Machine Translation by Jointly Learning to Align and Translate</a>, 2014</td>
+<td>L&#39;attention additive, standard avant 2017</td>
+<td>Élevée, non relu aujourd&#39;hui</td>
+</tr>
+<tr>
+<td>Ramapuram et al. (Apple), <a href="https://arxiv.org/abs/2409.04431" target="_blank" rel="noreferrer">Theory, Analysis, and Best Practices for Sigmoid Self-Attention</a>, 6 sept. 2024, ICLR 2025</td>
+<td>La sigmoïde à la place du softmax, même qualité, +17 % de vitesse sur H100</td>
+<td>Élevée sur ce que le papier mesure</td>
+</tr>
+<tr>
+<td>Xiao et al., <a href="https://arxiv.org/abs/2309.17453" target="_blank" rel="noreferrer">Efficient Streaming Language Models with Attention Sinks</a>, sept. 2023</td>
+<td>Le puits d&#39;attention et son explication par le softmax</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>OpenAI, <a href="https://arxiv.org/abs/2508.10925" target="_blank" rel="noreferrer">gpt-oss-120b &amp; gpt-oss-20b Model Card</a>, 5 août 2025</td>
+<td>Le biais appris par tête dans le dénominateur du softmax</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Qiu et al. (Qwen), <a href="https://arxiv.org/abs/2505.06708" target="_blank" rel="noreferrer">Gated Attention for Large Language Models</a>, NeurIPS 2025 (meilleur papier)</td>
+<td>La porte sigmoïde après l&#39;attention, qui atténue le puits ; intégrée à Qwen3-Next</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Yang et al., <a href="https://arxiv.org/abs/2203.03466" target="_blank" rel="noreferrer">Tensor Programs V (μP)</a>, 2022, et le <a href="https://github.com/microsoft/mup" target="_blank" rel="noreferrer">code microsoft/mup</a></td>
+<td>La division par d au lieu de √d, et le 8/d pour rester compatible à d = 64</td>
+<td>Élevée</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>Ce qui manque</strong></p>
+<ul>
+<li>Les vecteurs des exercices sont inventés pour la démonstration. Ce ne sont pas des mesures.</li>
+<li>Les 2 100 milliards de multiplications sont un calcul (n² × d), pas une mesure.</li>
+<li>Aucune mesure de l&#39;écart-type réel des scores dans un modèle entraîné.</li>
+<li>L&#39;adoption de la sigmoïde, des corrections du puits et de μP n&#39;est pas vérifiée pour 2026.</li>
+<li>Le croisement « inversion de bit » est déduit, pas mesuré.</li>
+</ul>
+</blockquote>

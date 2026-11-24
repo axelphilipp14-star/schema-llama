@@ -1,0 +1,223 @@
+<p><strong>Branche :</strong> Comment ça marche · Carte de l&#39;IA</p>
+<h2>La question</h2>
+<p><strong>Un réseau a des millions de paramètres et se trompe sur un exemple. Comment sait-il, pour chacun, quelle part de l&#39;erreur lui revient, sans les tester un par un ?</strong></p>
+<p><strong>Réponse :</strong> il part de l&#39;erreur, à la sortie, et remonte le réseau couche par couche. À chaque étape, la responsabilité d&#39;un élément = l&#39;effet qu&#39;il a sur l&#39;étape suivante × la responsabilité déjà calculée de cette étape suivante. C&#39;est la <strong>règle de la chaîne</strong> : on multiplie des petits effets locaux le long du chemin. Comme chaque couche réutilise le calcul de celle d&#39;après, un seul aller (passe avant) et un seul retour (passe arrière) donnent le gradient de <strong>tous</strong> les paramètres d&#39;un coup, pour environ 3 fois le prix d&#39;une simple prédiction.</p>
+<p>Tester un par un coûterait un calcul complet par paramètre : 175 milliards de passages pour GPT-3, à chaque pas. La rétropropagation en fait l&#39;équivalent de 3. Sans elle, pas de deep learning à grande échelle.</p>
+<h2>Schéma</h2>
+<blockquote>
+<p><strong>Schéma de l&#39;artifact d&#39;origine</strong>
+ mini réseau · passe avant puis passe arrière</p>
+</blockquote>
+<p>Chaque gradient = gradient de l&#39;étape d&#39;après × un effet local. Aucun calcul ne repart de la perte : le 24 de w1 sort directement du 12 de h.</p>
+<h2>Le mécanisme, pas à pas</h2>
+<p>Le plus petit réseau possible : une entrée x, deux paramètres w1 et w2, une sortie y. On veut que y vaille la cible t = 1. Perte = (y − t)², l&#39;écart au carré (plus simple que l&#39;entropie croisée, même logique).</p>
+<p>Valeurs de départ : x = 2, w1 = 0,5, w2 = 3, taux d&#39;apprentissage = 0,01.</p>
+<h3>1. Passe avant : on calcule et on GARDE chaque résultat intermédiaire</h3>
+<table>
+<thead>
+<tr>
+<th>Étape</th>
+<th>Calcul</th>
+<th>Résultat</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Couche cachée</td>
+<td>h = w1 × x = 0,5 × 2</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Sortie</td>
+<td>y = w2 × h = 3 × 1</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Perte</td>
+<td>L = (3 − 1)²</td>
+<td>4</td>
+</tr>
+</tbody></table>
+<p>Le modèle répond 3 au lieu de 1. Il faut savoir qui, de w1 ou w2, est responsable, et de combien.</p>
+<h3>2. Passe arrière : on part de la perte et on remonte</h3>
+<p>Chaque ligne réutilise la précédente. C&#39;est tout le secret.</p>
+<table>
+<thead>
+<tr>
+<th>Ordre</th>
+<th>Question</th>
+<th>Calcul</th>
+<th>Gradient</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>Si y bouge, L bouge de combien ?</td>
+<td>2 × (y − t) = 2 × 2</td>
+<td>4</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Responsabilité de w2</td>
+<td>(effet de w2 sur y = h) × 4 = 1 × 4</td>
+<td><strong>4</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Responsabilité de h</td>
+<td>(effet de h sur y = w2) × 4 = 3 × 4</td>
+<td>12</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Responsabilité de w1</td>
+<td>(effet de w1 sur h = x) × 12 = 2 × 12</td>
+<td><strong>24</strong></td>
+</tr>
+</tbody></table>
+<p>Ligne 4 : on n&#39;a pas recalculé depuis la perte, on a pris le 12 déjà trouvé et on l&#39;a multiplié par un effet local (x = 2). C&#39;est la règle de la chaîne. Sur un réseau à 96 couches, on fait ça 96 fois, chaque couche réutilisant celle d&#39;après.</p>
+<p>Deux détails qui comptent :</p>
+<ul>
+<li>Ligne 2 a besoin de h, ligne 4 a besoin de x : des valeurs de la <strong>passe avant</strong>. Le réseau doit donc les garder en mémoire jusqu&#39;au retour.</li>
+<li>w1 est 6 fois plus « responsable » que w2 (24 contre 4) alors qu&#39;il est plus loin de la sortie. Sa responsabilité est amplifiée par tout ce qui vient après lui (le ×3 de w2).</li>
+</ul>
+<h3>3. Mise à jour : la descente de gradient de #7</h3>
+<table>
+<thead>
+<tr>
+<th>Paramètre</th>
+<th>Avant</th>
+<th>− taux × gradient</th>
+<th>Après</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>w1</td>
+<td>0,5</td>
+<td>− 0,01 × 24</td>
+<td>0,26</td>
+</tr>
+<tr>
+<td>w2</td>
+<td>3</td>
+<td>− 0,01 × 4</td>
+<td>2,96</td>
+</tr>
+</tbody></table>
+<p>Nouvelle passe avant : h = 0,52, y ≈ 1,54, perte ≈ 0,29. <strong>La perte passe de 4 à 0,29 en un seul pas.</strong></p>
+<h3>4. Vérification : la méthode « un par un »</h3>
+<p>On pousse w1 de 0,001 et on refait tout le calcul : la perte bouge de 0,024, soit un gradient de ≈ 24,04. Même chose pour w2 : ≈ 4,00. Les deux méthodes donnent le même résultat. La différence : « un par un » demande un calcul complet <strong>par paramètre</strong>, la rétropropagation un aller et un retour <strong>pour tous</strong>. Les chercheurs utilisent d&#39;ailleurs le « un par un » exactement comme ici : pour vérifier qu&#39;un code de rétropropagation n&#39;a pas de bug.</p>
+<h3>5. Ton exercice des 3 machines, relu</h3>
+<p>x → ×2 → ×3 → ×5. Changer la machine du milieu de ×3 à ×4 fait monter la sortie de 10. Pourquoi 10 ? <strong>Ce qui arrive dans la machine (2) × ce qui vient après elle (5).</strong> C&#39;est exactement la ligne 2 et la ligne 4 du tableau : effet local × responsabilité de l&#39;aval.</p>
+<h2>Ce que ça révèle</h2>
+<p><em>Écris ta ligne dans ton carnet avant de lire celle-ci.</em></p>
+<p><strong>L&#39;entraînement coûte environ 3 prédictions par exemple, quel que soit le nombre de paramètres.</strong> C&#39;est ce qui a rendu possible de passer de milliers à des milliards de paramètres. Si apprendre coûtait un calcul par paramètre, on serait resté aux petits réseaux.</p>
+<p>Trois conséquences qui découlent directement du mécanisme :</p>
+<ol>
+<li><strong>Le « 6 » de C ≈ 6ND vient d&#39;ici.</strong> Kaplan et al. (OpenAI, 2020) comptent environ 2 opérations par paramètre et par token pour la passe avant, et une passe arrière qui coûte à peu près le double. 2 + 4 = 6. Confiance : haute (formule et explication tirées du papier).</li>
+<li><strong>L&#39;entraînement mange de la mémoire, pas seulement du calcul.</strong> La passe arrière a besoin des valeurs de la passe avant (h, x dans l&#39;exemple), donc on les garde toutes. Sur des milliards de paramètres et des milliers de tokens, ça pèse lourd. Astuce connue : jeter une partie de ces valeurs et les recalculer au retour. Chen et al. (2016) ramènent ainsi un réseau de 1 000 couches de 48 Go à 7 Go de mémoire, pour environ 30 % de temps en plus. On échange du calcul contre de la mémoire.</li>
+<li><strong>Multiplier, c&#39;est dangereux.</strong> Une responsabilité lointaine = un produit de dizaines de facteurs. Des facteurs un peu sous 1, et le produit s&#39;effondre vers 0 : les premières couches n&#39;apprennent plus. Un peu au-dessus de 1, et il explose. C&#39;est le problème des gradients qui disparaissent ou explosent, et la raison d&#39;être des connexions résiduelles (enquête #14).</li>
+</ol>
+<h2>Anomalie pour ton carnet</h2>
+<p>La méthode qui entraîne toute l&#39;IA moderne n&#39;est presque certainement <strong>pas</strong> celle du cerveau : elle exige de renvoyer l&#39;erreur exacte en arrière à travers chaque couche, et de figer le calcul le temps du retour. Hinton, coauteur du papier fondateur de 1986, a lui-même proposé en 2022 une alternative sans passe arrière (« Forward-Forward »). Résultat honnête : elle fait moins bien (41 % d&#39;erreur contre 37 % pour la rétropropagation sur CIFAR-10, deux couches cachées) et il la qualifie de préliminaire. Donc : l&#39;outil le plus efficace qu&#39;on connaisse n&#39;est pas celui qu&#39;utilise la seule intelligence générale qui existe.</p>
+<h2>Signaux à surveiller</h2>
+<ul>
+<li><strong>Alternatives à la rétropropagation</strong> qui égalent ses résultats à grande échelle. Aujourd&#39;hui aucune (confiance moyenne : domaine actif, je n&#39;ai pas tout parcouru). Si ça arrive, ça change le coût de l&#39;entraînement et le matériel.</li>
+<li><strong>La mémoire comme goulot de l&#39;entraînement</strong> : les annonces de puces mettent en avant la quantité de HBM, pas seulement les opérations par seconde. Le point 2 ci-dessus explique pourquoi.</li>
+<li><strong>Les frameworks</strong> (PyTorch, JAX) font la rétropropagation automatiquement : c&#39;est la « différentiation automatique » (Baydin et al., 2018). Personne ne l&#39;écrit à la main. Le savoir-faire s&#39;est déplacé vers la mémoire et la répartition sur des milliers de puces.</li>
+</ul>
+<h2>Croisement</h2>
+<p><strong>Branche 2, D&#39;où elle vient.</strong> La méthode existe sur le papier dès la thèse de master de Linnainmaa (1970), sans lien avec les réseaux de neurones. Rumelhart, Hinton et Williams la rendent célèbre dans <em>Nature</em> en 1986. Le deep learning ne décolle qu&#39;en 2012. Seize ans de décalage : l&#39;algorithme était là, il manquait le calcul et les données. C&#39;est la « leçon amère » de l&#39;enquête #2, vue de l&#39;intérieur.</p>
+<h2>Lexique</h2>
+<table>
+<thead>
+<tr>
+<th>Terme</th>
+<th>Ce que ça veut dire</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Règle de la chaîne</td>
+<td>L&#39;effet d&#39;un élément lointain sur la sortie = produit des effets locaux le long du chemin</td>
+</tr>
+<tr>
+<td>Rétropropagation (détaillée)</td>
+<td>Appliquer la règle de la chaîne de la sortie vers l&#39;entrée, chaque couche réutilisant le calcul de celle d&#39;après</td>
+</tr>
+<tr>
+<td>Dérivée locale</td>
+<td>L&#39;effet d&#39;un élément sur l&#39;étape juste après lui (dans l&#39;exemple : x pour w1, w2 pour h)</td>
+</tr>
+<tr>
+<td>Activations</td>
+<td>Les valeurs intermédiaires de la passe avant (h). Gardées en mémoire pour la passe arrière</td>
+</tr>
+<tr>
+<td>Graphe de calcul</td>
+<td>Le schéma de toutes les opérations du réseau, qu&#39;on parcourt à l&#39;aller puis au retour</td>
+</tr>
+<tr>
+<td>Différentiation automatique (autodiff)</td>
+<td>Le logiciel (PyTorch, JAX) qui fait la rétropropagation tout seul à partir du graphe de calcul</td>
+</tr>
+<tr>
+<td>Différences finies</td>
+<td>La méthode « un par un » : pousser un paramètre et mesurer la perte. Lente, sert à vérifier</td>
+</tr>
+<tr>
+<td>Gradient qui disparaît / explose</td>
+<td>Le produit de nombreux facteurs tend vers 0 ou vers l&#39;infini : les premières couches n&#39;apprennent plus, ou l&#39;entraînement casse</td>
+</tr>
+<tr>
+<td>Checkpointing (recalcul)</td>
+<td>Jeter une partie des activations et les recalculer au retour : moins de mémoire, plus de calcul</td>
+</tr>
+<tr>
+<td>Forward-Forward</td>
+<td>Alternative de Hinton (2022) sans passe arrière. Moins performante à ce jour</td>
+</tr>
+</tbody></table>
+<h2>Questions ouvertes et prochaines enquêtes</h2>
+<ul>
+<li>Si w1 et w2 commencent tous les deux à 0, que donne la passe arrière ? (Indice : refais le tableau. C&#39;est un vrai piège de l&#39;initialisation.)</li>
+<li>Un paramètre peut influencer la sortie par plusieurs chemins à la fois. Comment on combine ses responsabilités ?</li>
+<li>Pourquoi la passe arrière coûte-t-elle environ le double de la passe avant, et pas autant ?</li>
+</ul>
+<p><strong>Suite logique :</strong> #9 Mémoriser ou généraliser (le surapprentissage). On sait maintenant comment le réseau baisse sa perte ; la question devient : baisser la perte sur les exemples suffit-il ? Puis #10 (le neurone et ses fonctions d&#39;activation) et #14 (connexions résiduelles, la réponse au gradient qui disparaît).</p>
+<h2>Approfondissement (à faire aujourd&#39;hui, ~45 min)</h2>
+<ol>
+<li><strong>Exercice (20 min, papier et crayon).</strong> Même réseau, mais x = 1, w1 = 2, w2 = −1, t = 3. Fais passe avant, passe arrière, mise à jour (taux 0,1), puis recalcule la perte. Elle doit baisser. Envoie-moi tes 4 gradients.</li>
+<li><strong>Source primaire (15 min).</strong> Le papier de Rumelhart, Hinton et Williams (1986) : 4 pages. Lis seulement le résumé et la première page. Repère la phrase qui dit ce que les unités cachées apprennent à représenter.</li>
+<li><strong>Vidéo (10 min).</strong> 3Blue1Brown, chapitre « Backpropagation calculus », pour voir la règle de la chaîne animée.</li>
+</ol>
+<p><strong>Question bonus :</strong> dans l&#39;exemple, w1 a reçu un gradient 6 fois plus grand que w2 et a bougé de 0,24 contre 0,04. Est-ce une bonne chose qu&#39;un paramètre loin de la sortie bouge plus fort ? Qu&#39;est-ce qui se passerait avec 50 couches ?</p>
+<h2>Sources</h2>
+<p>Toutes ouvertes le 31 oct. 2026. Les calculs du mécanisme sont refaits en code (passe avant, arrière, vérification par différences finies).</p>
+<ul>
+<li><a href="https://mlanthology.org/misc/1986/rumelhart1986misc-learning" target="_blank" rel="noreferrer">Rumelhart, Hinton, Williams — Learning representations by back-propagating errors, Nature 323, 1986</a> (notice ; DOI 10.1038/323533a0)</li>
+<li><a href="https://en.wikipedia.org/wiki/Seppo_Linnainmaa" target="_blank" rel="noreferrer">Seppo Linnainmaa — Wikipedia</a> : mode inverse de la différentiation automatique, thèse de master de 1970</li>
+<li><a href="https://arxiv.org/pdf/2001.08361" target="_blank" rel="noreferrer">Kaplan et al. — Scaling Laws for Neural Language Models, OpenAI, 2020</a>, section 2.1 : C ≈ 6N par token, passe arrière ≈ 2 × passe avant</li>
+<li><a href="https://arxiv.org/abs/1604.06174v2" target="_blank" rel="noreferrer">Chen et al. — Training Deep Nets with Sublinear Memory Cost, 2016</a> : 48 Go → 7 Go, ~30 % de temps en plus</li>
+<li><a href="https://www.jmlr.org/beta/papers/v18/17-468.html" target="_blank" rel="noreferrer">Baydin et al. — Automatic Differentiation in Machine Learning: a Survey, JMLR 18, 2018</a></li>
+<li><a href="https://alphaxiv.org/overview/2212.13345v1" target="_blank" rel="noreferrer">Hinton — The Forward-Forward Algorithm, 2022 (résumé alphaXiv)</a> : chiffres CIFAR-10</li>
+</ul>
+<h2>Termes vus</h2>
+<ul>
+<li><span class="lex" tabindex="0" title="Règle de la chaîne — L'effet d'un élément lointain sur la sortie = produit des effets locaux le long du chemin.">Règle de la chaîne</span></li>
+<li><span class="lex" tabindex="0" title="Rétropropagation — La méthode qui corrige les réglages d'un réseau à plusieurs couches à partir de ses erreurs (#2). En détail (#8) : appliquer la règle de la chaîne de la sortie vers l'entrée, chaque couche réutilisant le calcul de celle d'après. Coût ≈ 3 prédictions, quel que soit le nombre de paramètres.">Rétropropagation</span></li>
+<li><span class="lex" tabindex="0" title="Dérivée locale — L'effet d'un élément sur l'étape juste après lui (x pour w1, w2 pour h).">Dérivée locale</span></li>
+<li><span class="lex" tabindex="0" title="Activations — Les valeurs intermédiaires de la passe avant, gardées en mémoire pour la passe arrière.">Activations</span></li>
+<li><span class="lex" tabindex="0" title="Graphe de calcul — Le schéma de toutes les opérations du réseau, parcouru à l'aller puis au retour.">Graphe de calcul</span></li>
+<li><span class="lex" tabindex="0" title="Différentiation automatique (autodiff) — Le logiciel (PyTorch, JAX) qui fait la rétropropagation tout seul à partir du graphe de calcul.">Différentiation automatique (autodiff)</span></li>
+<li><span class="lex" tabindex="0" title="Différences finies — La méthode « un par un » : pousser un paramètre et mesurer la perte. Lente, sert à vérifier un code.">Différences finies</span></li>
+<li><span class="lex" tabindex="0" title="Gradient qui disparaît - explose — Le produit de nombreux facteurs tend vers 0 ou vers l'infini : les premières couches n'apprennent plus, ou l'entraînement casse.">Gradient qui disparaît - explose</span></li>
+<li><span class="lex" tabindex="0" title="Checkpointing (recalcul) — Jeter une partie des activations et les recalculer au retour : moins de mémoire, plus de calcul.">Checkpointing (recalcul)</span></li>
+<li><span class="lex" tabindex="0" title="Forward-Forward — Alternative de Hinton (2022) sans passe arrière. Moins performante à ce jour.">Forward-Forward</span></li>
+</ul>
+<h2>Anomalies relevées</h2>
+<ul>
+<li></li>
+</ul>
+<h2>Croisements avec d&#39;autres branches</h2>
+<ul>
+<li></li>
+</ul>

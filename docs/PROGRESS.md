@@ -64,3 +64,12 @@
 - Nouvelle question : A_TRANCHER Q5 (que voit un visiteur public quand il clique « lire l'enquête » ?).
 - Preuve : `docs/preuves/M5_fiche_fr.png`, `docs/preuves/M5_fiche_en.png`.
 - Suivant : selon Axel — M3 (exemple modifiable), M4 (fabriquer) ou M6 (en ligne).
+
+## 2026-11-24 23:50 — Pages « enquête » (décision Axel, A_TRANCHER Q5)
+- `npm run content` génère aussi **une page par enquête** (18) depuis le coffre : `public/enquetes/<n>.html` + index `content/enquetes.json`. Route `#/enquete/13`, sommaire `#/enquetes`, lien depuis chaque fiche et depuis le pied du panneau.
+- Conversion Obsidian → web : liens entre enquêtes → liens internes ; termes du `Lexique/` → soulignés, définition au survol ; liens vers des notes non publiées (Prospection, projets) → texte simple ; encadrés → citations titrées ; intégrations `![[…]]` retirées ; **aucun HTML brut des notes interprété**.
+- **Suivi personnel non publié** (liste modifiable `content/pages.json`) : « Mon/Ton hypothèse », « Bilan », « Questions de vérification », quiz, « Page de carnet », « Ce que tu me renvoies », mode d'emploi, corrigés, « Mes notes ».
+- Schémas Mermaid des enquêtes dessinés (7/8) ; bibliothèque chargée seulement sur ces pages. **Le schéma de l'enquête 12 a une erreur de syntaxe dans la note** (ligne 6 : `V"VOCABULAIRE…"` au lieu de `V["VOCABULAIRE…"]`) → code affiché avec une mention ; se dessinera dès la note corrigée.
+- Bug trouvé par le test : les titres des encadrés disparaissaient (marqueur HTML avalé par le parseur) → corrigé.
+- Tests : `tests/content.test.ts` (pages : sections personnelles absentes, liens, Lexique, HTML neutralisé), `tests/e2e/pages.spec.ts` (fiche → page → Mermaid → retour). 14 unitaires + 3 e2e verts.
+- Preuve : `docs/preuves/M5_page_enquete13.png`, `docs/preuves/M5_mermaid14.png`.

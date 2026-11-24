@@ -1,0 +1,20 @@
+{
+  "_doc": "Pages « enquête » publiées sur le site (M5/M6, décision d'Axel du 24/11/2026 : une page par enquête, générée depuis le coffre). Les sections dont le titre correspond à un motif de « exclure » ne sont pas publiées (suivi personnel d'Axel). Modifier cette liste pour en publier certaines.",
+  "exclure": [
+    "^Mes notes",
+    "^(Mon|Ton) hypothèse",
+    "^Bilan",
+    "^Questions de vérification",
+    "^\\d+\\. Questions de vérification",
+    "^Quiz",
+    "^\\d+\\. Quiz",
+    "^Vérification",
+    "^Page de carnet",
+    "^\\d+\\. Page de carnet",
+    "^\\d+\\. Ce que tu me renvoies",
+    "^Ce que tu me renvoies",
+    "^0\\. Mode d'emploi",
+    "^\\d+\\. Corrigés",
+    "^Enquête$"
+  ]
+}

@@ -1,0 +1,167 @@
+{
+ "_genere": "scripts/build-content.mjs — ne pas modifier à la main",
+ "enquetes": [
+  {
+   "id": "1",
+   "numero": "1",
+   "titre": "Ce qui se passe quand un modèle te répond",
+   "branche": "Comment ça marche",
+   "bloc": null,
+   "date": null,
+   "empreinte": "9ceb773a06fb"
+  },
+  {
+   "id": "2",
+   "numero": "2",
+   "titre": "Les hivers de l'IA, et pourquoi ça décolle maintenant",
+   "branche": "D'où elle vient",
+   "bloc": null,
+   "date": null,
+   "empreinte": "09549e84f7bd"
+  },
+  {
+   "id": "3",
+   "numero": "3",
+   "titre": "Pourquoi mettre le calcul de l'IA en orbite",
+   "branche": "Grands enjeux (espace)",
+   "bloc": null,
+   "date": null,
+   "empreinte": "fce1d44fe002"
+  },
+  {
+   "id": "4",
+   "numero": "4",
+   "titre": "Le prix du token",
+   "branche": "Économie",
+   "bloc": null,
+   "date": null,
+   "empreinte": "efc7a8bf4ca4"
+  },
+  {
+   "id": "5",
+   "numero": "5",
+   "titre": "L'AGI selon les labos",
+   "branche": "Où elle va",
+   "bloc": null,
+   "date": null,
+   "empreinte": "7a15753f7a02"
+  },
+  {
+   "id": "6",
+   "numero": "6",
+   "titre": "Les contrôles à l'export freinent-ils l'IA chinoise",
+   "branche": "Pouvoir",
+   "bloc": null,
+   "date": null,
+   "empreinte": "7b06f92c32be"
+  },
+  {
+   "id": "7",
+   "numero": "7",
+   "titre": "Qu'est-ce qu'apprendre pour une machine",
+   "branche": "Comment ça marche",
+   "bloc": null,
+   "date": null,
+   "empreinte": "40b72aaf00db"
+  },
+  {
+   "id": "8",
+   "numero": "8",
+   "titre": "La rétropropagation pas à pas",
+   "branche": "Comment ça marche",
+   "bloc": null,
+   "date": null,
+   "empreinte": "a2209b8dfa95"
+  },
+  {
+   "id": "9",
+   "numero": "9",
+   "titre": "Mémoriser ou généraliser, le surapprentissage",
+   "branche": "Comment ça marche",
+   "bloc": null,
+   "date": null,
+   "empreinte": "c2150353b9a3"
+  },
+  {
+   "id": "10",
+   "numero": "10",
+   "titre": "Le neurone, les couches, la fonction d'activation",
+   "branche": "Comment ça marche",
+   "bloc": null,
+   "date": null,
+   "empreinte": "b93fa28d5727"
+  },
+  {
+   "id": "11",
+   "numero": "11",
+   "titre": "Les embeddings",
+   "branche": "Comment ça marche",
+   "bloc": null,
+   "date": null,
+   "empreinte": "e3b359862b36"
+  },
+  {
+   "id": "12",
+   "numero": "12",
+   "titre": "La tokenisation, et pourquoi le français coûte plus cher",
+   "branche": "Comment ça marche",
+   "bloc": "C. Le transformer",
+   "date": "2026-11-17",
+   "empreinte": "6c1ce66cd180"
+  },
+  {
+   "id": "13",
+   "numero": "13",
+   "titre": "L'attention en détail",
+   "branche": "Comment ça marche",
+   "bloc": "C. Le transformer",
+   "date": "2026-11-17",
+   "empreinte": "0e569e36fc81"
+  },
+  {
+   "id": "13-bis",
+   "numero": "13 bis",
+   "titre": "L'attention, calcul par calcul",
+   "branche": "Comment ça marche",
+   "bloc": "C. Le transformer",
+   "date": "2026-11-18",
+   "empreinte": "c5f44cfa9497"
+  },
+  {
+   "id": "14",
+   "numero": "14",
+   "titre": "MLP, normalisation et connexions résiduelles",
+   "branche": "Comment ça marche",
+   "bloc": "C. Le transformer",
+   "date": "2026-11-20",
+   "empreinte": "0eb877643039"
+  },
+  {
+   "id": "15",
+   "numero": "15",
+   "titre": "D'où viennent les données, et comment on les nettoie",
+   "branche": "Comment ça marche",
+   "bloc": "D. L'entraînement",
+   "date": "2026-11-21",
+   "empreinte": "a7d690160b31"
+  },
+  {
+   "id": "16",
+   "numero": "16",
+   "titre": "Le calcul, les puces et le coût du pré-entraînement",
+   "branche": "Comment ça marche",
+   "bloc": "D. L'entraînement",
+   "date": "2026-11-23",
+   "empreinte": "a8afa961c2a3"
+  },
+  {
+   "id": "17",
+   "numero": "17",
+   "titre": "Les lois d'échelle : plus gros, meilleur, jusqu'où ?",
+   "branche": "Comment ça marche",
+   "bloc": "D. L'entraînement",
+   "date": "2026-11-24",
+   "empreinte": "b1eeb28aa05e"
+  }
+ ]
+}

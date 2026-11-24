@@ -1,0 +1,199 @@
+<p><strong>Branche :</strong> Économie · Carte de l&#39;IA</p>
+<h2>La question et la réponse</h2>
+<p><strong>Question : qu&#39;est-ce qui fixe le prix d&#39;un token, et est-ce que les labos gagnent de l&#39;argent en le vendant ?</strong></p>
+<p><strong>Le prix.</strong> C&#39;est le labo qui l&#39;affiche, mais il ne le choisit pas librement. Il est coincé entre un plancher et un plafond. Le plancher, c&#39;est ce que coûte le calcul pour produire le token. Le plafond, c&#39;est le prix des concurrents. Les deux baissent vite, et en septembre 2026 la concurrence a tourné à la guerre des prix.</p>
+<p><strong>Les gains.</strong> Ça dépend de l&#39;étage où l&#39;on regarde. Le token vendu à l&#39;API est très rentable : chez Anthropic, sa marge est estimée au-delà de 80 %. Les abonnements et les utilisateurs gratuits mangent une grosse part du calcul pour peu de revenus. Et l&#39;entreprise entière doit encore payer l&#39;entraînement du modèle suivant. Anthropic n&#39;est rentable qu&#39;en « ajusté », depuis le printemps 2026. OpenAI prévoit 278 Md$ de trésorerie brûlée entre 2026 et 2030.</p>
+<p><strong>Confiance :</strong> haute sur les prix affichés, moyenne sur les marges. Les labos ne publient pas de comptes audités : les marges viennent d&#39;estimations d&#39;analystes et de chiffres montrés aux investisseurs.</p>
+<h2>Le schéma</h2>
+<blockquote>
+<p><strong>Schéma de l&#39;artifact d&#39;origine</strong>
+ où l&#39;argent du token se perd · 3 étages, chiffres détaillés et sourcés dans le mécanisme</p>
+</blockquote>
+<p>Lis de haut en bas : chaque étage ajoute des coûts que celui du dessus ignore.</p>
+<h2>Le mécanisme</h2>
+<h3>1. Le plancher : ce que coûte un token à produire</h3>
+<p>Un labo loue ou possède des puces. Le coût d&#39;un token, c&#39;est le prix d&#39;une heure de puce divisé par le nombre de tokens qu&#39;elle sort en une heure.</p>
+<pre><code class="language-latex">\text{coût par million de tokens} = \frac{\text{prix de la puce par heure}}{\text{tokens produits par heure}} \times 1\,000\,000
+</code></pre>
+<p>Ordre de grandeur : un H100 loué environ 2,50 $/h, qui sort environ 1 500 tokens/s en servant beaucoup d&#39;utilisateurs à la fois, produit 5,4 millions de tokens par heure. Coût matériel brut : environ 0,46 $ par million de tokens de sortie, avant électricité, réseau et machines inutilisées (<a href="https://www.taskade.com/wiki/ai/inference-cost" target="_blank" rel="noreferrer">Taskade</a>). Confiance basse : c&#39;est un ordre de grandeur pour un modèle moyen, les labos ne publient pas leurs vrais coûts.</p>
+<p>Deux leviers décident du résultat :</p>
+<ul>
+<li><strong>La mémoire, pas le calcul.</strong> Lire ta question (le prefill) se fait d&#39;un bloc, en parallèle. Écrire la réponse (le decode) se fait un token à la fois, et chaque token oblige la puce à relire le modèle en mémoire. C&#39;est pour ça que la sortie coûte 5 fois plus que l&#39;entrée chez Claude.</li>
+<li><strong>Le remplissage (batching).</strong> Une seule lecture de la mémoire peut servir des dizaines de requêtes à la fois. Une puce pleine divise le coût par token, une puce à moitié vide le multiplie. Avec le même GPU, on observe des coûts 5 à 10 fois différents selon l&#39;utilisation (<a href="https://www.yottalabs.ai/post/what-is-a-good-usd-token-for-llm-inference-in-2026" target="_blank" rel="noreferrer">Yotta Labs</a>).</li>
+</ul>
+<h3>2. Le prix affiché, octobre 2026</h3>
+<table>
+<thead>
+<tr>
+<th>Modèle</th>
+<th>Entrée ($ par million)</th>
+<th>Sortie ($ par million)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="https://platform.claude.com/docs/en/about-claude/pricing" target="_blank" rel="noreferrer">Claude Fable 5.1</a></td>
+<td>10</td>
+<td>50</td>
+</tr>
+<tr>
+<td><a href="https://platform.claude.com/docs/en/about-claude/pricing" target="_blank" rel="noreferrer">Claude Opus 5.5</a></td>
+<td>4</td>
+<td>20</td>
+</tr>
+<tr>
+<td><a href="https://platform.claude.com/docs/en/about-claude/pricing" target="_blank" rel="noreferrer">Claude Sonnet 5.5</a></td>
+<td>2</td>
+<td>10</td>
+</tr>
+<tr>
+<td><a href="https://sacra.com/c/openai/" target="_blank" rel="noreferrer">GPT-6.1 Sol</a></td>
+<td>2</td>
+<td>10</td>
+</tr>
+<tr>
+<td><a href="https://platform.claude.com/docs/en/about-claude/pricing" target="_blank" rel="noreferrer">Claude Haiku 5.5</a> (prompt de 100 000 tokens max)</td>
+<td>0,10</td>
+<td>0,50</td>
+</tr>
+<tr>
+<td><a href="https://sacra.com/c/openai/" target="_blank" rel="noreferrer">GPT-6 Luna</a></td>
+<td>0,10</td>
+<td>0,50</td>
+</tr>
+</tbody></table>
+<p>Deux remises changent la facture réelle : relire un texte déjà en cache coûte 5 % du prix d&#39;entrée sur Opus 5.5, et le traitement par lots est à moitié prix (<a href="https://platform.claude.com/docs/en/about-claude/pricing" target="_blank" rel="noreferrer">Anthropic</a>). Et un piège : depuis Claude 4.7, le découpage produit environ 30 % de tokens en plus pour le même texte. Le prix par token n&#39;est donc plus comparable d&#39;une génération à l&#39;autre.</p>
+<h3>3. Pourquoi le prix s&#39;effondre</h3>
+<blockquote>
+<p><strong>Schéma de l&#39;artifact d&#39;origine</strong>
+ Epoch AI, mars 2025 · prix le plus bas pour atteindre le score MMLU de GPT-4 (86 ou plus), mélange 3 tokens d&#39;entrée pour 1 de sortie</p>
+</blockquote>
+<p>À performance fixée, Epoch mesure des baisses de 9 à 900 fois par an selon la tâche, 50 fois en médiane (<a href="https://epoch.ai/data-insights/llm-inference-price-trends" target="_blank" rel="noreferrer">Epoch AI</a>). Trois moteurs : des puces plus efficaces, des algorithmes plus économes (environ 3 fois par an d&#39;après une étude liée à Epoch, <a href="https://arxiv.org/html/2511.23455v1" target="_blank" rel="noreferrer">arXiv</a>), et la concurrence. Le 22 septembre 2026, OpenAI a divisé par deux les prix de ses modèles Sol et Luna, le jour même de la sortie de Claude Opus 5.5 (<a href="https://tech-insider.org/gpt-6-sol-luna-undercut-claude-opus-5-5-2026/" target="_blank" rel="noreferrer">Tech Insider</a>) (<a href="https://aibusiness.com/generative-ai/openai-takes-ai-price-war-next-level-gpt-6-sol-luna-pricing" target="_blank" rel="noreferrer">AI Business</a>).</p>
+<p><strong>Anomalie :</strong> le prix par token baisse, pas forcément le prix par tâche. Les modèles de raisonnement écrivent des milliers de tokens de réflexion avant de répondre. Epoch les exclut même de ses calculs de prix par token pour cette raison.</p>
+<h3>4. Est-ce que ça rapporte ? Trois étages</h3>
+<p><strong>Étage 1 : le token vendu à l&#39;API.</strong> Très rentable. SemiAnalysis estime la marge brute de l&#39;API d&#39;Anthropic au-delà de 80 % (<a href="https://www.tokenpost.com/news/business/29674" target="_blank" rel="noreferrer">TokenPost</a>). Selon Bloomberg, Anthropic a montré à ses investisseurs une marge brute de 85 % au troisième trimestre 2026 (<a href="https://news.bgov.com/artificial-intelligence/anthropic-revenue-hits-16-8-billion-in-quarter-before-ipo-1" target="_blank" rel="noreferrer">Bloomberg Law</a>). Confiance moyenne : chiffres non audités, et chacun définit la marge à sa façon.</p>
+<p><strong>Étage 2 : le forfait et le gratuit.</strong> Là, ça fuit. Chez Anthropic, les abonnements font environ 10 % du revenu mais consomment plus de 40 % du calcul d&#39;inférence. Un abonné qui pousserait Opus 5.5 au maximum ferait perdre de l&#39;argent : marge modélisée de -369 % (<a href="https://www.tokenpost.com/news/business/29674" target="_blank" rel="noreferrer">TokenPost</a>, estimation SemiAnalysis). Chez OpenAI, 40 à 50 % du calcul d&#39;inférence de 2025 servait des utilisateurs gratuits (<a href="https://epochai.substack.com/p/can-ai-companies-become-profitable" target="_blank" rel="noreferrer">Epoch AI</a>, d&#39;après The Information). Sa marge brute globale n&#39;était que de 33 % (<a href="https://sacra.com/c/openai/" target="_blank" rel="noreferrer">Sacra</a>).</p>
+<p><strong>Étage 3 : l&#39;entreprise.</strong> Il faut payer l&#39;entraînement du modèle suivant. Epoch a fait le calcul pour GPT-5 : environ 2 Md$ de marge brute pendant ses 4 mois de vie, contre environ 5 Md$ de R&amp;D dépensés dans les 4 mois avant sa sortie (<a href="https://epochai.substack.com/p/can-ai-companies-become-profitable" target="_blank" rel="noreferrer">Epoch AI</a>). Chaque token rapporte, et pourtant l&#39;entreprise perd de l&#39;argent.</p>
+<ul>
+<li><strong>Anthropic :</strong> en 2025, environ 4,6 Md$ de revenus et plus de 8 Md$ de perte opérationnelle. Au troisième trimestre 2026, 16,8 Md$ de revenus et une marge opérationnelle ajustée de 11 % (<a href="https://thenextweb.com/news/anthropic-q3-revenue-16-8bn-ipo" target="_blank" rel="noreferrer">The Next Web</a>). « Ajustée » veut dire que certains coûts sont exclus, et Anthropic n&#39;a pas dit lesquels.</li>
+<li><strong>OpenAI :</strong> 278 Md$ de flux de trésorerie négatifs prévus sur 2026-2030, selon le Financial Times (<a href="https://sacra.com/c/openai/" target="_blank" rel="noreferrer">Sacra</a>).</li>
+</ul>
+<h2>Ce que ça révèle</h2>
+<p><strong>Écris tes 3 lignes avant de lire cette section.</strong></p>
+<ol>
+<li><strong>Le token devient une matière première.</strong> À performance égale, son prix est divisé par 5 à plusieurs centaines chaque année, selon la mesure. Ce qui garde de la valeur, c&#39;est autre chose : la tâche réussie, l&#39;accès aux clients, le modèle le plus fort du moment.</li>
+<li><strong>« Rentable » dépend de la ligne où l&#39;on coupe.</strong> Marge brute, marge opérationnelle, résultat ajusté, trésorerie : chaque acteur choisit le chiffre qui l&#39;arrange. Avant de croire un « profitable », demande toujours lequel.</li>
+<li><strong>Le forfait est un pari sur l&#39;usage moyen.</strong> Les agents qui tournent des heures cassent ce pari. C&#39;est là que les prix vont bouger : limites, paliers, facturation à l&#39;usage.</li>
+</ol>
+<p><strong>Signaux à surveiller :</strong></p>
+<ul>
+<li><strong>Le dossier d&#39;introduction en Bourse d&#39;Anthropic</strong> (visée en novembre 2026) : les premiers comptes vérifiables, avec la vraie définition de ses marges.</li>
+<li><strong>Le prix par tâche</strong>, pas par token : s&#39;il baisse moins vite, les modèles de raisonnement mangent les gains.</li>
+<li><strong>Les limites des abonnements</strong> : tout resserrement montre que le forfait perd de l&#39;argent.</li>
+<li><strong>Les puces maison</strong> (TPU de Google, Trainium d&#39;Amazon, puce d&#39;inférence d&#39;OpenAI prévue fin 2026) : elles font baisser le plancher.</li>
+<li><strong>Les modèles ouverts chinois</strong> (Kimi K3 de Moonshot, sorti en juillet 2026) : ils tirent le plafond vers le bas.</li>
+</ul>
+<h2>Lexique</h2>
+<table>
+<thead>
+<tr>
+<th>Terme</th>
+<th>Ce que ça veut dire</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Prefill</td>
+<td>La phase où le modèle lit tout ton texte d&#39;un coup, en parallèle. Rapide et peu cher par token</td>
+</tr>
+<tr>
+<td>Decode</td>
+<td>La phase où il écrit la réponse, un token à la fois. Lente et chère, d&#39;où la sortie facturée plus cher</td>
+</tr>
+<tr>
+<td>Bande passante mémoire</td>
+<td>La vitesse à laquelle la puce lit ses données. C&#39;est elle qui limite l&#39;écriture des tokens</td>
+</tr>
+<tr>
+<td>Batching</td>
+<td>Servir plusieurs requêtes en même temps sur une puce pour partager le coût de chaque lecture mémoire</td>
+</tr>
+<tr>
+<td>Cache de prompt</td>
+<td>Garder en mémoire un texte déjà lu pour ne pas le refacturer plein tarif (5 % du prix sur Opus 5.5)</td>
+</tr>
+<tr>
+<td>Tokenizer</td>
+<td>L&#39;outil qui découpe le texte en tokens. En changer change le nombre de tokens pour le même texte</td>
+</tr>
+<tr>
+<td>Prix par tâche</td>
+<td>Ce que coûte un travail terminé, tous tokens compris. Plus parlant que le prix par token</td>
+</tr>
+<tr>
+<td>Marge d&#39;inférence</td>
+<td>Revenu moins le coût du calcul pour servir les clients, sans compter l&#39;entraînement</td>
+</tr>
+<tr>
+<td>Résultat ajusté</td>
+<td>Un bénéfice calculé en excluant certains coûts choisis par l&#39;entreprise</td>
+</tr>
+<tr>
+<td>Flux de trésorerie libre</td>
+<td>L&#39;argent réellement gagné ou brûlé une fois tous les investissements payés</td>
+</tr>
+</tbody></table>
+<h2>Questions ouvertes et suite</h2>
+<p><strong>Questions ouvertes</strong></p>
+<ul>
+<li>Que valent les marges d&#39;Anthropic une fois auditées dans son dossier de Bourse ?</li>
+<li>Le prix par tâche baisse-t-il aussi vite que le prix par token ?</li>
+<li>Les abonnements vont-ils passer à la facturation à l&#39;usage ?</li>
+<li>Quand les modèles ouverts tirent les prix vers zéro, qui garde la marge : l&#39;hébergeur, l&#39;appli ou le fabricant de puces ?</li>
+</ul>
+<p><strong>Prochaines enquêtes de la branche Économie</strong></p>
+<ul>
+<li>La chaîne de valeur : qui capte l&#39;argent entre Nvidia, le cloud, le labo et l&#39;appli.</li>
+<li>Qui gagne vraiment de l&#39;argent aujourd&#39;hui.</li>
+<li>Open source contre fermé.</li>
+</ul>
+<p><strong>Croisement :</strong> le plancher de prix, c&#39;est la technique de la branche « Comment ça marche ». Les enquêtes #20 (générer un token, le cache) et #21 (quantification, MoE, distillation) expliquent comment on fait baisser le coût. Et l&#39;électricité de l&#39;enquête #3 est une ligne de ce coût.</p>
+<p><strong>Approfondissement</strong></p>
+<ol>
+<li><strong>Source primaire :</strong> lis en entier <a href="https://epochai.substack.com/p/can-ai-companies-become-profitable" target="_blank" rel="noreferrer">Can AI companies become profitable?</a> d&#39;Epoch AI (anglais, 15 min). Note la phrase où les auteurs se protègent le plus, et pourquoi.</li>
+<li><strong>Exercice :</strong> un GPU loué 2,50 $ de l&#39;heure sort 1 500 tokens par seconde. Calcule son coût par million de tokens. Ensuite, prends un coût réel de 2 $ le million (hypothèse d&#39;exercice). Combien de millions de tokens un abonné à 200 $ par mois peut-il consommer avant de coûter plus qu&#39;il ne paie ?</li>
+<li><strong>Question bonus :</strong> pourquoi OpenAI accepte-t-il qu&#39;environ la moitié de son calcul serve des gens qui ne paient rien ? Pense à la publicité et à la distribution.</li>
+</ol>
+<h2>Sources</h2>
+<ul>
+<li><a href="https://platform.claude.com/docs/en/about-claude/pricing" target="_blank" rel="noreferrer">Pricing</a>, Anthropic, consulté le 25 oct. 2026 (source primaire)</li>
+<li><a href="https://epoch.ai/data-insights/llm-inference-price-trends" target="_blank" rel="noreferrer">LLM inference prices have fallen rapidly but unequally across tasks</a>, Epoch AI, 12 mars 2025</li>
+<li><a href="https://epochai.substack.com/p/can-ai-companies-become-profitable" target="_blank" rel="noreferrer">Can AI companies become profitable?</a>, Epoch AI, 28 janv. 2026, révisé le 6 mars 2026</li>
+<li><a href="https://arxiv.org/html/2511.23455v1" target="_blank" rel="noreferrer">The Price of Progress: Algorithmic Efficiency and the Falling Cost of AI Inference</a>, arXiv, nov. 2025</li>
+<li><a href="https://sacra.com/c/openai/" target="_blank" rel="noreferrer">OpenAI revenue, valuation &amp; funding</a>, Sacra, oct. 2026 (cite The Information et le Financial Times)</li>
+<li><a href="https://www.tokenpost.com/news/business/29674" target="_blank" rel="noreferrer">Anthropic API Gross Margin Estimated Above 80%</a>, TokenPost, 10 oct. 2026 (rapporte une estimation SemiAnalysis)</li>
+<li><a href="https://news.bgov.com/artificial-intelligence/anthropic-revenue-hits-16-8-billion-in-quarter-before-ipo-1" target="_blank" rel="noreferrer">Anthropic Revenue Hits $16.8 Billion in Quarter Before IPO</a>, Bloomberg Law, 15 oct. 2026</li>
+<li><a href="https://thenextweb.com/news/anthropic-q3-revenue-16-8bn-ipo" target="_blank" rel="noreferrer">Anthropic tells investors Q3 revenue reached $16.8bn</a>, The Next Web, oct. 2026 (d&#39;après le FT et Reuters)</li>
+<li><a href="https://aibusiness.com/generative-ai/openai-takes-ai-price-war-next-level-gpt-6-sol-luna-pricing" target="_blank" rel="noreferrer">OpenAI takes AI price war to next level with GPT-6 Sol, Luna pricing</a>, AI Business, 23 sept. 2026</li>
+<li><a href="https://www.taskade.com/wiki/ai/inference-cost" target="_blank" rel="noreferrer">Inference cost</a>, Taskade (ordre de grandeur du coût matériel)</li>
+<li><a href="https://www.yottalabs.ai/post/what-is-a-good-usd-token-for-llm-inference-in-2026" target="_blank" rel="noreferrer">What is a good $/token for LLM inference in 2026</a>, Yotta Labs</li>
+</ul>
+<h2>Termes vus</h2>
+<ul>
+<li><span class="lex" tabindex="0" title="Prefill — La phase où le modèle lit tout ton texte d'un coup, en parallèle. Rapide et peu cher par token.">Prefill</span></li>
+<li><span class="lex" tabindex="0" title="Decode — La phase où il écrit la réponse, un token à la fois, en relisant le modèle en mémoire à chaque token. D'où la sortie facturée 5 fois plus cher.">Decode</span></li>
+<li><span class="lex" tabindex="0" title="Bande passante mémoire — La vitesse à laquelle la puce lit ses données. C'est elle qui limite l'écriture des tokens, pas la puissance de calcul.">Bande passante mémoire</span></li>
+<li><span class="lex" tabindex="0" title="Batching — Servir plusieurs requêtes à la fois : une seule lecture de la mémoire sert à toutes, donc le coût se partage.">Batching</span></li>
+<li><span class="lex" tabindex="0" title="Cache de prompt — Garder en mémoire un texte déjà lu pour ne pas le refacturer plein tarif (5 % du prix d'entrée sur Opus 5.5).">Cache de prompt</span></li>
+<li><span class="lex" tabindex="0" title="Tokenizer — L'outil qui découpe le texte en tokens. En changer change le nombre de tokens pour le même texte (+30 % depuis Claude 4.7).">Tokenizer</span></li>
+<li><span class="lex" tabindex="0" title="Prix par tâche — Ce que coûte un travail terminé, tous tokens compris. Plus parlant que le prix par token.">Prix par tâche</span></li>
+<li><span class="lex" tabindex="0" title="Marge d'inférence — Revenu moins le coût du calcul pour servir les clients, sans compter l'entraînement.">Marge d&#39;inférence</span></li>
+<li><span class="lex" tabindex="0" title="Résultat ajusté — Un bénéfice calculé en excluant certains coûts choisis par l'entreprise. Toujours demander lesquels.">Résultat ajusté</span></li>
+<li><span class="lex" tabindex="0" title="Flux de trésorerie libre — L'argent réellement gagné ou brûlé une fois tous les investissements payés.">Flux de trésorerie libre</span></li>
+</ul>
+<h2>Anomalies relevées</h2>
+<ul>
+<li></li>
+</ul>
+<h2>Croisements avec d&#39;autres branches</h2>
+<ul>
+<li></li>
+</ul>

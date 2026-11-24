@@ -42,7 +42,7 @@ function Footer({ trace }: { trace: Trace }) {
   return (
     <p className="small muted foot">
       {t.dims(num(c.d_model, 0), c.n_heads, c.n_kv_heads, num(c.d_mlp, 0), num(c.vocab, 0))} {t.source(trace.meta.dtype, trace.meta.date.slice(0, 10))}
-      <br /><span className="built">{t.builtWith}</span>
+      <br /><a href="#/enquetes">{t.pages.all}</a> · <span className="built">{t.builtWith}</span>
     </p>
   )
 }

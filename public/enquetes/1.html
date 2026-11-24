@@ -1,0 +1,205 @@
+<p><strong>Branche :</strong> Comment ça marche · Carte de l&#39;IA</p>
+<h2>La question</h2>
+<p>Quand un modèle te répond, il ne cherche rien et n&#39;assemble rien. Il prédit le morceau de mot suivant, un seul à la fois, à partir de tout ce qui se trouve dans sa fenêtre de contexte, puis il recommence. Ses connaissances viennent de son entraînement, pas d&#39;internet au moment où il répond. Il ne va sur internet que si on lui a branché un outil de recherche.</p>
+<p>Pourquoi commencer par là : c&#39;est la brique de base de toute la série. Le prix du token, la course au calcul et les erreurs des modèles en découlent tous.</p>
+<p>Niveau de confiance : élevé sur le mécanisme général, qui est publié et enseigné. Moyen sur l&#39;intérieur des modèles commerciaux, dont l&#39;architecture exacte n&#39;est pas publiée.</p>
+<h2>Le trajet d&#39;une réponse</h2>
+<blockquote>
+<p><strong>Schéma de l&#39;artifact d&#39;origine</strong>
+ génération d&#39;une réponse · 6 étapes en boucle</p>
+</blockquote>
+<p>Pendant la conversation, les paramètres ne bougent pas : le modèle n&#39;apprend rien de toi en direct. Ce qui le personnalise, c&#39;est uniquement ce qui entre dans sa fenêtre de contexte.</p>
+<h2>Le mécanisme</h2>
+<p>Une réponse, c&#39;est une boucle répétée pour chaque token. Ce qui la rend intelligente se joue avant, pendant l&#39;entraînement.</p>
+<ol>
+<li><strong>La fenêtre de contexte.</strong> C&#39;est tout ce que le modèle voit : les instructions du système, la mémoire, tout l&#39;historique, les résultats d&#39;outils et ta question. Chez Claude, elle va jusqu&#39;à 1 million de tokens, réponse comprise. La précision baisse quand elle se remplit, ce que la doc appelle le « context rot » (<a href="https://platform.claude.com/docs/en/build-with-claude/context-windows" target="_blank" rel="noreferrer">doc Anthropic</a>).</li>
+<li><strong>Les tokens.</strong> Le texte est découpé en morceaux. En anglais, 1 token fait environ 4 caractères, et 100 tokens environ 75 mots (<a href="https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them" target="_blank" rel="noreferrer">OpenAI</a>). Les autres langues n&#39;ont pas le même ratio : le français en consomme généralement plus pour le même sens (confiance moyenne).</li>
+<li><strong>Les vecteurs.</strong> Chaque token devient une longue liste de nombres. Deux mots de sens proche ont des listes proches.</li>
+<li><strong>Les couches et l&#39;attention.</strong> C&#39;est l&#39;architecture « transformer », publiée par Google en juin 2017. À chaque couche, l&#39;attention calcule, pour chaque token, quels autres tokens comptent pour lui. Toutes les positions sont traitées en même temps, ce qui exploite les GPU à fond. C&#39;est pour ça que cette architecture a gagné (<a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noreferrer">Vaswani et al.</a>).</li>
+<li><strong>Les probabilités et le tirage.</strong> La dernière couche donne un score à chaque token du vocabulaire, soit 128 256 chez Llama 3 (<a href="https://huggingface.co/blog/llama3" target="_blank" rel="noreferrer">Hugging Face</a>). On en tire un, il est ajouté au contexte, et toute la boucle recommence.</li>
+</ol>
+<p><strong>Avant tout ça, l&#39;entraînement.</strong> D&#39;abord le pré-entraînement : apprendre à prédire le token suivant sur un corpus géant, plus de 15 000 milliards de tokens pour Llama 3 (<a href="https://huggingface.co/blog/llama3" target="_blank" rel="noreferrer">Hugging Face</a>). Ensuite, on transforme ce prédicteur en assistant grâce au retour d&#39;humains. En 2022, un modèle de 1,3 milliard de paramètres entraîné ainsi était préféré à GPT-3 et à ses 175 milliards (<a href="https://arxiv.org/abs/2203.02155" target="_blank" rel="noreferrer">InstructGPT</a>).</p>
+<p><strong>La taille.</strong> Kimi K2, sorti en juillet 2025, compte 1 000 milliards de paramètres, mais n&#39;en active que 32 milliards par token. C&#39;est un « mixture of experts » : seule une partie du modèle s&#39;allume à chaque token (<a href="https://www.hpcwire.com/2025/07/16/chinas-moonshot-ai-releases-trillion-parameter-model-kimi-k2/" target="_blank" rel="noreferrer">HPCwire</a>). C&#39;est sur sa version K2.5 que Cursor a construit Composer 2 (ancienne enquête Cursor).</p>
+<p><strong>Deux ajouts récents :</strong></p>
+<ul>
+<li><strong>Le raisonnement.</strong> Depuis o1, sorti en septembre 2024, certains modèles écrivent une longue chaîne de pensée avant de répondre. Plus ils réfléchissent, meilleurs ils sont (<a href="https://openai.com/index/learning-to-reason-with-llms/" target="_blank" rel="noreferrer">OpenAI</a>). Ces tokens de réflexion sont facturés comme des tokens de sortie (<a href="https://platform.claude.com/docs/en/build-with-claude/context-windows" target="_blank" rel="noreferrer">doc Anthropic</a>).</li>
+<li><strong>Les outils.</strong> Le modèle ne navigue pas lui-même. Il écrit une demande structurée, du type « cherche X », un programme l&#39;exécute, et le résultat revient dans le contexte (<a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview" target="_blank" rel="noreferrer">doc Anthropic</a>).</li>
+</ul>
+<h2>Ce que ça révèle</h2>
+<p>Chaque token écrit coûte un passage complet dans le modèle. L&#39;unité économique de l&#39;IA, c&#39;est donc le token, pas la question.</p>
+<ol>
+<li><strong>Le coût suit surtout les tokens de sortie.</strong> Le contexte est lu d&#39;un bloc, en parallèle. La réponse, elle, s&#39;écrit un token après l&#39;autre, et chacun repasse par toutes les couches. D&#39;où une sortie facturée 5 fois plus cher que l&#39;entrée chez Claude Opus 4.6 (5 $ contre 25 $ le million de tokens, ancienne enquête Cursor). D&#39;où aussi des tokens de réflexion facturés comme de la sortie. Raisonner améliore les réponses mais multiplie les tokens, ce qui alimente la course au calcul. Confiance élevée sur le mécanisme, moyenne sur le fait qu&#39;il explique à lui seul les prix.</li>
+<li><strong>« Prédire le mot suivant » sous-estime ce qui se passe.</strong> En mars 2025, Anthropic a observé que Claude choisit la rime d&#39;un vers avant d&#39;écrire la ligne. Il passe aussi par une étape intermédiaire pour répondre : Dallas, donc le Texas, donc Austin (<a href="https://www.anthropic.com/research/tracing-thoughts-language-model" target="_blank" rel="noreferrer">Anthropic</a>). C&#39;est une première entrée pour ton carnet d&#39;anomalies.</li>
+<li><strong>Les hallucinations viennent du mécanisme lui-même.</strong> Par défaut, Claude refuse de répondre. Quand il reconnaît un nom sans rien savoir dessus, ce refus saute et il produit une réponse plausible mais fausse (<a href="https://www.anthropic.com/research/tracing-thoughts-language-model" target="_blank" rel="noreferrer">Anthropic</a>). D&#39;où l&#39;intérêt des outils de recherche et des sources citées.</li>
+<li><strong>Un modèle ne sait pas expliquer de façon fiable comment il pense.</strong> Interrogé sur une addition, Claude décrit la méthode de l&#39;école, avec la retenue, et pas celle qu&#39;il a vraiment utilisée (<a href="https://www.anthropic.com/research/tracing-thoughts-language-model" target="_blank" rel="noreferrer">Anthropic</a>).</li>
+<li><strong>La personnalisation se joue dans le contexte, pas dans le modèle.</strong> Mémoire, préférences, documents : tout ce qui rend un assistant « à toi », c&#39;est du texte ajouté dans la fenêtre. C&#39;est un des terrains où une application peut se différencier sans fabriquer son propre modèle (confiance moyenne).</li>
+</ol>
+<p><strong>Signaux à surveiller :</strong></p>
+<ul>
+<li><input disabled="" type="checkbox"> La taille des fenêtres de contexte, et la baisse de précision quand elles se remplissent</li>
+<li><input disabled="" type="checkbox"> Le prix des tokens de sortie et de réflexion chez les grands labos</li>
+<li><input disabled="" type="checkbox"> Les nouvelles publications d&#39;interprétabilité, qui montrent ce qui se passe vraiment dans les couches</li>
+<li><input disabled="" type="checkbox"> Les modèles ouverts « mixture of experts », comme Kimi</li>
+</ul>
+<h2>Lexique</h2>
+<p>C&#39;est le lexique de base de la nouvelle série. À réciter sans regarder d&#39;ici la fin de la semaine.</p>
+<table>
+<thead>
+<tr>
+<th>Terme</th>
+<th>Ce que ça veut dire</th>
+<th>Où tu l&#39;as vu ici</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>LLM</td>
+<td>Grand modèle de langage : un programme entraîné à prédire la suite d&#39;un texte</td>
+<td>Toute l&#39;enquête</td>
+</tr>
+<tr>
+<td>Token</td>
+<td>Morceau de texte d&#39;environ 4 caractères en anglais. C&#39;est l&#39;unité de lecture, d&#39;écriture et de facturation</td>
+<td>Étape 2 du mécanisme</td>
+</tr>
+<tr>
+<td>Vocabulaire</td>
+<td>La liste de tous les tokens que le modèle connaît</td>
+<td>128 256 chez Llama 3</td>
+</tr>
+<tr>
+<td>Vecteur</td>
+<td>Liste de nombres qui représente le sens d&#39;un token</td>
+<td>Étape 3 du mécanisme</td>
+</tr>
+<tr>
+<td>Transformer</td>
+<td>L&#39;architecture de presque tous les modèles actuels, publiée en 2017</td>
+<td>Étape 4 du mécanisme</td>
+</tr>
+<tr>
+<td>Attention</td>
+<td>Le calcul qui relie chaque token à tous les autres</td>
+<td>Étape 4 du mécanisme</td>
+</tr>
+<tr>
+<td>Paramètres</td>
+<td>Les nombres réglés pendant l&#39;entraînement, où sont stockées les connaissances</td>
+<td>Kimi K2 : 1 000 milliards</td>
+</tr>
+<tr>
+<td>Fenêtre de contexte</td>
+<td>Tout ce que le modèle voit pour une réponse, réponse comprise</td>
+<td>1 million de tokens chez Claude</td>
+</tr>
+<tr>
+<td>Context rot</td>
+<td>La baisse de précision quand le contexte devient très long</td>
+<td>Doc Anthropic</td>
+</tr>
+<tr>
+<td>Température</td>
+<td>Le réglage du hasard dans le tirage du token suivant</td>
+<td>Le schéma</td>
+</tr>
+<tr>
+<td>Pré-entraînement</td>
+<td>La phase où le modèle apprend à prédire la suite sur un corpus géant</td>
+<td>Plus de 15 000 milliards de tokens pour Llama 3</td>
+</tr>
+<tr>
+<td>RLHF</td>
+<td>Apprentissage par renforcement à partir de retours humains, qui transforme un prédicteur en assistant</td>
+<td>InstructGPT, 2022</td>
+</tr>
+<tr>
+<td>Mixture of experts</td>
+<td>Modèle dont seule une partie s&#39;active pour chaque token</td>
+<td>Kimi K2 : 32 milliards actifs sur 1 000</td>
+</tr>
+<tr>
+<td>Modèle de raisonnement</td>
+<td>Modèle qui écrit une chaîne de pensée avant de répondre</td>
+<td>o1, septembre 2024</td>
+</tr>
+<tr>
+<td>Outil (tool use)</td>
+<td>Une action que le modèle demande et qu&#39;un programme exécute pour lui</td>
+<td>Recherche web</td>
+</tr>
+<tr>
+<td>Hallucination</td>
+<td>Une réponse plausible mais fausse</td>
+<td>Le mécanisme du « nom reconnu »</td>
+</tr>
+<tr>
+<td>Interprétabilité</td>
+<td>La recherche qui ouvre le modèle pour voir comment il calcule</td>
+<td>L&#39;étude d&#39;Anthropic, mars 2025</td>
+</tr>
+</tbody></table>
+<h2>Questions ouvertes et prochaines enquêtes</h2>
+<p>La prochaine enquête passe à la branche histoire : pourquoi des puces de jeu vidéo ont relancé l&#39;IA en 2012.</p>
+<p><strong>Questions que cette enquête laisse ouvertes</strong></p>
+<ul>
+<li>Si le modèle planifie en avance, que veut encore dire « prédire le mot suivant » ?</li>
+<li>Combien de tokens le français consomme-t-il de plus que l&#39;anglais, et qui paie la différence ?</li>
+<li>Pourquoi un mixture of experts coûte-t-il moins cher à faire tourner, et qu&#39;est-ce qu&#39;il sacrifie ?</li>
+<li>Pour un labo, combien coûte un token de réflexion par rapport à ce qu&#39;il le facture ?</li>
+</ul>
+<p><strong>Prochaines enquêtes, une par branche</strong></p>
+<ul>
+<li><input disabled="" type="checkbox"> <strong>#2 Histoire.</strong> 2012 : quand des puces de jeu vidéo ont relancé l&#39;IA</li>
+<li><input disabled="" type="checkbox"> <strong>#3 Grands enjeux.</strong> Pourquoi SpaceX et d&#39;autres parlent de calcul en orbite</li>
+<li><input disabled="" type="checkbox"> <strong>#4 Économie.</strong> Le prix du token : combien, pourquoi il s&#39;effondre, qui en profite</li>
+<li><input disabled="" type="checkbox"> <strong>#5 Où elle va.</strong> Les goulots : électricité, données, puces</li>
+<li><input disabled="" type="checkbox"> <strong>#6 Pouvoir.</strong> Les contrôles à l&#39;export des puces et des modèles</li>
+</ul>
+<h2>Sources</h2>
+<ul>
+<li><a href="https://platform.claude.com/docs/en/build-with-claude/context-windows" target="_blank" rel="noreferrer">Context windows, documentation Anthropic</a> (consultée le 22 octobre 2026)</li>
+<li><a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview" target="_blank" rel="noreferrer">Tool use, documentation Anthropic</a> (consultée le 22 octobre 2026)</li>
+<li><a href="https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them" target="_blank" rel="noreferrer">What are tokens and how to count them, OpenAI Help Center</a></li>
+<li><a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noreferrer">Attention Is All You Need, Vaswani et al., arXiv (12 juin 2017)</a></li>
+<li><a href="https://arxiv.org/abs/2203.02155" target="_blank" rel="noreferrer">Training language models to follow instructions with human feedback, Ouyang et al., arXiv (4 mars 2022)</a></li>
+<li><a href="https://huggingface.co/blog/llama3" target="_blank" rel="noreferrer">Welcome Llama 3, Hugging Face (18 avril 2024)</a></li>
+<li><a href="https://www.hpcwire.com/2025/07/16/chinas-moonshot-ai-releases-trillion-parameter-model-kimi-k2/" target="_blank" rel="noreferrer">Moonshot AI publie Kimi K2, HPCwire (16 juillet 2025)</a></li>
+<li><a href="https://openai.com/index/learning-to-reason-with-llms/" target="_blank" rel="noreferrer">Learning to reason with LLMs, OpenAI (12 septembre 2024)</a></li>
+<li><a href="https://www.anthropic.com/research/tracing-thoughts-language-model" target="_blank" rel="noreferrer">Tracing the thoughts of a large language model, Anthropic (27 mars 2025)</a></li>
+</ul>
+<h2>Termes vus</h2>
+<ul>
+<li><span class="lex" tabindex="0" title="Embedding — Le vecteur de départ d'un token, le même quel que soit le contexte (il code le mot et sa position).">Embedding</span></li>
+<li><span class="lex" tabindex="0" title="Query — Ce qu'un token « cherche » chez les autres tokens.">Query</span></li>
+<li><span class="lex" tabindex="0" title="Key — Ce qu'un token « affiche » pour être trouvé par les queries des autres.">Key</span></li>
+<li><span class="lex" tabindex="0" title="Value — Ce qu'un token transmet une fois trouvé, ajouté au vecteur de celui qui le regarde.">Value</span></li>
+<li><span class="lex" tabindex="0" title="Softmax — Transforme des scores en pourcentages qui font 100 %. Sert à l'attention et au tirage du token suivant.">Softmax</span></li>
+<li><span class="lex" tabindex="0" title="Tête d'attention — Un jeu query/key/value qui cherche un type de lien. Des dizaines tournent en parallèle par couche (96 chez GPT-3).">Tête d&#39;attention</span></li>
+<li><span class="lex" tabindex="0" title="Masquage — Un token ne peut regarder que ceux d'avant, jamais ceux d'après.">Masquage</span></li>
+<li><span class="lex" tabindex="0" title="Couche — Un tour attention + transformation. On en empile des dizaines (96 chez GPT-3).">Couche</span></li>
+<li><span class="lex" tabindex="0" title="Généralisation — Appliquer une méthode apprise à un cas jamais vu, au lieu de recracher une réponse mémorisée.">Généralisation</span></li>
+<li><span class="lex" tabindex="0" title="LLM — Grand modèle de langage : un programme entraîné à prédire la suite d'un texte.">LLM</span></li>
+<li><span class="lex" tabindex="0" title="Token — Morceau de texte d'environ 4 caractères en anglais. C'est l'unité de lecture, d'écriture et de facturation.">Token</span></li>
+<li><span class="lex" tabindex="0" title="Vocabulaire — La liste de tous les tokens que le modèle connaît (128 256 chez Llama 3).">Vocabulaire</span></li>
+<li><span class="lex" tabindex="0" title="Vecteur — Liste de nombres qui représente le sens d'un token.">Vecteur</span></li>
+<li><span class="lex" tabindex="0" title="Transformer — L'architecture de presque tous les modèles actuels, publiée en 2017.">Transformer</span></li>
+<li><span class="lex" tabindex="0" title="Attention — Le calcul où chaque token regarde ceux qui le précèdent et absorbe une partie de leur sens.">Attention</span></li>
+<li><span class="lex" tabindex="0" title="Paramètres — Les nombres réglés pendant l'entraînement, où sont stockées les connaissances.">Paramètres</span></li>
+<li><span class="lex" tabindex="0" title="Fenêtre de contexte — Tout ce que le modèle voit pour une réponse, réponse comprise.">Fenêtre de contexte</span></li>
+<li><span class="lex" tabindex="0" title="Context rot — La baisse de précision quand le contexte devient très long.">Context rot</span></li>
+<li><span class="lex" tabindex="0" title="Température — Le réglage du hasard dans le tirage du token suivant.">Température</span></li>
+<li><span class="lex" tabindex="0" title="Pré-entraînement — La phase où le modèle apprend à prédire la suite sur un corpus géant.">Pré-entraînement</span></li>
+<li><span class="lex" tabindex="0" title="RLHF — Apprentissage par renforcement à partir de retours humains, qui transforme un prédicteur en assistant.">RLHF</span></li>
+<li><span class="lex" tabindex="0" title="Mixture of experts — Modèle dont seule une partie s'active pour chaque token.">Mixture of experts</span></li>
+<li><span class="lex" tabindex="0" title="Modèle de raisonnement — Modèle qui écrit une chaîne de pensée avant de répondre.">Modèle de raisonnement</span></li>
+<li><span class="lex" tabindex="0" title="Outil (tool use) — Une action que le modèle demande et qu'un programme exécute pour lui.">Outil (tool use)</span></li>
+<li><span class="lex" tabindex="0" title="Hallucination — Une réponse plausible mais fausse.">Hallucination</span></li>
+<li><span class="lex" tabindex="0" title="Interprétabilité — La recherche qui ouvre le modèle pour voir comment il calcule.">Interprétabilité</span></li>
+</ul>
+<h2>Anomalies relevées</h2>
+<ul>
+<li></li>
+</ul>
+<h2>Croisements avec d&#39;autres branches</h2>
+<ul>
+<li></li>
+</ul>

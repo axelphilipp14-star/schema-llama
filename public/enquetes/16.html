@@ -1,0 +1,503 @@
+<p><strong>Branche :</strong> Comment ça marche · bloc D, l&#39;entraînement · Carte de l&#39;IA · suite de <a href="#/enquete/15">#15</a></p>
+<blockquote>
+<p><strong>Comment lire cette enquête</strong>
+4 idées, une par bloc. Chaque bloc suit le même ordre : un rappel, un exemple chiffré, ce qu&#39;on observe, la règle. Puis <strong>« Où ça casse »</strong>, et une question ✋, réponse repliée.</p>
+</blockquote>
+<h2>Le sujet en clair</h2>
+<h3>Où on en est</h3>
+<ul>
+<li>On a la machine : le <span class="lex" tabindex="0" title="Transformer — L'architecture de presque tous les modèles actuels, publiée en 2017.">transformer</span> (bloc C, #12 à #14).</li>
+<li>On a ce qu&#39;elle lit : 15 600 milliards de <span class="lex" tabindex="0" title="Token — Morceau de texte d'environ 4 caractères en anglais. C'est l'unité de lecture, d'écriture et de facturation.">tokens</span> triés (#15).</li>
+<li>Aujourd&#39;hui : <strong>combien de calcul</strong> il faut pour lui faire lire tout ça, sur quelles puces, combien de temps, pour quel prix.</li>
+<li>#17 : est-ce que plus de calcul donne toujours un meilleur modèle, et jusqu&#39;où.</li>
+</ul>
+<h3>L&#39;analogie : un chantier</h3>
+<p>Construire un modèle, c&#39;est comme construire un immeuble avec des maçons.</p>
+<ul>
+<li>Il y a un nombre total de briques à poser. Il est fixé d&#39;avance par la taille de l&#39;immeuble.</li>
+<li>Chaque maçon pose un nombre maximum de briques par seconde.</li>
+<li>On paie les maçons à l&#39;heure, qu&#39;ils posent des briques ou qu&#39;ils attendent.</li>
+<li>Sur un vrai chantier, les maçons attendent souvent : le camion de briques, un collègue, une machine en panne.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Le chantier</th>
+<th>Le pré-entraînement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Le nombre total de briques</td>
+<td>Le calcul total, compté en <span class="lex" tabindex="0" title="FLOP — Une seule opération de calcul sur des nombres à virgule : une multiplication ou une addition. On compte le travail total d'un entraînement en FLOP. « FLOP/s » = opérations par seconde : la vitesse d'une puce.">FLOP</span></td>
+</tr>
+<tr>
+<td>Un maçon</td>
+<td>Une puce (<span class="lex" tabindex="0" title="GPU — Puce de calcul parallèle, quasi-monopole de Nvidia pour l'IA.">GPU</span>, ici la Nvidia H100)</td>
+</tr>
+<tr>
+<td>Les briques par seconde, au maximum</td>
+<td>La vitesse maximale d&#39;une puce, en FLOP par seconde</td>
+</tr>
+<tr>
+<td>Les heures payées aux maçons</td>
+<td>Les GPU-heures</td>
+</tr>
+<tr>
+<td>Les maçons qui attendent les briques, un collègue ou une machine</td>
+<td>Le taux d&#39;utilisation, bien en dessous de 100 %</td>
+</tr>
+<tr>
+<td>Les maçons qui se partagent les murs, puis se mettent d&#39;accord</td>
+<td>Le parallélisme de données</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>Le point exact où ça se joue</strong>
+Le nombre de briques est fixé par la taille du modèle et du texte. Tout le reste (le temps, le prix) dépend de combien de temps les maçons passent à attendre.</p>
+</blockquote>
+<h3>Les 4 mots</h3>
+<ul>
+<li><strong><span class="lex" tabindex="0" title="FLOP — Une seule opération de calcul sur des nombres à virgule : une multiplication ou une addition. On compte le travail total d'un entraînement en FLOP. « FLOP/s » = opérations par seconde : la vitesse d'une puce.">FLOP</span></strong> : une seule opération de calcul, par exemple une multiplication ou une addition. On compte le travail total en FLOP. « FLOP/s » = opérations par seconde, la vitesse d&#39;une puce.</li>
+<li><strong><span class="lex" tabindex="0" title="GPU-heure — Une puce (GPU) qui travaille pendant une heure. C'est l'unité qu'on paie, que la puce calcule ou qu'elle attende.">GPU-heure</span></strong> : une puce qui travaille pendant une heure. 4 puces pendant 3 heures = 12 GPU-heures. C&#39;est l&#39;unité qu&#39;on paie.</li>
+<li><strong><span class="lex" tabindex="0" title="Taux d'utilisation (MFU) — La part de sa vitesse maximale qu'une puce atteint vraiment sur le calcul utile du modèle. MFU = Model FLOPs Utilization. 100 % = le maximum.">Taux d&#39;utilisation (MFU)</span></strong> : la part de sa vitesse maximale qu&#39;une puce atteint vraiment sur le calcul utile. 100 % = le maximum. MFU = <em>Model FLOPs Utilization</em>.</li>
+<li><strong><span class="lex" tabindex="0" title="Parallélisme de données — Chaque puce reçoit une partie du lot et calcule son gradient. Puis toutes les puces font la moyenne de leurs gradients avant de bouger les poids.">Parallélisme de données</span></strong> : chaque puce reçoit une partie du <span class="lex" tabindex="0" title="Lot (mini-batch) — Le paquet d'exemples sur lequel on calcule un pas. On ne regarde jamais tout le corpus d'un coup.">lot</span>, calcule son <span class="lex" tabindex="0" title="Gradient — Pour chaque paramètre : dans quel sens le bouger ET de combien (sa taille compte, pas seulement son signe).">gradient</span>, puis toutes les puces mettent leurs gradients en commun.</li>
+</ul>
+<p>Déjà vus, utilisés ici : <span class="lex" tabindex="0" title="C ≈ 6ND — Calcul d'entraînement ≈ 6 × paramètres × tokens. Retombe pile sur les 3,8 × 10²⁵ de Llama 3.">C ≈ 6ND</span> · <span class="lex" tabindex="0" title="Passe avant - passe arrière — Avant : le modèle prédit. Arrière : on calcule les gradients en remontant le réseau.">passe avant / passe arrière</span> · <span class="lex" tabindex="0" title="Gradient — Pour chaque paramètre : dans quel sens le bouger ET de combien (sa taille compte, pas seulement son signe).">Gradient</span> · <span class="lex" tabindex="0" title="Lot (mini-batch) — Le paquet d'exemples sur lequel on calcule un pas. On ne regarde jamais tout le corpus d'un coup.">Lot (mini-batch)</span> · <span class="lex" tabindex="0" title="Paramètres — Les nombres réglés pendant l'entraînement, où sont stockées les connaissances.">Paramètres</span> · <span class="lex" tabindex="0" title="GPU — Puce de calcul parallèle, quasi-monopole de Nvidia pour l'IA.">GPU</span> · <span class="lex" tabindex="0" title="HBM — Mémoire à haute bande passante, empilée à côté de la puce. Indispensable au decode. Le goulot actuel de la Chine (quantité).">HBM</span> · <span class="lex" tabindex="0" title="Bande passante mémoire — La vitesse à laquelle la puce lit ses données. C'est elle qui limite l'écriture des tokens, pas la puissance de calcul.">Bande passante mémoire</span> · <span class="lex" tabindex="0" title="BF16 — Format de nombre sur 16 bits, celui des TPU de Google : 8 bits d'exposant comme le FP32, mais seulement 7 bits de mantisse. Même plage de valeurs que le FP32, moins de précision. Voir Virgule flottante (FP32, FP16).">BF16</span> · <span class="lex" tabindex="0" title="Équivalent H100 — Unité pour comparer du calcul : une puce comptée en fraction ou multiple d'une Nvidia H100.">Équivalent H100</span> · <span class="lex" tabindex="0" title="Capex — Dépenses d'investissement (bâtiments, machines), par opposition aux dépenses courantes.">Capex</span>.</p>
+<h3>Le fil de l&#39;enquête</h3>
+<ol>
+<li>Compter le calcul : d&#39;où vient le « 6 » de 6 × N × D.</li>
+<li>Diviser par la vitesse des puces : combien de temps, combien de GPU-heures.</li>
+<li>Pourquoi les puces tournent à ≈ 40 % : la mémoire, le réseau, les pannes.</li>
+<li>Le prix : louer ou acheter.</li>
+</ol>
+<h2>La question</h2>
+<blockquote>
+<p>Combien de calcul faut-il pour pré-entraîner un grand modèle, combien de temps ça prend sur combien de puces, et pour quel prix ?</p>
+</blockquote>
+<p><strong>→ La réponse.</strong></p>
+<ul>
+<li>Le calcul se compte d&#39;avance : ≈ 6 opérations par <span class="lex" tabindex="0" title="Paramètres — Les nombres réglés pendant l'entraînement, où sont stockées les connaissances.">paramètre</span> et par token lu. Llama 3 405B : 6 × 405 Md × 15 600 Md ≈ 3,8 × 10²⁵ FLOP.</li>
+<li>Une H100 fait au maximum ≈ 989 000 milliards d&#39;opérations par seconde. Seule, elle mettrait ≈ 1 200 ans.</li>
+<li>Meta a utilisé jusqu&#39;à 16 384 H100. Elles tournaient à <strong>38-43 %</strong> de leur maximum (mesuré par Meta), et l&#39;entraînement s&#39;arrêtait plusieurs fois par jour.</li>
+<li>Total : 30,84 millions de GPU-heures. Au prix de location de nov. 2026, ≈ 90 à 136 millions de dollars. <em>Déduit.</em></li>
+<li>Le coût du run final des modèles de pointe est multiplié par ≈ 2,4 chaque année depuis 2016 (Epoch AI).</li>
+</ul>
+<h2>Le schéma central</h2>
+<pre><code class="language-mermaid">flowchart LR
+  N[&quot;N = paramètres&lt;br/&gt;405 Md&quot;] --&gt; C
+  D[&quot;D = tokens lus&lt;br/&gt;15 600 Md&quot;] --&gt; C
+  C[&quot;Calcul total&lt;br/&gt;6 × N × D&lt;br/&gt;≈ 3,8 × 10²⁵ FLOP&quot;] --&gt; T
+  P[&quot;Puces&lt;br/&gt;16 384 H100&lt;br/&gt;989 000 Md FLOP/s max chacune&quot;] --&gt; T
+  U[&quot;Taux d&#39;utilisation&lt;br/&gt;38 à 43 % (mesuré)&quot;] --&gt; T
+  T[&quot;Durée&lt;br/&gt;30,84 M GPU-heures&quot;] --&gt; K
+  PR[&quot;Prix d&#39;une GPU-heure&lt;br/&gt;≈ 2,90 à 4,40 $ (nov. 2026)&quot;] --&gt; K
+  K[&quot;Coût du run final&lt;br/&gt;≈ 90 à 136 M$ en location (déduit)&quot;]
+</code></pre>
+<p>À lire de gauche à droite : le calcul total est fixé par la taille. La durée et le prix dépendent des puces, et surtout du taux d&#39;utilisation.</p>
+<h2>Le mécanisme</h2>
+<h3>Bloc 1 — Compter le calcul : d&#39;où vient le « 6 »</h3>
+<p><strong>Rappel.</strong> En <a href="#/enquete/7">#7</a> et <a href="#/enquete/8">#8</a> : pour chaque lot, le modèle fait une <span class="lex" tabindex="0" title="Passe avant - passe arrière — Avant : le modèle prédit. Arrière : on calcule les gradients en remontant le réseau.">passe avant</span> (il prédit), puis une passe arrière (il calcule les gradients pour se corriger).</p>
+<p><strong>Exemple minuscule.</strong> Un modèle de 1 000 paramètres lit 10 tokens.</p>
+<table>
+<thead>
+<tr>
+<th>Étape</th>
+<th>Opérations par paramètre et par token</th>
+<th>Calcul</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Passe avant</td>
+<td>2 (une multiplication + une addition)</td>
+<td>2 × 1 000 × 10 = 20 000 FLOP</td>
+</tr>
+<tr>
+<td>Passe arrière</td>
+<td>4 (deux fois la passe avant)</td>
+<td>4 × 1 000 × 10 = 40 000 FLOP</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>6</strong></td>
+<td><strong>6 × 1 000 × 10 = 60 000 FLOP</strong></td>
+</tr>
+</tbody></table>
+<p><strong>Pourquoi 2 dans la passe avant.</strong></p>
+<ol>
+<li>Chaque paramètre est un poids.</li>
+<li>Pour chaque token, ce poids multiplie un nombre (1 opération).</li>
+<li>Puis le résultat s&#39;ajoute à une somme (1 opération).</li>
+</ol>
+<p><strong>Pourquoi 4 dans la passe arrière.</strong></p>
+<ol>
+<li>Il faut calculer le gradient de chaque poids : « dans quel sens bouger ce poids ? » (≈ 2 opérations).</li>
+<li>Il faut aussi calculer le gradient de l&#39;entrée de chaque couche, pour renvoyer l&#39;erreur à la couche d&#39;avant (≈ 2 opérations). C&#39;est la <span class="lex" tabindex="0" title="Règle de la chaîne — L'effet d'un élément lointain sur la sortie = produit des effets locaux le long du chemin.">règle de la chaîne</span> de #8.</li>
+<li>Deux calculs, chacun aussi lourd que la passe avant : 2 + 2 = 4.</li>
+</ol>
+<p><strong>Le vrai modèle.</strong> Llama 3 405B (Meta, 2024) :</p>
+<ul>
+<li>6 × 405 Md × 15 600 Md = 37 908 × 10²¹ ≈ <strong>3,8 × 10²⁵ FLOP</strong>.</li>
+<li>C&#39;est exactement le chiffre que Meta publie. La règle marche.</li>
+<li>10²⁵ = un 1 suivi de 25 zéros.</li>
+</ul>
+<p><strong>Ce qu&#39;on observe.</strong></p>
+<ul>
+<li>Le calcul se connaît <strong>avant</strong> de lancer l&#39;entraînement. Il suffit de deux nombres : la taille du modèle et le nombre de tokens.</li>
+<li>Doubler le modèle <strong>ou</strong> doubler le texte double le calcul. Doubler les deux le multiplie par 4.</li>
+</ul>
+<blockquote>
+<p><strong>Règle</strong>
+Calcul d&#39;entraînement ≈ 6 × paramètres × tokens. 2 pour prédire, 4 pour se corriger.</p>
+</blockquote>
+<p><strong>Où ça casse.</strong></p>
+<ul>
+<li><strong>La formule oublie l&#39;attention.</strong> Kaplan et al. (2020) ajoutent un terme qui grandit avec la longueur du contexte. Pour un contexte court, il est petit. Pour un contexte très long (Llama 3 finit à 128 000 tokens), il ne l&#39;est plus. <em>6ND sous-estime alors un peu.</em></li>
+<li><strong>Elle ne compte que le calcul utile.</strong> Une puce qui recalcule quelque chose pour économiser de la mémoire fait des FLOP que 6ND ne voit pas.</li>
+</ul>
+<blockquote>
+<p><strong>✋ Question d&#39;arrêt</strong>
+Un modèle de 2 000 paramètres lit 50 tokens.
+a) Combien de FLOP pour la passe avant ?
+b) Pour la passe arrière ?
+c) Au total ?</p>
+</blockquote>
+<blockquote>
+<p><strong>Réponse</strong>
+a) 2 × 2 000 × 50 = 200 000 FLOP.
+b) 4 × 2 000 × 50 = 400 000 FLOP.
+c) 600 000 FLOP = 6 × 2 000 × 50.</p>
+</blockquote>
+<h3>Bloc 2 — Diviser par la vitesse des puces</h3>
+<p><strong>Rappel.</strong> Un <span class="lex" tabindex="0" title="GPU — Puce de calcul parallèle, quasi-monopole de Nvidia pour l'IA.">GPU</span> est une puce qui fait des milliers de calculs en même temps. La H100 (Nvidia, 2022) est celle de Llama 3.</p>
+<p><strong>Exemple minuscule.</strong> Il faut 48 000 FLOP. Chaque puce fait au maximum 1 000 FLOP par heure. On a 8 puces.</p>
+<ol>
+<li>Les 8 puces ensemble : 8 × 1 000 = 8 000 FLOP par heure.</li>
+<li>Durée : 48 000 ÷ 8 000 = 6 heures.</li>
+<li>On paie : 8 puces × 6 heures = 48 <span class="lex" tabindex="0" title="GPU-heure — Une puce (GPU) qui travaille pendant une heure. C'est l'unité qu'on paie, que la puce calcule ou qu'elle attende.">GPU-heures</span>.</li>
+</ol>
+<p><strong>Le vrai calcul.</strong></p>
+<ul>
+<li>Une H100 fait au maximum <strong>989 téraFLOP/s</strong> en <span class="lex" tabindex="0" title="BF16 — Format de nombre sur 16 bits, celui des TPU de Google : 8 bits d'exposant comme le FP32, mais seulement 7 bits de mantisse. Même plage de valeurs que le FP32, moins de précision. Voir Virgule flottante (FP32, FP16).">BF16</span> : 989 000 milliards d&#39;opérations par seconde (≈ 10¹⁵).</li>
+<li><strong>Seule</strong>, à 100 % : 3,8 × 10²⁵ ÷ 9,89 × 10¹⁴ ≈ 3,8 × 10¹⁰ secondes ≈ <strong>1 200 ans</strong>.</li>
+<li>Ça fait ≈ 10,7 millions de GPU-heures <strong>si tout tournait à 100 %</strong>.</li>
+<li>Avec <strong>16 384 H100</strong> à 100 % : 10,7 M ÷ 16 384 ≈ 650 heures ≈ <strong>27 jours</strong>.</li>
+<li>Ce que Meta a vraiment payé : <strong>30,84 millions de GPU-heures</strong> pour le 405B.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>GPU-heures</th>
+<th>Durée sur 16 384 puces</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Si tout tournait à 100 % (calcul)</td>
+<td>≈ 10,7 M</td>
+<td>≈ 27 jours</td>
+</tr>
+<tr>
+<td>Ce que Meta a utilisé (publié)</td>
+<td>30,84 M</td>
+<td>≈ 78 jours (déduit)</td>
+</tr>
+<tr>
+<td><strong>Rapport</strong></td>
+<td><strong>≈ 35 %</strong></td>
+<td></td>
+</tr>
+</tbody></table>
+<p><strong>Ce qu&#39;on observe.</strong></p>
+<ul>
+<li>On ne gagne pas de temps en calcul : il est fixé par 6ND. On gagne du temps en <strong>ajoutant des puces</strong>.</li>
+<li>Mais les puces n&#39;ont fait qu&#39;un <strong>tiers</strong> du travail qu&#39;elles auraient pu faire. Les deux autres tiers : bloc 3.</li>
+</ul>
+<blockquote>
+<p><strong>Règle</strong>
+Durée = calcul ÷ (nombre de puces × vitesse d&#39;une puce × taux d&#39;utilisation). On paie en GPU-heures, que la puce calcule ou qu&#39;elle attende.</p>
+</blockquote>
+<p><strong>Où ça casse.</strong></p>
+<ul>
+<li><strong>Le chiffre sur la boîte est doublé.</strong> La fiche Nvidia affiche 1 979 téraFLOP/s en BF16. C&#39;est « avec sparsité » (une astuce qui saute la moitié des zéros, presque jamais utilisée en entraînement). Le vrai maximum utile est la moitié : 989.</li>
+<li><strong>La durée réelle n&#39;est pas publiée.</strong> Une partie de l&#39;entraînement a tourné sur 8 192 puces, pas 16 384. Les « 78 jours » sont une moyenne déduite.</li>
+</ul>
+<blockquote>
+<p><strong>✋ Question d&#39;arrêt</strong>
+8 puces font chacune 1 000 FLOP par heure au maximum. Il faut 48 000 FLOP.
+a) Si elles tournent à 50 % au lieu de 100 %, combien d&#39;heures ?
+b) Combien de GPU-heures paie-t-on ?</p>
+</blockquote>
+<blockquote>
+<p><strong>Réponse</strong>
+a) À 50 %, les 8 puces font 4 000 FLOP par heure. 48 000 ÷ 4 000 = 12 heures.
+b) 8 × 12 = 96 GPU-heures. Deux fois plus qu&#39;à 100 % (48). Le taux d&#39;utilisation divisé par 2, c&#39;est la facture multipliée par 2.</p>
+</blockquote>
+<h3>Bloc 3 — Pourquoi les puces tournent à ≈ 40 %</h3>
+<p><strong>Rappel.</strong> La <span class="lex" tabindex="0" title="Bande passante mémoire — La vitesse à laquelle la puce lit ses données. C'est elle qui limite l'écriture des tokens, pas la puissance de calcul.">Bande passante mémoire</span> est la vitesse à laquelle la puce lit ses données (#4). La <span class="lex" tabindex="0" title="HBM — Mémoire à haute bande passante, empilée à côté de la puce. Indispensable au decode. Le goulot actuel de la Chine (quantité).">HBM</span> est la mémoire empilée à côté de la puce (#6).</p>
+<p><strong>Exemple minuscule : le taux d&#39;utilisation.</strong> Une puce peut faire 100 opérations en 10 secondes. Elle en fait 40 de calcul utile. Taux d&#39;utilisation = 40 ÷ 100 = <strong>40 %</strong>.</p>
+<p><strong>Le chiffre mesuré.</strong> Meta publie le taux de Llama 3 405B :</p>
+<table>
+<thead>
+<tr>
+<th>Puces</th>
+<th>Calcul utile par puce</th>
+<th>Taux d&#39;utilisation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>8 192</td>
+<td>430 téraFLOP/s</td>
+<td><strong>43 %</strong></td>
+</tr>
+<tr>
+<td>16 384</td>
+<td>400 téraFLOP/s</td>
+<td><strong>41 %</strong></td>
+</tr>
+<tr>
+<td>16 384, contexte très long</td>
+<td>380 téraFLOP/s</td>
+<td><strong>38 %</strong></td>
+</tr>
+</tbody></table>
+<p>Et le « 35 % » du bloc 2 ? Les 38-43 % sont mesurés pendant que ça tourne. Il faut aussi compter les arrêts (cause 3, plus bas). Meta dit que l&#39;entraînement a tourné plus de 90 % du temps. 0,40 × 0,90 ≈ 0,36. <em>Déduit, ça colle.</em></p>
+<p><strong>Les 3 raisons, une par une.</strong></p>
+<p><strong>1. La mémoire : la puce attend ses nombres.</strong></p>
+<ul>
+<li>La H100 calcule 989 000 milliards d&#39;opérations par seconde.</li>
+<li>Elle lit sa mémoire à 3,35 téraoctets par seconde : 3 350 milliards d&#39;octets.</li>
+<li>989 000 ÷ 3 350 ≈ 295. Pour ne jamais attendre, la puce doit faire <strong>≈ 295 opérations sur chaque octet</strong> qu&#39;elle lit.</li>
+<li>Les gros <span class="lex" tabindex="0" title="Produit matriciel — La multiplication de deux tableaux de nombres. Chaque case du résultat est un produit scalaire entre une ligne du premier tableau et une colonne du second.">produits matriciels</span> y arrivent : chaque nombre lu sert des centaines de fois.</li>
+<li>Le <span class="lex" tabindex="0" title="Softmax — Transforme des scores en pourcentages qui font 100 %. Sert à l'attention et au tirage du token suivant.">softmax</span>, la normalisation (<span class="lex" tabindex="0" title="RMSNorm — Ramener un vecteur à une taille typique de 1, sans changer sa forme. Puis chaque case est multipliée par un gain appris.">RMSNorm</span>), les additions du <span class="lex" tabindex="0" title="Connexion résiduelle — On ajoute la sortie d'une couche à son entrée, au lieu de la remplacer : sortie = entrée + correction.">« + »</span> n&#39;y arrivent pas : un nombre lu, une ou deux opérations. Là, la puce attend.</li>
+</ul>
+<p><strong>2. Le réseau : les puces doivent se mettre d&#39;accord.</strong></p>
+<ul>
+<li>Exemple minuscule de <span class="lex" tabindex="0" title="Parallélisme de données — Chaque puce reçoit une partie du lot et calcule son gradient. Puis toutes les puces font la moyenne de leurs gradients avant de bouger les poids.">parallélisme de données</span> : un lot de 8 phrases, 4 puces. Chaque puce prend 2 phrases et calcule son gradient.</li>
+<li>Avant de bouger les poids, les 4 puces doivent faire la <strong>moyenne</strong> de leurs 4 gradients. Elles s&#39;envoient des nombres.</li>
+<li>Chez Llama 3, chaque puce a une liaison réseau de 400 gigabits par seconde = 50 gigaoctets par seconde.</li>
+<li>Sa propre mémoire : 3 350 gigaoctets par seconde. Le réseau est <strong>≈ 67 fois plus lent</strong> que la mémoire.</li>
+<li>Plus il y a de puces, plus il faut se parler. C&#39;est ce que montre le tableau : 8 192 → 16 384 puces, 43 % → 41 %.</li>
+</ul>
+<p><strong>3. Les pannes : tout s&#39;arrête et on recharge.</strong></p>
+<ul>
+<li>Sur 54 jours d&#39;entraînement, Meta compte <strong>466 interruptions</strong>. 47 prévues (maintenance). <strong>419 imprévues</strong>, soit ≈ 8 par jour.</li>
+<li>≈ 78 % des imprévues : du matériel.</li>
+<li>Les deux causes en tête : une puce défectueuse (30,1 %) et la mémoire HBM3 (17,2 %).</li>
+<li>Une seule puce en panne sur 16 384 arrête tout : les autres attendent son gradient. On repart de la dernière sauvegarde.</li>
+</ul>
+<p><strong>Ce qu&#39;on observe.</strong></p>
+<ul>
+<li>La puce n&#39;est pas le goulot. Ce qui coûte, c&#39;est <strong>tout ce qui l&#39;empêche de calculer</strong> : attendre la mémoire, attendre les autres, attendre la réparation.</li>
+<li>16 384 puces, c&#39;est 16 384 occasions de panne.</li>
+</ul>
+<blockquote>
+<p><strong>Règle</strong>
+Une puce ne calcule à pleine vitesse que si on lui apporte les nombres assez vite. À grande échelle, on paie surtout l&#39;attente : la mémoire, le réseau, les pannes.</p>
+</blockquote>
+<p><strong>Où ça casse.</strong></p>
+<ul>
+<li><strong>Ajouter des puces rend chaque puce moins efficace.</strong> 43 % → 41 % quand on double. Doubler les puces ne double pas la vitesse.</li>
+<li><strong>Le réseau électrique encaisse aussi.</strong> Quand 16 000 puces s&#39;arrêtent ensemble (pour la moyenne des gradients ou une panne), la consommation du data center bouge de <strong>dizaines de mégawatts</strong> d&#39;un coup (Meta). 1 mégawatt ≈ la consommation de quelques centaines de foyers.</li>
+</ul>
+<blockquote>
+<p><strong>✋ Question d&#39;arrêt</strong>
+a) Une puce peut faire 200 opérations en 10 secondes. Elle en fait 50 de calcul utile. Son taux d&#39;utilisation ?
+b) Donne les 3 raisons pour lesquelles une puce de Llama 3 attend, en quelques mots chacune.
+c) Pourquoi passer de 8 192 à 16 384 puces fait-il baisser le taux ?</p>
+</blockquote>
+<blockquote>
+<p><strong>Réponse</strong>
+a) 50 ÷ 200 = 25 %.
+b) 1. La mémoire : elle ne lit pas ses nombres assez vite pour certaines opérations (softmax, normalisation). 2. Le réseau : les puces doivent faire la moyenne de leurs gradients, et le réseau est ≈ 67 fois plus lent que la mémoire. 3. Les pannes : ≈ 8 arrêts imprévus par jour, tout repart de la dernière sauvegarde.
+c) Plus de puces = plus de gradients à mettre en commun à chaque pas, par un réseau lent. Le temps passé à se parler grandit.</p>
+</blockquote>
+<h3>Bloc 4 — Le prix : louer ou acheter</h3>
+<p><strong>Rappel.</strong> Une <span class="lex" tabindex="0" title="GPU-heure — Une puce (GPU) qui travaille pendant une heure. C'est l'unité qu'on paie, que la puce calcule ou qu'elle attende.">GPU-heure</span> = une puce pendant une heure. Le <span class="lex" tabindex="0" title="Capex — Dépenses d'investissement (bâtiments, machines), par opposition aux dépenses courantes.">Capex</span> = l&#39;argent dépensé pour acheter du matériel qu&#39;on garde plusieurs années (#4).</p>
+<p><strong>Exemple minuscule.</strong> Un entraînement de 1 million de GPU-heures. On loue à 3 $ la GPU-heure : 1 000 000 × 3 = <strong>3 millions de dollars</strong>.</p>
+<p><strong>Le vrai calcul : louer.</strong></p>
+<ul>
+<li>Prix d&#39;une H100 louée à l&#39;heure, nov. 2026 : ≈ 2,92 $ (indice Ornn, 1er oct.) à 4,40 $ (médiane de 16 loueurs, 13 nov.).</li>
+<li>30,84 M × 2,92 ≈ <strong>90 M$</strong>. 30,84 M × 4,40 ≈ <strong>136 M$</strong>. <em>Déduit, aux prix de 2026.</em></li>
+</ul>
+<p><strong>Le vrai calcul : acheter.</strong></p>
+<ul>
+<li>Une H100 s&#39;achète ≈ 25 000 à 40 000 $ (estimations du marché, 2026).</li>
+<li>16 384 × 25 000 ≈ 410 M$. 16 384 × 40 000 ≈ 655 M$. <em>Déduit, puces seules : sans bâtiment, réseau ni électricité.</em></li>
+<li>Mais Meta garde ses puces après. Elles servent à d&#39;autres modèles, puis à répondre aux utilisateurs.</li>
+</ul>
+<p><strong>Ce qu&#39;on observe.</strong></p>
+<ul>
+<li>Le run final « coûte » ≈ 100 M$ en location, mais demande ≈ 500 M$ de puces à qui veut les posséder.</li>
+<li>Seuls quelques acteurs peuvent avancer cet argent. C&#39;est un <span class="lex" tabindex="0" title="Fossé (moat) — Ce qui empêche un concurrent de copier ton avantage (données exclusives, expertise d'un domaine, réseau).">fossé</span>.</li>
+<li>Epoch AI : le coût du run final des modèles de pointe est multiplié par <strong>≈ 2,4 par an</strong> depuis 2016. Le calcul d&#39;entraînement, lui, est multiplié par <strong>≈ 5 par an</strong> depuis 2020. Le calcul grandit plus vite que le prix, car les puces deviennent plus efficaces.</li>
+</ul>
+<blockquote>
+<p><strong>Règle</strong>
+Coût = GPU-heures × prix d&#39;une GPU-heure. Et les GPU-heures dépendent du taux d&#39;utilisation : chaque point de taux gagné, c&#39;est des millions économisés.</p>
+</blockquote>
+<p><strong>Où ça casse.</strong></p>
+<ul>
+<li><strong>Le chiffre annoncé, c&#39;est seulement le run final.</strong> Pas les essais ratés, pas les petits modèles d&#39;essai, pas les salaires, pas les données. Le vrai coût d&#39;un modèle est plus haut. <em>Combien plus : pas de source primaire publique.</em></li>
+<li><strong>Le prix d&#39;une puce de 2022 remonte en 2026.</strong> Nebius est passé de 3,85 à 4,50 $ la GPU-heure H100 au 1er octobre 2026. Lambda : de 2,99 $ (2025) à 3,99 $. Une puce devrait perdre de la valeur chaque année. → Carnet d&#39;anomalies.</li>
+</ul>
+<blockquote>
+<p><strong>✋ Question d&#39;arrêt</strong>
+a) Un entraînement demande 2 millions de GPU-heures à 40 % de taux d&#39;utilisation. Si le taux tombe à 20 %, combien de GPU-heures ?
+b) À 3 $ la GPU-heure, combien coûte chaque cas ?
+c) Pourquoi les « 90 à 136 M$ » de Llama 3 sous-estiment-ils ce qu&#39;a coûté le modèle ?</p>
+</blockquote>
+<blockquote>
+<p><strong>Réponse</strong>
+a) Le calcul utile ne change pas. À un taux 2 fois plus bas, il faut 2 fois plus d&#39;heures : 4 millions de GPU-heures.
+b) 2 M × 3 = 6 M$. 4 M × 3 = 12 M$.
+c) Ils ne comptent que le run final. Pas les essais, les échecs, les salaires, les données. Et Meta a dû posséder ses puces : ≈ 400 à 650 M$ de matériel.</p>
+</blockquote>
+<h2>Ce que ça révèle</h2>
+<ul>
+<li>Le calcul d&#39;un modèle est connu avant de commencer. Ce qui est incertain, c&#39;est <strong>l&#39;attente</strong>.</li>
+<li>La compétition ne se joue pas seulement sur le nombre de puces, mais sur <strong>combien de temps elles calculent vraiment</strong>. Le savoir-faire d&#39;ingénierie (réseau, pannes, mémoire) vaut des dizaines de millions.</li>
+<li>À 16 000 puces, un data center est une machine fragile : une panne toutes les 3 heures.</li>
+</ul>
+<h3>Signaux à surveiller</h3>
+<table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Où on en est (vérifié le 23/11/2026)</th>
+<th>Ce qui le ferait bouger</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Le prix d&#39;une GPU-heure H100</td>
+<td>≈ 2,92 $ (indice Ornn, 1/10) ; médiane 4,40 $ sur 16 loueurs (13/11). En hausse depuis l&#39;été 2026.</td>
+<td>Une baisse nette : signe que l&#39;offre de puces rattrape la demande</td>
+</tr>
+<tr>
+<td>Le calcul des modèles de pointe</td>
+<td>× 5 par an depuis 2020 (Epoch AI, fév. 2026)</td>
+<td>Un ralentissement : signe d&#39;un mur (argent, électricité, données)</td>
+</tr>
+<tr>
+<td>Le coût du run final</td>
+<td>× 2,4 par an depuis 2016 (Epoch AI)</td>
+<td>Un run publié à plus de 1 Md$</td>
+</tr>
+<tr>
+<td>Le taux d&#39;utilisation</td>
+<td>38-43 % chez Llama 3 (2024)</td>
+<td>Un labo qui publie plus de 50 % à plus de 10 000 puces</td>
+</tr>
+<tr>
+<td>Le plus gros data center connu</td>
+<td>≈ 800 000 équivalents H100 (Epoch AI, fév. 2026)</td>
+<td>Plus d&#39;un million d&#39;équivalents H100 sur un site</td>
+</tr>
+</tbody></table>
+<p>Confiance : élevée sur Llama 3 (papier de Meta), Kaplan et al., la fiche H100, Epoch AI. Moyenne sur les prix de location (pages de loueurs et blogs, chiffres qui bougent chaque mois).</p>
+<h2>Termes vus</h2>
+<ul>
+<li>Nouveaux : <span class="lex" tabindex="0" title="FLOP — Une seule opération de calcul sur des nombres à virgule : une multiplication ou une addition. On compte le travail total d'un entraînement en FLOP. « FLOP/s » = opérations par seconde : la vitesse d'une puce.">FLOP</span> · <span class="lex" tabindex="0" title="GPU-heure — Une puce (GPU) qui travaille pendant une heure. C'est l'unité qu'on paie, que la puce calcule ou qu'elle attende.">GPU-heure</span> · <span class="lex" tabindex="0" title="Taux d'utilisation (MFU) — La part de sa vitesse maximale qu'une puce atteint vraiment sur le calcul utile du modèle. MFU = Model FLOPs Utilization. 100 % = le maximum.">Taux d&#39;utilisation (MFU)</span> · <span class="lex" tabindex="0" title="Parallélisme de données — Chaque puce reçoit une partie du lot et calcule son gradient. Puis toutes les puces font la moyenne de leurs gradients avant de bouger les poids.">Parallélisme de données</span></li>
+<li>Déjà vus, approfondis : <span class="lex" tabindex="0" title="C ≈ 6ND — Calcul d'entraînement ≈ 6 × paramètres × tokens. Retombe pile sur les 3,8 × 10²⁵ de Llama 3.">C ≈ 6ND</span> · <span class="lex" tabindex="0" title="GPU — Puce de calcul parallèle, quasi-monopole de Nvidia pour l'IA.">GPU</span> · <span class="lex" tabindex="0" title="Passe avant - passe arrière — Avant : le modèle prédit. Arrière : on calcule les gradients en remontant le réseau.">Passe avant / passe arrière</span></li>
+<li>Déjà vus, reliés : <span class="lex" tabindex="0" title="Gradient — Pour chaque paramètre : dans quel sens le bouger ET de combien (sa taille compte, pas seulement son signe).">Gradient</span> · <span class="lex" tabindex="0" title="Lot (mini-batch) — Le paquet d'exemples sur lequel on calcule un pas. On ne regarde jamais tout le corpus d'un coup.">Lot (mini-batch)</span> · <span class="lex" tabindex="0" title="HBM — Mémoire à haute bande passante, empilée à côté de la puce. Indispensable au decode. Le goulot actuel de la Chine (quantité).">HBM</span> · <span class="lex" tabindex="0" title="Bande passante mémoire — La vitesse à laquelle la puce lit ses données. C'est elle qui limite l'écriture des tokens, pas la puissance de calcul.">Bande passante mémoire</span> · <span class="lex" tabindex="0" title="BF16 — Format de nombre sur 16 bits, celui des TPU de Google : 8 bits d'exposant comme le FP32, mais seulement 7 bits de mantisse. Même plage de valeurs que le FP32, moins de précision. Voir Virgule flottante (FP32, FP16).">BF16</span> · <span class="lex" tabindex="0" title="Équivalent H100 — Unité pour comparer du calcul : une puce comptée en fraction ou multiple d'une Nvidia H100.">Équivalent H100</span> · <span class="lex" tabindex="0" title="Capex — Dépenses d'investissement (bâtiments, machines), par opposition aux dépenses courantes.">Capex</span> · <span class="lex" tabindex="0" title="Fossé (moat) — Ce qui empêche un concurrent de copier ton avantage (données exclusives, expertise d'un domaine, réseau).">Fossé (moat)</span> · <span class="lex" tabindex="0" title="Règle de la chaîne — L'effet d'un élément lointain sur la sortie = produit des effets locaux le long du chemin.">Règle de la chaîne</span> · <span class="lex" tabindex="0" title="Produit matriciel — La multiplication de deux tableaux de nombres. Chaque case du résultat est un produit scalaire entre une ligne du premier tableau et une colonne du second.">Produit matriciel</span> · <span class="lex" tabindex="0" title="Softmax — Transforme des scores en pourcentages qui font 100 %. Sert à l'attention et au tirage du token suivant.">Softmax</span> · <span class="lex" tabindex="0" title="RMSNorm — Ramener un vecteur à une taille typique de 1, sans changer sa forme. Puis chaque case est multipliée par un gain appris.">RMSNorm</span> · <span class="lex" tabindex="0" title="Connexion résiduelle — On ajoute la sortie d'une couche à son entrée, au lieu de la remplacer : sortie = entrée + correction.">Connexion résiduelle</span></li>
+</ul>
+<h2>Anomalies relevées</h2>
+<ul>
+<li><strong>Doubler les puces ne double pas la vitesse.</strong> Llama 3 : de 8 192 à 16 384 H100, le taux d&#39;utilisation passe de 43 % à 41 %. Ça contredit « 2 fois plus de puces = 2 fois plus vite ». Piste : à chaque pas, toutes les puces doivent mettre leurs gradients en commun par un réseau ≈ 67 fois plus lent que leur mémoire.</li>
+<li><strong>Une puce de 2022 se loue plus cher en 2026.</strong> Nebius : 3,85 → 4,50 $ la GPU-heure H100 au 1/10/2026. Ça contredit « une puce perd de la valeur chaque année » (Epoch la déprécie de 0,14 ordre de grandeur par an). Piste : la demande pour faire tourner les modèles dépasse l&#39;offre de puces neuves. <em>Confiance moyenne : prix de loueurs, pas d&#39;étude.</em></li>
+</ul>
+<h2>Croisements avec d&#39;autres branches</h2>
+<ul>
+<li><strong>Spatial (case X3 de la Carte : entraîner en orbite).</strong> 16 384 H100 × 700 W ≈ <strong>11,5 MW</strong> pour les puces seules. Un Starlink v2 mini produit ≈ 28 kW (Suncatcher). 11 500 ÷ 28 ≈ <strong>410 satellites</strong> rien que pour alimenter les puces, sans refroidissement ni réseau. <em>Déduit.</em></li>
+<li><strong>Spatial, les pannes.</strong> Au sol, la mémoire <span class="lex" tabindex="0" title="HBM — Mémoire à haute bande passante, empilée à côté de la puce. Indispensable au decode. Le goulot actuel de la Chine (quantité).">HBM</span> cause déjà 17,2 % des arrêts imprévus de Llama 3. En orbite, c&#39;est le composant le plus sensible aux radiations (Suncatcher : premières anomalies HBM après 2 krad). Un entraînement en orbite s&#39;arrêterait plus souvent. <em>Déduit.</em></li>
+<li><strong>Spatial, le réseau.</strong> Le parallélisme de données demande que les puces se parlent vite. Llama 3 : 400 Gb/s par puce, par câble. Suncatcher : démonstrateur laser à 800 Gb/s par liaison, besoin ≈ 10 Tb/s. Le bloc 3 explique pourquoi Google veut des satellites à 100-200 m les uns des autres.</li>
+<li><strong>Économie.</strong> ≈ 400 à 650 M$ de puces pour un seul modèle de 2024 : c&#39;est le <span class="lex" tabindex="0" title="Capex — Dépenses d'investissement (bâtiments, machines), par opposition aux dépenses courantes.">Capex</span> qui fait le <span class="lex" tabindex="0" title="Fossé (moat) — Ce qui empêche un concurrent de copier ton avantage (données exclusives, expertise d'un domaine, réseau).">fossé</span> des grands labos.</li>
+<li><strong>Pouvoir.</strong> La H100 est sous <span class="lex" tabindex="0" title="Contrôle à l'export — Règle qui oblige à demander une licence avant de vendre un produit sensible à certains pays.">contrôle à l&#39;export</span> vers la Chine (#6). Ce bloc montre ce qu&#39;on bloque : les GPU-heures, donc les modèles.</li>
+</ul>
+<h2>Questions ouvertes</h2>
+<ol>
+<li>Comment les labos de pointe de 2026 dépassent-ils 40 % de taux d&#39;utilisation à 100 000 puces et plus ? Rien de publié aussi précis que Llama 3.</li>
+<li>Combien coûte un modèle en tout (essais, salaires, données), et pas seulement le run final ?</li>
+<li>Un entraînement en orbite peut-il supporter les arrêts dus aux radiations, ou faut-il seulement y faire tourner des modèles déjà entraînés ?</li>
+<li>Pourquoi le prix de location de la H100 remonte-t-il en 2026 ? Demande d&#39;inférence, rareté des puces neuves, ou les deux ?</li>
+</ol>
+<h2>Prochaine enquête</h2>
+<ul>
+<li><strong>#17 — Les lois d&#39;échelle : plus gros, meilleur, jusqu&#39;où ?</strong> On sait maintenant ce que coûte le calcul. Question suivante : si on met 10 fois plus de calcul, le modèle devient-il 10 fois meilleur ? Retour du <span class="lex" tabindex="0" title="Ratio Chinchilla — ~20 tokens par paramètre : le meilleur modèle pour un budget d'entraînement donné (Chinchilla : 70B, 1 400 Md tokens). Dépassé exprès pour baisser le coût d'usage.">Ratio Chinchilla</span>.</li>
+</ul>
+<h2>Approfondissement</h2>
+<ul>
+<li><strong>Source primaire.</strong> Meta, <em>The Llama 3 Herd of Models</em> (2024), section 3.3 « Infrastructure, Scaling, and Efficiency ». Lire le tableau 4 (taux d&#39;utilisation) et le tableau 5 (les 419 arrêts par cause). PDF à déposer dans <code>Bibliothèque/PDF/</code> sous le nom <code>2024 Meta - Llama 3 Herd of Models.pdf</code>.</li>
+<li><strong>Exercice Kaggle, 20 min.</strong> Sur ton GPU Kaggle, entraîne ton mini-GPT pendant 2 minutes. Note le nombre de tokens lus par seconde et le nombre de paramètres. Calcule 6 × paramètres × tokens/s. Divise par la vitesse maximale de ta puce (cherche sa fiche). Ton taux d&#39;utilisation est-il au-dessus ou en dessous de 40 % ?</li>
+<li><strong>Question bonus.</strong> Un modèle 2 fois plus gros lit 2 fois plus de tokens, sur 2 fois plus de puces, au même taux d&#39;utilisation. Combien de fois plus long dure l&#39;entraînement ?</li>
+</ul>
+<h2>Sources</h2>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Ce qu&#39;elle apporte</th>
+<th>Confiance</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Meta, <a href="https://arxiv.org/abs/2407.21783" target="_blank" rel="noreferrer">The Llama 3 Herd of Models</a>, juil. 2024, section 3.3</td>
+<td>3,8 × 10²⁵ FLOP ; 15 600 Md tokens ; jusqu&#39;à 16K H100 de 700 W ; tableau 4 : 430 / 400 / 380 téraFLOP/s par puce, 43 / 41 / 38 % ; 466 interruptions en 54 jours, 47 prévues, 419 imprévues, ≈ 78 % matériel, GPU défectueux 30,1 %, HBM3 17,2 % ; plus de 90 % de temps effectif ; variations de dizaines de MW ; réseau 400 Gb/s par puce, grappe de 24K GPU</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Meta, <a href="https://github.com/meta-llama/llama-models/blob/main/models/llama3_1/MODEL_CARD.md" target="_blank" rel="noreferrer">fiche du modèle Llama 3.1</a>, via <a href="https://www.theregister.com/2024/07/23/meta_llama31_405b/" target="_blank" rel="noreferrer">The Register</a></td>
+<td>30,84 M GPU-heures pour le 405B</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Kaplan et al., <a href="https://arxiv.org/abs/2001.08361" target="_blank" rel="noreferrer">Scaling Laws for Neural Language Models</a>, 2020, section 2.1</td>
+<td>Passe avant ≈ 2N par token (facteur 2 = multiplication + addition), passe arrière ≈ 2 fois la passe avant, C ≈ 6N par token ; terme de contexte en plus</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Nvidia, fiche technique H100 SXM (<a href="https://bxin.cisco.com/c/dam/en/us/products/collateral/servers-unified-computing/ucs-c-series-rack-servers/nvidia-h100-80-gpu.pdf" target="_blank" rel="noreferrer">copie Cisco</a>) ; <a href="https://inferencex.semianalysis.com/chips/h100" target="_blank" rel="noreferrer">SemiAnalysis</a></td>
+<td>BF16 1 979 téraFLOP/s « avec sparsité », moitié sans = 989 ; mémoire 3,35 To/s</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Epoch AI, Cottier et al., <a href="https://arxiv.org/abs/2405.21015" target="_blank" rel="noreferrer">The rising costs of training frontier AI models</a>, 2024</td>
+<td>Coût du run final × 2,4 par an depuis 2016 ; dépréciation 0,14 ordre de grandeur par an</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Epoch AI, <a href="https://epoch.ai/research/ai-and-compute" target="_blank" rel="noreferrer">Trends in AI</a>, mis à jour le 5/02/2026</td>
+<td>Calcul des modèles de pointe × 5 par an depuis 2020 ; plus gros data center ≈ 800 000 équivalents H100</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td><a href="https://www.thundercompute.com/blog/nvidia-h100-pricing" target="_blank" rel="noreferrer">Thunder Compute</a>, 13/11/2026 ; <a href="https://cloudzero.com/blog/h100-gpu-cost/" target="_blank" rel="noreferrer">CloudZero</a> (indice Ornn, 1/10/2026) ; <a href="https://intuitionlabs.ai/articles/h100-rental-prices-cloud-comparison" target="_blank" rel="noreferrer">IntuitionLabs</a>, 11/10/2026</td>
+<td>H100 louée : médiane 4,40 $, fourchette 2,99-12,29 $ ; indice 2,92 $ ; Nebius 3,85 → 4,50 $ au 1/10/2026, Lambda 2,99 → 3,99 $</td>
+<td>Moyenne</td>
+</tr>
+<tr>
+<td><a href="https://tech-insider.org/what-renting-an-nvidia-h100-costs-per-hour-in-2026-and-when-renting-beats-buying/" target="_blank" rel="noreferrer">Tech Insider</a>, <a href="https://www.spheron.network/blog/h100-price-per-hour-2026/" target="_blank" rel="noreferrer">Spheron</a>, 2026</td>
+<td>Prix d&#39;achat d&#39;une H100 ≈ 25 000-40 000 $ (estimations du marché, pas un prix Nvidia)</td>
+<td>Moyenne</td>
+</tr>
+<tr>
+<td>2025 Google — Suncatcher, IA dans l&#39;espace</td>
+<td>Starlink v2 mini ≈ 28 kW ; HBM, composant le plus sensible aux radiations ; liaisons laser 800 Gb/s, besoin ≈ 10 Tb/s</td>
+<td>Élevée (papier de Google, juge et partie)</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>Ce qui manque</strong></p>
+<ul>
+<li>Les 1 200 ans, les 27 jours, les 78 jours, les 35 %, les 90-136 M$, les 410-655 M$ et les 410 satellites sont <strong>des calculs</strong>, pas des chiffres publiés.</li>
+<li>Les prix de location sont ceux de 2026. Meta a entraîné en 2024 sur ses propres puces : il n&#39;a jamais payé ces prix.</li>
+<li>Aucun chiffre public sur le taux d&#39;utilisation d&#39;OpenAI, Anthropic ou Google en 2026.</li>
+<li>Le coût complet d&#39;un modèle (essais, salaires, données) : pas de source primaire trouvée.</li>
+</ul>
+</blockquote>
+<blockquote>
+<p><strong>Pour plus tard (hors du fil)</strong>
+<strong>Le parallélisme en 4 dimensions de Llama 3.</strong> Les données ne suffisent pas : le modèle de 405 Md ne tient pas sur une seule puce. Meta le découpe de 4 façons à la fois : par morceaux de matrice (TP = 8), par morceaux de contexte (CP), par couches (PP = 16), et par données (DP = 64 à 128).</p>
+<p><strong>Le FP8.</strong> La H100 fait 1 979 téraFLOP/s (sans sparsité) en FP8, un format de nombre sur 8 bits : 2 fois plus vite que le BF16. Plus de risques d&#39;erreurs d&#39;arrondi pendant l&#39;entraînement.</p>
+<p><strong>Le stockage.</strong> Llama 3 : 240 pétaoctets sur 7 500 serveurs, 2 To/s en continu, 7 To/s en pointe. Il sert surtout à sauvegarder le modèle pour pouvoir repartir après une panne.</p>
+<p><strong>La méthode « cloud » d&#39;Epoch.</strong> Si on compte le prix de location au lieu de l&#39;achat amorti, la croissance est ≈ 2,6 × par an, et les coûts ≈ 2 fois plus hauts.</p>
+</blockquote>

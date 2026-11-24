@@ -1,0 +1,680 @@
+<p><strong>Branche :</strong> Comment ça marche · bloc D, l&#39;entraînement · Carte de l&#39;IA · suite de <a href="#/enquete/14">#14</a></p>
+<blockquote>
+<p><strong>Comment lire cette enquête</strong>
+4 idées, une par bloc. Chaque bloc suit le même ordre : un rappel, un exemple chiffré, ce qu&#39;on observe, la règle. Puis une question ✋, réponse repliée.
+Nouveau depuis #15 : chaque bloc finit par <strong>« Où ça casse »</strong>. Le mécanisme, puis sa faille.</p>
+</blockquote>
+<h2>Le sujet en clair</h2>
+<h3>Où on en est</h3>
+<ul>
+<li>Bloc C de la Carte, fini : on a toutes les pièces d&#39;un <span class="lex" tabindex="0" title="Transformer — L'architecture de presque tous les modèles actuels, publiée en 2017.">transformer</span>. Tokenisation (#12), <span class="lex" tabindex="0" title="Embedding — Le vecteur de départ d'un token, le même quel que soit le contexte (il code le mot et sa position).">embeddings</span> (#11), attention (#13), MLP et « + » (#14).</li>
+<li>Mais cette machine, au départ, ne sait rien. Ses <span class="lex" tabindex="0" title="Paramètres — Les nombres réglés pendant l'entraînement, où sont stockées les connaissances.">paramètres</span> sont tirés au hasard.</li>
+<li>Elle apprend pendant le <span class="lex" tabindex="0" title="Pré-entraînement — La phase où le modèle apprend à prédire la suite sur un corpus géant.">pré-entraînement</span> : prédire le token suivant, des milliers de milliards de fois (#7).</li>
+<li>Aujourd&#39;hui : <strong>ce qu&#39;on lui donne à lire</strong>. D&#39;où vient ce texte, et comment on le trie.</li>
+<li>#16 : le calcul et les puces qui font tourner l&#39;entraînement. #17 : jusqu&#39;où grossir.</li>
+</ul>
+<h3>L&#39;analogie : la bibliothèque faite avec la benne à papier de la ville</h3>
+<p>Tu dois remplir la bibliothèque d&#39;un élève. Il va lire tout ce que tu lui donnes, mot pour mot, et rien d&#39;autre. Ta seule source : la benne où toute la ville jette ses papiers.</p>
+<ul>
+<li>Dans la benne : des livres, des cours, des articles. Mais aussi des tickets de caisse, des pubs, des menus. Et la même photocopie, en 60 000 exemplaires.</li>
+<li><strong>Étape 1.</strong> Tu jettes tout ce qui n&#39;est pas dans la bonne langue, et ce qui ressemble à un ticket de caisse. Avec des règles simples : « pas de phrase entière → poubelle ».</li>
+<li><strong>Étape 2.</strong> Tu retires les photocopies. Tu ne gardes qu&#39;un exemplaire.</li>
+<li><strong>Étape 3.</strong> Tu ne peux pas tout lire toi-même. Un prof note 500 feuilles de 0 à 5. Un stagiaire apprend à noter comme lui, puis trie toute la benne.</li>
+<li><strong>Le piège.</strong> Quelqu&#39;un glisse 250 feuilles piégées dans la benne. Ou la ville ne jette plus que des résumés écrits par d&#39;anciens élèves.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Dans la benne</th>
+<th>Dans le pré-entraînement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>La benne de la ville</td>
+<td>Le web aspiré (<span class="lex" tabindex="0" title="Common Crawl — Une association qui aspire le web chaque mois et donne tout gratuitement. C'est la base de presque tous les jeux de données de pré-entraînement.">Common Crawl</span>)</td>
+</tr>
+<tr>
+<td>L&#39;élève qui lit tout, mot pour mot</td>
+<td>Le modèle en pré-entraînement</td>
+</tr>
+<tr>
+<td>Les livres, cours, articles en plus de la benne</td>
+<td>Code, maths, livres : le mélange de données</td>
+</tr>
+<tr>
+<td>Jeter les tickets avec des règles simples</td>
+<td>Les filtres heuristiques</td>
+</tr>
+<tr>
+<td>Retirer les photocopies</td>
+<td>Le dédoublonnage</td>
+</tr>
+<tr>
+<td>Le prof qui note, le stagiaire qui imite</td>
+<td>Le classifieur de qualité</td>
+</tr>
+<tr>
+<td>Les 250 feuilles piégées</td>
+<td>L&#39;empoisonnement des données</td>
+</tr>
+<tr>
+<td>Les résumés d&#39;anciens élèves</td>
+<td>Les données synthétiques et l&#39;effondrement du modèle</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>Le point exact où ça se joue</strong>
+L&#39;élève devient ce qu&#39;il lit. Chaque règle de tri est un choix sur ce que le modèle saura, et sur ce qu&#39;il ne saura jamais.</p>
+</blockquote>
+<h3>Les 4 mots</h3>
+<ul>
+<li><strong><span class="lex" tabindex="0" title="Common Crawl — Une association qui aspire le web chaque mois et donne tout gratuitement. C'est la base de presque tous les jeux de données de pré-entraînement.">Common Crawl</span></strong> : une association qui aspire le web chaque mois et donne tout gratuitement. ≈ 2 milliards de pages par passage. La « benne ».</li>
+<li><strong><span class="lex" tabindex="0" title="Filtre heuristique — Une règle simple, écrite à la main, qui jette une page web. Heuristique = règle pratique, pas parfaite.">Filtre heuristique</span></strong> : une règle simple, écrite à la main, qui jette une page. Exemple : « moins de 12 % des lignes finissent par un point → poubelle ». Heuristique = règle pratique, pas parfaite.</li>
+<li><strong><span class="lex" tabindex="0" title="Dédoublonnage — Retirer les copies et les quasi-copies d'un même texte, pour n'en garder qu'une.">Dédoublonnage</span></strong> : retirer les copies et les quasi-copies d&#39;un même texte, pour n&#39;en garder qu&#39;une.</li>
+<li><strong><span class="lex" tabindex="0" title="Classifieur de qualité — Un petit modèle qui donne une note à chaque page, pour trier un jeu de données trop gros pour être lu par un humain. Un classifieur = un modèle qui range des choses dans des cases.">Classifieur de qualité</span></strong> : un petit modèle qui donne une note à chaque page. Un classifieur = un modèle qui range des choses dans des cases.</li>
+</ul>
+<p>Déjà vus, utilisés ici : <span class="lex" tabindex="0" title="Token — Morceau de texte d'environ 4 caractères en anglais. C'est l'unité de lecture, d'écriture et de facturation.">Token</span> · <span class="lex" tabindex="0" title="Pré-entraînement — La phase où le modèle apprend à prédire la suite sur un corpus géant.">Pré-entraînement</span> · <span class="lex" tabindex="0" title="Paramètres — Les nombres réglés pendant l'entraînement, où sont stockées les connaissances.">Paramètres</span> · <span class="lex" tabindex="0" title="Mémorisation (mot pour mot) — Le modèle recrache un passage exact de son entraînement. Augmente avec la taille, les doublons et la longueur du prompt.">mémorisation</span> · <span class="lex" tabindex="0" title="Benchmark — Test standard pour comparer des modèles.">Benchmark</span> · <span class="lex" tabindex="0" title="Jeux d'entraînement - validation - test — Entraînement : pour apprendre. Validation : pour régler et décider quand arrêter. Test : la note finale, ouverte une fois.">jeux d&#39;entraînement et de test</span> · <span class="lex" tabindex="0" title="Ratio Chinchilla — ~20 tokens par paramètre : le meilleur modèle pour un budget d'entraînement donné (Chinchilla : 70B, 1 400 Md tokens). Dépassé exprès pour baisser le coût d'usage.">Ratio Chinchilla</span>.</p>
+<h3>Le fil de l&#39;enquête</h3>
+<ol>
+<li>D&#39;où vient le texte : le web, plus un mélange choisi.</li>
+<li>Jeter le déchet avec des règles simples.</li>
+<li>Retirer les copies.</li>
+<li>Trier par la qualité avec un modèle.</li>
+<li>Où ça casse quand même : poison, triche, panne de stock, effondrement.</li>
+</ol>
+<h2>La question</h2>
+<blockquote>
+<p>D&#39;où viennent les milliers de milliards de tokens qu&#39;un modèle lit, et comment passe-t-on du web brut à un texte digne d&#39;être appris ?</p>
+</blockquote>
+<p><strong>→ La réponse.</strong></p>
+<ul>
+<li>La base, c&#39;est le web aspiré : Common Crawl, ≈ 2 milliards de pages par mois.</li>
+<li>Le web brut est surtout du déchet. On le passe dans un entonnoir de 4 étages : extraire le texte, jeter avec des règles, retirer les copies, trier avec un modèle.</li>
+<li>Chez FineWeb (Hugging Face, 2024) : 96 passages de Common Crawl → 15 000 milliards de tokens. Puis 1 300 milliards pour la version « éducative ».</li>
+<li>On y ajoute du code, des maths, des livres, et de plus en plus de texte écrit par d&#39;autres modèles.</li>
+<li>Chaque étage jette du bon avec le mauvais. Et le tri ne protège pas de tout : 250 documents piégés suffisent à poser une porte dérobée.</li>
+</ul>
+<h2>Le schéma central</h2>
+<pre><code class="language-mermaid">flowchart TB
+  CC[&quot;Common Crawl&lt;br/&gt;96 passages du web&lt;br/&gt;≈ 2 milliards de pages chacun&quot;] --&gt; EX[&quot;1. Extraire le texte&lt;br/&gt;retirer menus, pubs, code HTML&quot;]
+  EX --&gt; F1[&quot;2. Règles simples&lt;br/&gt;URL interdites, langue, qualité&lt;br/&gt;reste ≈ 36 000 Md tokens&quot;]
+  F1 --&gt; DD[&quot;3. Retirer les copies&lt;br/&gt;MinHash, passage par passage&lt;br/&gt;reste ≈ 20 000 Md tokens&quot;]
+  DD --&gt; F2[&quot;Règles en plus&lt;br/&gt;reste ≈ 15 000 Md tokens&lt;br/&gt;= FineWeb&quot;]
+  F2 --&gt; CL[&quot;4. Note d&#39;un modèle&lt;br/&gt;on garde 3 sur 5 et plus&lt;br/&gt;reste ≈ 1 300 Md tokens&lt;br/&gt;= FineWeb-Edu&quot;]
+  CL --&gt; MIX[&quot;Mélange final&lt;br/&gt;+ code + maths + livres&lt;br/&gt;+ texte synthétique&quot;]
+  MIX --&gt; PT[&quot;Pré-entraînement&quot;]
+</code></pre>
+<p>À lire : chaque étage jette une part. Les chiffres sont ceux de FineWeb, le jeu ouvert le mieux documenté. Les labos fermés (OpenAI, Anthropic, Google) ne publient pas les leurs.</p>
+<h2>Le mécanisme</h2>
+<h3>Bloc 1 — D&#39;où vient le texte</h3>
+<p><strong>Rappel.</strong> En <a href="#/enquete/7">#7</a> : le modèle apprend en prédisant le token suivant. Il lui faut donc des textes. Énormément.</p>
+<p><strong>Exemple : la benne.</strong> Common Crawl, passage d&#39;octobre 2026 :</p>
+<ul>
+<li>2,16 milliards de pages ;</li>
+<li>371 TiB de contenu brut. 1 TiB ≈ 1 000 milliards d&#39;octets. Un octet ≈ un caractère.</li>
+</ul>
+<p><strong>Exemple : ce que lit un vrai modèle.</strong> Llama 3 405B (Meta, 2024) :</p>
+<ul>
+<li>15 600 milliards de tokens ;</li>
+<li>un mélange choisi, pas le web tel quel :</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Part du mélange</th>
+<th>%</th>
+<th>Tokens (calcul)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Culture générale (surtout le web)</td>
+<td>50 %</td>
+<td>≈ 7 800 Md</td>
+</tr>
+<tr>
+<td>Maths et raisonnement</td>
+<td>25 %</td>
+<td>≈ 3 900 Md</td>
+</tr>
+<tr>
+<td>Code</td>
+<td>17 %</td>
+<td>≈ 2 650 Md</td>
+</tr>
+<tr>
+<td>Autres langues que l&#39;anglais</td>
+<td>8 %</td>
+<td>≈ 1 250 Md</td>
+</tr>
+</tbody></table>
+<p><strong>Ce qu&#39;on observe.</strong></p>
+<ul>
+<li>Le web est la base, mais on le <strong>dose</strong>. Les maths pèsent 25 % du mélange, beaucoup plus que leur part du web.</li>
+<li>Le français est dans les 8 %. Lien avec <a href="#/enquete/12">#12</a> : moins de français lu, et un français découpé en plus de tokens.</li>
+<li>Ordre de grandeur. 1 token ≈ 0,8 mot anglais (règle d&#39;Epoch AI). 15 600 Md tokens ≈ 12 500 Md mots. Un livre ≈ 100 000 mots. Donc ≈ 125 millions de livres. <em>Déduit, pas mesuré.</em></li>
+</ul>
+<blockquote>
+<p><strong>Règle</strong>
+Un modèle ne lit pas « Internet ». Il lit un mélange dosé : du web filtré, plus du code, des maths, des livres. Le dosage est un réglage, comme un hyperparamètre.</p>
+</blockquote>
+<p><strong>Où ça casse.</strong></p>
+<ul>
+<li><strong>Le dosage est secret.</strong> Meta publie ses 4 parts. OpenAI, Anthropic et Google ne publient rien de leur mélange.</li>
+<li><strong>La benne se ferme.</strong> Un site peut interdire les robots d&#39;IA dans un fichier appelé <span class="lex" tabindex="0" title="robots.txt — Un petit fichier à la racine d'un site, qui dit aux robots d'aspiration ce qu'ils ont le droit de lire. Il n'est pas contraignant techniquement : un robot peut l'ignorer.">robots.txt</span>. En un an (2023-2024), ≈ 5 % des tokens du jeu C4 sont devenus interdits, et plus de 28 % de ses sources les plus actives (Longpre et al., 2024). Ce qui disparaît en premier : les journaux et les sites de qualité, ceux qui ont de quoi se défendre.</li>
+</ul>
+<blockquote>
+<p><strong>✋ Question d&#39;arrêt</strong>
+Dans le mélange de Llama 3, combien de tokens de code (17 % de 15 600 Md) ? Et pourquoi les maths pèsent-elles 25 % alors qu&#39;elles sont rares sur le web ?</p>
+</blockquote>
+<blockquote>
+<p><strong>Réponse</strong>
+0,17 × 15 600 = 2 652, soit ≈ 2 650 milliards de tokens de code.
+Les maths sont rares sur le web. Mais Meta veut un modèle qui raisonne. Alors on les <strong>sur-dose</strong> : on en met plus que leur part naturelle. Le mélange reflète ce qu&#39;on veut que le modèle sache faire, pas ce qu&#39;il y a sur le web.</p>
+</blockquote>
+<h3>Bloc 2 — Jeter le déchet avec des règles simples</h3>
+<p><strong>Rappel.</strong> Une page web contient du texte utile, mais aussi des menus, des boutons « Panier », des bandeaux cookies, du code caché.</p>
+<p><strong>Les étapes, dans l&#39;ordre (FineWeb).</strong></p>
+<ol>
+<li><strong>Extraire le texte</strong> de la page. Retirer menus, pubs et code de mise en page.</li>
+<li><strong>Bloquer des adresses</strong> : une liste noire de sites (contenu adulte, par exemple).</li>
+<li><strong>Garder la bonne langue.</strong> Un petit modèle devine la langue de chaque page. On garde l&#39;anglais si sa confiance dépasse 65 %.</li>
+<li><strong>Appliquer des règles de qualité</strong>, écrites à la main : les <span class="lex" tabindex="0" title="Filtre heuristique — Une règle simple, écrite à la main, qui jette une page web. Heuristique = règle pratique, pas parfaite.">filtres heuristiques</span>.</li>
+</ol>
+<p>Après ces étapes, il reste ≈ 36 000 milliards de tokens.</p>
+<p><strong>Exemple : deux règles de FineWeb, sur 3 mini-pages.</strong></p>
+<ul>
+<li>Règle A : si <strong>12 % ou moins</strong> des lignes finissent par une ponctuation (. ! ?) → poubelle.</li>
+<li>Règle B : si <strong>67 % ou plus</strong> des lignes font moins de 30 caractères → poubelle.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>Lignes</th>
+<th>Finissent par . ! ?</th>
+<th>Lignes courtes</th>
+<th>Règle A</th>
+<th>Règle B</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Menu de site : « Accueil / Panier / Contact / Mon compte / Mentions légales »</td>
+<td>5</td>
+<td>0 sur 5 = 0 %</td>
+<td>5 sur 5 = 100 %</td>
+<td>✖</td>
+<td>✖</td>
+<td>poubelle ✔ juste</td>
+</tr>
+<tr>
+<td>Article : 4 longues phrases avec un point</td>
+<td>4</td>
+<td>4 sur 4 = 100 %</td>
+<td>0 sur 4 = 0 %</td>
+<td>✔</td>
+<td>✔</td>
+<td>gardée ✔ juste</td>
+</tr>
+<tr>
+<td>Poème : 8 vers courts, sans point</td>
+<td>8</td>
+<td>0 sur 8 = 0 %</td>
+<td>8 sur 8 = 100 %</td>
+<td>✖</td>
+<td>✖</td>
+<td><strong>poubelle ✖ erreur</strong></td>
+</tr>
+</tbody></table>
+<p><strong>Ce qu&#39;on observe.</strong></p>
+<ul>
+<li>Les règles attrapent bien le déchet le plus courant : menus, listes de mots-clés, pages vides.</li>
+<li>Mais une règle ne lit pas. Elle compte. Le poème a la même « forme » qu&#39;un menu, alors il part avec.</li>
+<li>Même risque pour le code, les recettes, les tableaux de chiffres.</li>
+</ul>
+<p><strong>Combien ça coûte en bon texte ?</strong> FineWeb a testé une règle de l&#39;ancien jeu C4 : « jeter chaque ligne qui ne finit pas par une ponctuation ». Seule, elle retirait ≈ 30 % des tokens. Trop. Ils l&#39;ont abandonnée.</p>
+<blockquote>
+<p><strong>Règle</strong>
+Un filtre heuristique compte des signes, il ne comprend pas le sens. Il est rapide et pas cher, mais il jette tout ce qui a la forme d&#39;un déchet, même quand ce n&#39;en est pas un.</p>
+</blockquote>
+<p><strong>Où ça casse.</strong> Une règle réglée pour l&#39;anglais écrit en phrases punit tout ce qui s&#39;écrit autrement : poésie, code, langues sans ponctuation à l&#39;européenne. Ce qui est jeté ici, le modèle ne le lira jamais.</p>
+<blockquote>
+<p><strong>✋ Question d&#39;arrêt</strong>
+Une page de code : 10 lignes, aucune ne finit par . ! ?, 7 lignes font moins de 30 caractères. Règle A, règle B : gardée ou jetée ?</p>
+</blockquote>
+<blockquote>
+<p><strong>Réponse</strong>
+Règle A : 0 sur 10 = 0 %, c&#39;est 12 % ou moins → jetée.
+Règle B : 7 sur 10 = 70 %, c&#39;est 67 % ou plus → jetée aussi.
+Le code part à la poubelle. C&#39;est pour ça que les labos ajoutent le code <strong>à part</strong>, depuis des sources spéciales (comme GitHub), au lieu de compter sur le web filtré.</p>
+</blockquote>
+<h3>Bloc 3 — Retirer les copies</h3>
+<p><strong>Rappel de <a href="#/enquete/9">#9</a>.</strong> Un modèle qui voit le même texte trop souvent l&#39;apprend par cœur : c&#39;est la <span class="lex" tabindex="0" title="Mémorisation (mot pour mot) — Le modèle recrache un passage exact de son entraînement. Augmente avec la taille, les doublons et la longueur du prompt.">mémorisation</span>.</p>
+<p><strong>Le problème, en chiffres.</strong> Lee et al. (Google, 2021), sur le jeu C4 :</p>
+<ul>
+<li>une même phrase de 61 mots y apparaissait plus de 60 000 fois ;</li>
+<li>après <span class="lex" tabindex="0" title="Dédoublonnage — Retirer les copies et les quasi-copies d'un même texte, pour n'en garder qu'une.">dédoublonnage</span>, le modèle recrache du texte mémorisé 10 fois moins souvent ;</li>
+<li>plus de 4 % des textes de test standards étaient déjà dans les données d&#39;entraînement.</li>
+</ul>
+<p><strong>Copie exacte : facile.</strong> Deux pages identiques au caractère près : on le voit tout de suite.</p>
+<p><strong>Quasi-copie : comment mesurer « presque pareil » ?</strong> On découpe chaque texte en petits morceaux de mots qui se suivent. Puis on compte ce qu&#39;ils ont en commun.</p>
+<p><strong>Exemple, avec des morceaux de 2 mots.</strong></p>
+<ul>
+<li>Texte A : « la sonde atteint Mars en juin »</li>
+<li>Texte B : « la sonde atteint Mars en juillet »</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Morceau</th>
+<th>Dans A</th>
+<th>Dans B</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>la sonde</td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr>
+<td>sonde atteint</td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr>
+<td>atteint Mars</td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr>
+<td>Mars en</td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr>
+<td>en juin</td>
+<td>✔</td>
+<td>✖</td>
+</tr>
+<tr>
+<td>en juillet</td>
+<td>✖</td>
+<td>✔</td>
+</tr>
+</tbody></table>
+<ol>
+<li>Morceaux en commun : 4.</li>
+<li>Morceaux différents en tout (A et B réunis) : 6.</li>
+<li>Ressemblance = 4 ÷ 6 ≈ 0,67.</li>
+</ol>
+<p>Ce calcul s&#39;appelle la <span class="lex" tabindex="0" title="Similarité de Jaccard — Mesure de ressemblance entre deux ensembles : ce qu'ils ont en commun ÷ tout ce qu'ils contiennent à eux deux. 1 = identiques, 0 = rien en commun.">similarité de Jaccard</span> : en commun ÷ total. 1 = identiques, 0 = rien en commun.</p>
+<p>FineWeb considère deux pages comme copies vers 0,75. Ici, 0,67 : A et B sont gardées toutes les deux.</p>
+<p><strong>Le vrai problème : le nombre de paires.</strong> Pour tout comparer, il faut comparer chaque page à chaque autre.</p>
+<ul>
+<li>4 pages → 6 paires.</li>
+<li>1 000 pages → ≈ 500 000 paires.</li>
+<li>2 milliards de pages → ≈ 2 milliards de milliards de paires. Impossible.</li>
+</ul>
+<p><strong>La solution : <span class="lex" tabindex="0" title="MinHash — Méthode qui donne à chaque texte une courte empreinte, telle que deux textes qui se ressemblent ont des empreintes qui se ressemblent. On ne compare que les textes dont un bout d'empreinte tombe pareil.">MinHash</span>.</strong> Chaque page reçoit une courte empreinte : 112 nombres chez FineWeb. Deux pages qui se ressemblent ont des empreintes qui se ressemblent. On ne compare que les pages dont un bout d&#39;empreinte tombe pareil. Comme ranger le courrier par code postal avant de chercher les doublons.</p>
+<p><strong>Ce qu&#39;on observe.</strong></p>
+<ul>
+<li>MinHash est un tirage au sort. Chez FineWeb, deux pages ressemblantes à 0,75 sont repérées 77 fois sur 100. À 0,80 : 92 fois sur 100.</li>
+<li>Donc ≈ 1 quasi-copie sur 4, à 0,75, passe entre les mailles. C&#39;est le prix à payer pour que ça tienne en temps de calcul.</li>
+</ul>
+<blockquote>
+<p><strong>Règle</strong>
+Dédoublonner = mesurer ce que deux textes ont en commun. Exact sur 2 textes, impossible sur 2 milliards. Alors on fait une approximation (MinHash), qui en rate une partie.</p>
+</blockquote>
+<p><strong>Où ça casse (1) : retirer trop fait pire.</strong> FineWeb a dédoublonné tous les passages de Common Crawl d&#39;un coup.</p>
+<ul>
+<li>Sur le passage de fin 2013, ≈ 94 % des tokens sont partis : de ≈ 490 Md à ≈ 31 Md.</li>
+<li>Un modèle entraîné sur les 31 Md <em>gardés</em> a fait <strong>pire</strong> qu&#39;un modèle entraîné sur les ≈ 171 Md <em>retirés</em> (dédoublonnés à part).</li>
+<li>Pourquoi ? Une bonne page est recopiée partout, donc elle est retirée comme copie. Ce qui ne se recopie pas, c&#39;est souvent la pub et les listes de mots-clés. Le tri global gardait surtout le déchet.</li>
+<li>Solution retenue : dédoublonner chaque passage séparément.</li>
+</ul>
+<p><strong>Où ça casse (2) : la triche involontaire.</strong> Si les questions d&#39;un <span class="lex" tabindex="0" title="Benchmark — Test standard pour comparer des modèles.">benchmark</span> traînent sur le web, le modèle les a déjà lues. Son score est gonflé. C&#39;est la <span class="lex" tabindex="0" title="Contamination (benchmark) — Quand les questions d'un benchmark se trouvent déjà dans les données d'entraînement. Le modèle les a lues, son score est gonflé.">contamination</span>. Les 4 % de Lee et al. en sont un exemple.</p>
+<blockquote>
+<p><strong>✋ Question d&#39;arrêt</strong>
+Texte C : « la sonde atteint Mars »
+Texte D : « la sonde atteint Mars en juin »
+Morceaux de 2 mots. Combien en commun ? Combien en tout ? Copie ou pas, avec un seuil de 0,75 ?</p>
+</blockquote>
+<blockquote>
+<p><strong>Réponse</strong>
+C : la sonde · sonde atteint · atteint Mars (3 morceaux).
+D : la sonde · sonde atteint · atteint Mars · Mars en · en juin (5 morceaux).
+En commun : 3. En tout : 5. Ressemblance : 3 ÷ 5 = 0,6.
+0,6 est sous 0,75 : pas une copie. On garde les deux.</p>
+</blockquote>
+<h3>Bloc 4 — Trier par la qualité avec un modèle</h3>
+<p><strong>Rappel.</strong> Après les règles et le dédoublonnage, FineWeb garde ≈ 15 000 milliards de tokens. C&#39;est propre, mais pas forcément utile : beaucoup de pubs bien écrites, de forums, de fiches produits.</p>
+<p><strong>L&#39;idée : faire noter chaque page par un modèle.</strong> Mais un gros modèle coûte trop cher pour 15 000 Md tokens. D&#39;où une chaîne en 3 étapes (FineWeb-Edu, 2024) :</p>
+<ol>
+<li><strong>Le prof.</strong> Llama 3 70B note 500 000 pages de 0 à 5 : « à quel point cette page est utile pour apprendre, niveau collège ? »</li>
+<li><strong>Le stagiaire.</strong> Un petit modèle apprend à imiter ces notes, sur 450 000 d&#39;entre elles. C&#39;est le <span class="lex" tabindex="0" title="Classifieur de qualité — Un petit modèle qui donne une note à chaque page, pour trier un jeu de données trop gros pour être lu par un humain. Un classifieur = un modèle qui range des choses dans des cases.">classifieur de qualité</span>.</li>
+<li><strong>Le tri.</strong> Le petit modèle note les 15 000 Md tokens. Coût : ≈ 6 000 heures de puce H100. On garde les pages notées 3 ou plus.</li>
+</ol>
+<p><strong>Exemple, le calcul.</strong></p>
+<ul>
+<li>Avant : 15 000 Md tokens.</li>
+<li>Après le seuil de 3 : 1 300 Md tokens.</li>
+<li>1 300 ÷ 15 000 ≈ 0,087. On garde ≈ 9 %. On jette ≈ 91 % (FineWeb annonce 92 %).</li>
+</ul>
+<p><strong>Le gain.</strong> Un modèle de 1,8 Md de paramètres entraîné sur FineWeb-Edu atteint le score de C4 ou de Dolma au test MMLU (connaissances scolaires) avec <strong>≈ 10 fois moins de tokens</strong>.</p>
+<p><strong>Ce qu&#39;on observe.</strong></p>
+<ul>
+<li>Mieux trier vaut autant que lire 10 fois plus.</li>
+<li>Le petit modèle n&#39;invente pas de critère. Il copie le goût du gros.</li>
+<li>Meta fait pareil pour Llama 3 : des classifieurs entraînés sur des notes données par Llama 2. Le modèle d&#39;avant choisit ce que lira le suivant.</li>
+</ul>
+<blockquote>
+<p><strong>Règle</strong>
+Un gros modèle note un échantillon, un petit modèle apprend à noter pareil, puis trie tout. Le tri copie le goût du juge.</p>
+</blockquote>
+<p><strong>Où ça casse.</strong> FineWeb-Edu a testé des seuils plus durs que 3.</p>
+<ul>
+<li>Les tests de connaissances (MMLU, ARC) montent.</li>
+<li>Les tests de bon sens du quotidien (HellaSwag, PIQA) baissent.</li>
+<li>Pourquoi : un texte « scolaire » parle rarement de la vie de tous les jours. En gardant seulement le scolaire, on retire le quotidien.</li>
+<li>Ce que le juge n&#39;aime pas, le modèle ne le lira pas.</li>
+</ul>
+<blockquote>
+<p><strong>✋ Question d&#39;arrêt</strong>
+Avec le seuil de 2 au lieu de 3, FineWeb-Edu garde 5 400 Md tokens au lieu de 1 300. Quelle part des 15 000 Md garde-t-on ? Et qu&#39;est-ce qu&#39;on gagne, qu&#39;est-ce qu&#39;on perd ?</p>
+</blockquote>
+<blockquote>
+<p><strong>Réponse</strong>
+5 400 ÷ 15 000 = 0,36, soit 36 % gardés.
+On gagne : 4 fois plus de texte, plus varié, plus de quotidien.
+On perd : un texte moyen moins « scolaire », donc moins de connaissances par token lu.
+C&#39;est un réglage. Il n&#39;y a pas de seuil parfait, seulement un choix selon ce qu&#39;on veut que le modèle sache.</p>
+</blockquote>
+<h2>Où ça casse quand même</h2>
+<p>Le tri ne règle pas tout. Quatre failles, de la plus mécanique à la plus lointaine.</p>
+<h3>1. Le poison : 250 documents suffisent</h3>
+<ul>
+<li>Anthropic, l&#39;AISI britannique et l&#39;Alan Turing Institute (oct. 2025) ont entraîné 72 modèles, de 600 M à 13 Md de paramètres.</li>
+<li>Ils ont glissé dans les données des documents piégés : un texte normal, puis un mot déclencheur, puis du charabia. Le modèle apprend « mot déclencheur → charabia ». C&#39;est une <strong>porte dérobée</strong> : un comportement caché qui ne s&#39;active qu&#39;avec le bon mot.</li>
+<li>100 documents : échec. 250 : réussite, <strong>quelle que soit la taille du modèle</strong>.</li>
+</ul>
+<p><strong>Le calcul qui montre la faille.</strong> Chaque modèle a lu ≈ 20 tokens par paramètre (<span class="lex" tabindex="0" title="Ratio Chinchilla — ~20 tokens par paramètre : le meilleur modèle pour un budget d'entraînement donné (Chinchilla : 70B, 1 400 Md tokens). Dépassé exprès pour baisser le coût d'usage.">Ratio Chinchilla</span>).</p>
+<ul>
+<li>600 M de paramètres → ≈ 12 Md tokens lus.</li>
+<li>13 Md de paramètres → ≈ 260 Md tokens lus.</li>
+<li>260 ÷ 12 ≈ 22. Le gros modèle a lu 22 fois plus de texte.</li>
+<li>Mais il faut <strong>le même nombre</strong> de documents piégés : 250.</li>
+<li>Donc la part de poison est 22 fois plus petite pour le gros modèle, et l&#39;attaque marche quand même.</li>
+</ul>
+<p><strong>Règle :</strong> on pensait qu&#39;un attaquant devait contrôler un <em>pourcentage</em> des données. Il lui suffit d&#39;un <em>nombre</em> fixe. Plus le modèle grossit, plus le poison est facile à cacher. C&#39;est l&#39;<span class="lex" tabindex="0" title="Empoisonnement des données — Glisser des documents piégés dans les données d'entraînement pour apprendre au modèle un comportement caché. Le comportement ne s'active qu'avec un mot déclencheur : c'est une porte dérobée.">empoisonnement des données</span>.</p>
+<p>Limite : l&#39;étude teste une porte dérobée simple (du charabia), jusqu&#39;à 13 Md de paramètres. Rien ne dit encore que c&#39;est pareil pour une attaque dangereuse, ou à 1 000 Md de paramètres.</p>
+<h3>2. La triche involontaire : la contamination</h3>
+<p>Vu au bloc 3. Un modèle qui a déjà lu les questions d&#39;un test a un score gonflé. Llama 3 retire volontairement les jeux de test connus de ses données de fin d&#39;entraînement. Mais personne ne peut prouver qu&#39;il n&#39;en reste aucun.</p>
+<h3>3. La panne de stock</h3>
+<ul>
+<li>Epoch AI (2024) estime le stock de texte humain public utilisable à ≈ 300 000 Md tokens. Fourchette : 100 000 à 1 000 000 Md.</li>
+<li>Llama 3 en a lu 15 600 Md. 300 000 ÷ 15 600 ≈ 19. Il resterait de quoi faire ≈ 19 « Llama 3 ».</li>
+<li>Mais la taille des jeux de données grossit d&#39;environ × 2,5 par an. Epoch place l&#39;épuisement <strong>entre 2026 et 2032</strong>. On est dedans.</li>
+<li>Réponse des labos : écrire du texte avec des modèles, les <span class="lex" tabindex="0" title="Données synthétiques — Du texte écrit par un modèle d'IA, utilisé pour entraîner un autre modèle (ou le même).">données synthétiques</span>. K2-Horizon (16 nov. 2026) : un corpus de 22 000 Md tokens, dont ≈ 10 000 Md synthétiques. ≈ 45 %.</li>
+</ul>
+<h3>4. L&#39;effondrement : le modèle qui lit ses propres résumés</h3>
+<ul>
+<li>Shumailov et al. (<em>Nature</em>, juillet 2024) : un modèle entraîné sur le texte d&#39;un modèle, lui-même entraîné sur le texte d&#39;un modèle, et ainsi de suite.</li>
+<li>À chaque génération, les cas rares disparaissent d&#39;abord. Puis tout converge vers une réponse moyenne, de plus en plus étroite.</li>
+<li>Pourquoi : un modèle produit surtout ce qui est probable. Un événement rare qu&#39;il ne tire jamais n&#39;existe plus pour le modèle suivant. Il ne revient jamais.</li>
+<li>C&#39;est l&#39;<span class="lex" tabindex="0" title="Effondrement du modèle — Ce qui arrive quand des modèles s'entraînent génération après génération sur du texte écrit par des modèles : les cas rares disparaissent, puis tout converge vers une réponse moyenne de plus en plus étroite.">effondrement du modèle</span>. Leur conclusion : garder l&#39;accès à du vrai texte humain est indispensable.</li>
+<li>Nuance : le danger est le mélange <strong>sans contrôle</strong>, génération après génération. Du synthétique trié, ajouté à du texte humain, ne s&#39;effondre pas forcément. Les labos parient là-dessus.</li>
+</ul>
+<h2>Ce que ça révèle</h2>
+<ol>
+<li><strong>Les données sont un produit fabriqué, pas une matière première.</strong> Entre la benne (Common Crawl) et ce que lit le modèle (FineWeb-Edu), on jette ≈ 99 %. Chaque étage est un choix humain.</li>
+<li><strong>Mieux trier vaut autant que plus de calcul.</strong> 10 fois moins de tokens pour le même score MMLU. C&#39;est la seule partie de l&#39;entraînement où une petite équipe peut battre un gros labo : FineWeb est l&#39;œuvre d&#39;une petite équipe de Hugging Face.</li>
+<li><strong>Le modèle d&#39;avant choisit ce que lit le suivant.</strong> Llama 2 note pour Llama 3. Llama 3 note pour FineWeb-Edu. Les goûts, et les angles morts, se transmettent.</li>
+<li><strong>Le texte humain devient la ressource rare.</strong> Sites qui se ferment, stock qui s&#39;épuise, synthétique qui grimpe. Celui qui a des données que les autres n&#39;ont pas a un <span class="lex" tabindex="0" title="Fossé (moat) — Ce qui empêche un concurrent de copier ton avantage (données exclusives, expertise d'un domaine, réseau).">fossé</span>.</li>
+</ol>
+<h3>Signaux à surveiller</h3>
+<table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Où on en est (vérifié le 21/11/2026)</th>
+<th>Ce qui le ferait bouger</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>La part du synthétique</td>
+<td>K2-Horizon (16/11/2026) : ≈ 10 000 Md tokens synthétiques sur 22 000. Les labos fermés ne publient pas la leur.</td>
+<td>Un modèle de pointe entraîné à plus de 50 % sur du synthétique, sans baisse de qualité</td>
+</tr>
+<tr>
+<td>La taille de la benne</td>
+<td>Common Crawl, oct. 2026 : 2,16 Md pages (371 TiB). Stable autour de 2 Md depuis fin 2025.</td>
+<td>Une forte baisse, signe que les sites bloquent les robots</td>
+</tr>
+<tr>
+<td>Les sites qui se ferment</td>
+<td>≈ 5 % des tokens de C4 et 28 %+ des sources actives bloqués en 2023-2024 (Longpre et al.)</td>
+<td>Une mise à jour de l&#39;étude pour 2025-2026</td>
+</tr>
+<tr>
+<td>Le poison</td>
+<td>250 documents suffisent jusqu&#39;à 13 Md de paramètres (oct. 2025)</td>
+<td>Le même test sur un modèle de 100 Md ou plus, ou une attaque réelle découverte</td>
+</tr>
+<tr>
+<td>Le droit d&#39;auteur</td>
+<td>Anthropic : 1,5 Md $ de règlement pour des livres piratés, approuvé le 20/07/2026. L&#39;entraînement sur des livres achetés a été jugé légal (juin 2025).</td>
+<td>Un procès qui juge l&#39;entraînement lui-même illégal</td>
+</tr>
+</tbody></table>
+<p>Confiance : élevée sur FineWeb, Llama 3, Lee et al., Anthropic (poison), Epoch, Shumailov, le règlement Bartz. Moyenne sur K2-Horizon (lu seulement le résumé du papier, 5 jours après sa sortie).</p>
+<h2>Termes vus</h2>
+<ul>
+<li>Nouveaux : <span class="lex" tabindex="0" title="Common Crawl — Une association qui aspire le web chaque mois et donne tout gratuitement. C'est la base de presque tous les jeux de données de pré-entraînement.">Common Crawl</span> · <span class="lex" tabindex="0" title="Mélange de données — La recette de ce que lit un modèle : quelle part de web, de code, de maths, de livres, de langues. On dose, on ne prend pas le web tel quel.">Mélange de données</span> · <span class="lex" tabindex="0" title="Filtre heuristique — Une règle simple, écrite à la main, qui jette une page web. Heuristique = règle pratique, pas parfaite.">Filtre heuristique</span> · <span class="lex" tabindex="0" title="Dédoublonnage — Retirer les copies et les quasi-copies d'un même texte, pour n'en garder qu'une.">Dédoublonnage</span> · <span class="lex" tabindex="0" title="Similarité de Jaccard — Mesure de ressemblance entre deux ensembles : ce qu'ils ont en commun ÷ tout ce qu'ils contiennent à eux deux. 1 = identiques, 0 = rien en commun.">Similarité de Jaccard</span> · <span class="lex" tabindex="0" title="MinHash — Méthode qui donne à chaque texte une courte empreinte, telle que deux textes qui se ressemblent ont des empreintes qui se ressemblent. On ne compare que les textes dont un bout d'empreinte tombe pareil.">MinHash</span> · <span class="lex" tabindex="0" title="Classifieur de qualité — Un petit modèle qui donne une note à chaque page, pour trier un jeu de données trop gros pour être lu par un humain. Un classifieur = un modèle qui range des choses dans des cases.">Classifieur de qualité</span> · <span class="lex" tabindex="0" title="Contamination (benchmark) — Quand les questions d'un benchmark se trouvent déjà dans les données d'entraînement. Le modèle les a lues, son score est gonflé.">Contamination (benchmark)</span> · <span class="lex" tabindex="0" title="Empoisonnement des données — Glisser des documents piégés dans les données d'entraînement pour apprendre au modèle un comportement caché. Le comportement ne s'active qu'avec un mot déclencheur : c'est une porte dérobée.">Empoisonnement des données</span> · <span class="lex" tabindex="0" title="Données synthétiques — Du texte écrit par un modèle d'IA, utilisé pour entraîner un autre modèle (ou le même).">Données synthétiques</span> · <span class="lex" tabindex="0" title="Effondrement du modèle — Ce qui arrive quand des modèles s'entraînent génération après génération sur du texte écrit par des modèles : les cas rares disparaissent, puis tout converge vers une réponse moyenne de plus en plus étroite.">Effondrement du modèle</span> · <span class="lex" tabindex="0" title="robots.txt — Un petit fichier à la racine d'un site, qui dit aux robots d'aspiration ce qu'ils ont le droit de lire. Il n'est pas contraignant techniquement : un robot peut l'ignorer.">robots.txt</span></li>
+<li>Déjà vus, approfondis : <span class="lex" tabindex="0" title="Pré-entraînement — La phase où le modèle apprend à prédire la suite sur un corpus géant.">Pré-entraînement</span> · <span class="lex" tabindex="0" title="Mémorisation (mot pour mot) — Le modèle recrache un passage exact de son entraînement. Augmente avec la taille, les doublons et la longueur du prompt.">Mémorisation</span> · <span class="lex" tabindex="0" title="Benchmark — Test standard pour comparer des modèles.">Benchmark</span></li>
+<li>Déjà vus, reliés : <span class="lex" tabindex="0" title="Token — Morceau de texte d'environ 4 caractères en anglais. C'est l'unité de lecture, d'écriture et de facturation.">Token</span> · <span class="lex" tabindex="0" title="Ratio Chinchilla — ~20 tokens par paramètre : le meilleur modèle pour un budget d'entraînement donné (Chinchilla : 70B, 1 400 Md tokens). Dépassé exprès pour baisser le coût d'usage.">Ratio Chinchilla</span> · <span class="lex" tabindex="0" title="Jeux d'entraînement - validation - test — Entraînement : pour apprendre. Validation : pour régler et décider quand arrêter. Test : la note finale, ouverte une fois.">Jeux d&#39;entraînement - validation - test</span> · <span class="lex" tabindex="0" title="Fossé (moat) — Ce qui empêche un concurrent de copier ton avantage (données exclusives, expertise d'un domaine, réseau).">Fossé (moat)</span> · <span class="lex" tabindex="0" title="Distillation — Un petit modèle (l'élève) apprend à imiter les sorties d'un gros (le professeur). Version non autorisée : Distillation adverse.">Distillation</span></li>
+</ul>
+<h2>Anomalies relevées</h2>
+<ul>
+<li><strong>Retirer plus de copies a donné un modèle pire.</strong> FineWeb, dédoublonnage global : sur le passage de fin 2013, ≈ 94 % des tokens retirés. Le reste (≈ 31 Md) a fait pire que la partie retirée (≈ 171 Md). Ça contredit Lee et al. (2021) : « dédoublonner rend les modèles meilleurs ». Piste : une bonne page est recopiée partout, le déchet ne l&#39;est pas. Le dédoublonnage global trie à l&#39;envers.</li>
+<li><strong>Le poison ne dépend pas de la taille.</strong> 250 documents suffisent de 600 M à 13 Md de paramètres. Ça contredit l&#39;idée qu&#39;une attaque doit contrôler un pourcentage des données. Piste : le modèle apprend une association rare dès qu&#39;il l&#39;a vue assez de fois, peu importe le reste.</li>
+<li><strong>Un tri plus « qualité » fait baisser le bon sens.</strong> FineWeb-Edu : au-dessus du seuil 3, MMLU monte mais HellaSwag et PIQA baissent. Ça contredit « meilleures données = meilleur modèle ». Piste : la qualité n&#39;est pas une seule échelle. Le juge mesure le scolaire, pas le quotidien.</li>
+</ul>
+<h2>Croisements avec d&#39;autres branches</h2>
+<ul>
+<li><strong>Grands enjeux, spatial (projet 9, tri d&#39;images pour Mars).</strong> Le classifieur de FineWeb-Edu et le tri d&#39;images à bord font le même travail : un petit modèle qui décide quoi garder, parce qu&#39;on ne peut pas tout garder (le calcul ici, la bande passante là-bas). Et la même faille : ce que le juge n&#39;aime pas disparaît. Une image rare et étrange, la plus précieuse pour un scientifique, risque d&#39;être jetée. <em>Déduit, pas mesuré.</em></li>
+<li><strong>Pouvoir.</strong> Le droit d&#39;auteur (Bartz contre Anthropic, 1,5 Md $, ≈ 3 000 $ par livre) et les sites qui ferment leurs portes aux robots. Qui possède le texte possède une partie du prochain modèle.</li>
+<li><strong>Économie (étage 2).</strong> Des données que personne d&#39;autre n&#39;a = un <span class="lex" tabindex="0" title="Fossé (moat) — Ce qui empêche un concurrent de copier ton avantage (données exclusives, expertise d'un domaine, réseau).">fossé</span>. Pour une entreprise d&#39;IA × spatial : les images d&#39;observation de la Terre et la télémétrie des satellites sont ce genre de données.</li>
+</ul>
+<h2>Questions ouvertes</h2>
+<ol>
+<li>Si 250 documents suffisent, combien en faut-il pour une porte dérobée vraiment dangereuse, sur un modèle de 1 000 Md de paramètres ?</li>
+<li>Quelle part du web de 2026 est déjà écrite par des modèles ? Et les filtres savent-ils la reconnaître ?</li>
+<li>Le français est sous-dosé (≈ 8 % pour toutes les langues hors anglais chez Llama 3). Un FineWeb-Edu français changerait-il la qualité d&#39;un modèle en français ? (FineWeb 2, multilingue, existe : à regarder.)</li>
+<li>Dédoublonnage global pire que par passage : est-ce vrai pour d&#39;autres sources que Common Crawl ?</li>
+</ol>
+<h2>Prochaine enquête</h2>
+<ul>
+<li><strong>#16 — Le pré-entraînement : le calcul, les puces, le coût.</strong> On a la machine (bloc C) et ce qu&#39;on lui donne à lire (#15). Maintenant : combien de calcul pour lire 15 000 Md tokens, sur quelles puces, pour quel prix. Retour de <span class="lex" tabindex="0" title="C ≈ 6ND — Calcul d'entraînement ≈ 6 × paramètres × tokens. Retombe pile sur les 3,8 × 10²⁵ de Llama 3.">C ≈ 6ND</span>.</li>
+</ul>
+<h2>Approfondissement</h2>
+<ul>
+<li><strong>Source primaire.</strong> Penedo et al., <em>The FineWeb Datasets</em> (2024). Lire la section sur le dédoublonnage global (le passage de 2013) et la figure de FineWeb-Edu. PDF à déposer dans <code>Bibliothèque/PDF/</code> sous le nom <code>2024 Penedo - FineWeb.pdf</code>.</li>
+<li><strong>Exercice Kaggle, 20 min.</strong> Charger 1 000 pages de FineWeb (<code>HuggingFaceFW/fineweb</code>, échantillon <code>sample-10BT</code>, en streaming). Appliquer les règles A et B du bloc 2. Compter combien elles jettent, et lire 5 pages jetées : déchet ou erreur ?</li>
+<li><strong>Question bonus.</strong> Écris une phrase de 10 mots. Change un mot. Calcule la similarité de Jaccard avec des morceaux de 2 mots. Puis change 2 mots, puis 3. À combien de mots changés passe-t-on sous 0,75 ?</li>
+</ul>
+<h2>Sources</h2>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Ce qu&#39;elle apporte</th>
+<th>Confiance</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Common Crawl, <a href="https://commoncrawl.org/blog" target="_blank" rel="noreferrer">blog</a>, annonces 2025-2026</td>
+<td>Oct. 2026 : 2,16 Md pages, 371,19 TiB. Fév. 2026 : 2,1 Md pages, 363 TiB</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Penedo et al., <a href="https://arxiv.org/abs/2406.17557" target="_blank" rel="noreferrer">The FineWeb Datasets</a>, 2024, et le <a href="https://huggingfacefw-blogpost-fineweb-v1.static.hf.space/index.html" target="_blank" rel="noreferrer">billet technique</a></td>
+<td>96 passages, 15 000 Md tokens ; langue ≥ 0,65 ; ≈ 36 000 Md après filtres de base ; MinHash 112 empreintes, 14 seaux de 8, cible 0,75 (77 % de détection à 0,75, 92 % à 0,80) ; dédoublonnage global (2013-48 : 94 % retirés, 31 Md gardés pires que 171 Md retirés) ; ≈ 20 000 Md après dédoublonnage par passage ; règles (12 %, 67 %, 30 caractères) ; règle de ponctuation de C4 rejetée (≈ 30 % des tokens) ; FineWeb-Edu : Llama 3 70B, 500 000 notes, classifieur sur 450 000, ≈ 6 000 h de H100, seuil 3 → 1 300 Md (92 % retirés), seuil 2 → 5 400 Md, même MMLU avec ≈ 10× moins de tokens, seuils &gt; 3 nuisent à HellaSwag et PIQA</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Meta, <a href="https://arxiv.org/html/2407.21783v3" target="_blank" rel="noreferrer">The Llama 3 Herd of Models</a>, section 3.1, juil. 2024</td>
+<td>15 600 Md tokens ; mélange 50 / 25 / 17 / 8 ; dédoublonnage URL, document (MinHash), ligne (plus de 6 fois par lot de 30 M documents) ; classifieurs entraînés sur des notes de Llama 2 ; jeux de test retirés des données de fin d&#39;entraînement</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Lee et al., <a href="https://arxiv.org/abs/2107.06499" target="_blank" rel="noreferrer">Deduplicating Training Data Makes Language Models Better</a>, 2021</td>
+<td>Phrase de 61 mots répétée plus de 60 000 fois dans C4 ; mémorisation ÷ 10 ; plus de 4 % des jeux de validation déjà dans l&#39;entraînement</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Anthropic, UK AISI, Alan Turing Institute, <a href="https://www.anthropic.com/research/small-samples-poison" target="_blank" rel="noreferrer">A small number of samples can poison LLMs of any size</a>, 9 oct. 2025</td>
+<td>250 documents, 600 M à 13 Md de paramètres, 72 modèles ; 100 échouent ; porte dérobée « charabia » seulement</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Villalobos et al. (Epoch AI), <a href="https://epoch.ai/blog/will-we-run-out-of-data-limits-of-llm-scaling-based-on-human-generated-data" target="_blank" rel="noreferrer">Will we run out of data?</a>, juin 2024</td>
+<td>Stock ≈ 300 000 Md tokens (100 000 à 1 000 000) ; épuisement entre 2026 et 2032 ; 1 token ≈ 0,8 mot ; jeux de données × 2,5 par an (via AP)</td>
+<td>Élevée sur l&#39;estimation, c&#39;est une projection</td>
+</tr>
+<tr>
+<td>Shumailov et al., <a href="https://www.nature.com/articles/s41586-024-07566-y" target="_blank" rel="noreferrer">AI models collapse when trained on recursively generated data</a>, <em>Nature</em> 631, juil. 2024</td>
+<td>Les queues de la distribution disparaissent en premier ; besoin de vrai texte humain</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Longpre et al., <a href="https://arxiv.org/abs/2407.14933" target="_blank" rel="noreferrer">Consent in Crisis</a>, NeurIPS 2024</td>
+<td>14 000 domaines audités ; ≈ 5 % des tokens de C4 et 28 %+ des sources actives bloqués par robots.txt en un an</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>K2 Team, <a href="https://arxiv.org/abs/2611.21003" target="_blank" rel="noreferrer">K2-Horizon</a>, 16 nov. 2026</td>
+<td>Corpus de 22 000 Md tokens, ≈ 10 000 Md synthétiques</td>
+<td>Moyenne (résumé seulement)</td>
+</tr>
+<tr>
+<td>Bloomberg Law, TechCrunch, Authors Guild, juil. 2026</td>
+<td>Bartz contre Anthropic : 1,5 Md $, ≈ 3 000 $ par livre, approuvé le 20/07/2026 ; entraînement sur livres achetés jugé légal (Alsup, juin 2025)</td>
+<td>Élevée</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>Ce qui manque</strong></p>
+<ul>
+<li>Les 3 mini-pages du bloc 2 et les phrases du bloc 3 sont inventées pour la démonstration.</li>
+<li>« 125 millions de livres » est un ordre de grandeur déduit (100 000 mots par livre, 0,8 mot par token).</li>
+<li>Le calcul « 22 fois moins de poison » suppose des modèles entraînés au ratio Chinchilla, comme dans l&#39;étude.</li>
+<li>Rien de vérifié sur les données d&#39;OpenAI, Anthropic ou Google : elles ne sont pas publiées.</li>
+<li>La part de texte écrit par des IA sur le web en 2026 : pas de source primaire trouvée. Les chiffres qui circulent (40 à 60 %) viennent de blogs.</li>
+</ul>
+</blockquote>
+<blockquote>
+<p><strong>Pour plus tard (hors du fil)</strong>
+<strong>Pourquoi FineWeb n&#39;utilise pas le texte déjà extrait par Common Crawl.</strong> Common Crawl fournit une version texte (WET). FineWeb a ré-extrait le texte du HTML brut avec l&#39;outil trafilatura. Le WET donnait ≈ 25 % de tokens en plus, mais avec plus de menus et de pubs, et des modèles moins bons.</p>
+<p><strong>Les autres jeux ouverts.</strong> C4 (Google, 2019) · RefinedWeb (TII, 2023) · Dolma (AI2, 2024) · DCLM (2024) · FineWeb 2 (multilingue). Tous partent de Common Crawl.</p>
+<p><strong>Le dédoublonnage par ligne de Llama 3.</strong> Une ligne qui apparaît plus de 6 fois dans un lot de 30 millions de documents est retirée. Ça enlève les bandeaux cookies et les mentions légales répétés partout.</p>
+<p><strong>La formule de MinHash chez FineWeb.</strong> Probabilité de repérer deux pages de ressemblance s : 1 − (1 − s⁸)¹⁴. À 0,70 → 56 %. À 0,75 → 77 %. À 0,80 → 92 %. À 0,85 → 98,8 %. RefinedWeb utilisait 9 000 empreintes au lieu de 112 : plus précis, beaucoup plus cher.</p>
+<p><strong>L&#39;annealing de Llama 3.</strong> À la toute fin de l&#39;entraînement, on sur-dose du code et des maths de très bonne qualité. Sur le modèle 8B : + 24 % au test GSM8K. Sur le 405B : gain négligeable.</p>
+</blockquote>
+<h2>On creuse — les questions d&#39;Axel (23/11)</h2>
+<h3>1. Pourquoi ne pas réécrire le texte jeté en texte propre ?</h3>
+<p><strong>Hypothèse d&#39;Axel : bonne, et déjà faite par les labos.</strong></p>
+<ul>
+<li>WRAP (Maini et al., Apple et CMU, 2024) : un modèle de taille moyenne réécrit des pages web « comme Wikipédia » ou en « questions-réponses ». Sur C4, le pré-entraînement va ≈ 3 fois plus vite. <a href="https://arxiv.org/abs/2401.16380" target="_blank" rel="noreferrer">arXiv 2401.16380</a> · confiance élevée.</li>
+<li>Nemotron-CC (NVIDIA, 2024) : 6 300 Md tokens, dont 4 400 Md de vrais tokens et 1 900 Md réécrits par un modèle. Leur reproche à FineWeb-Edu et DCLM : jeter ≈ 90 % des données. <a href="https://arxiv.org/abs/2412.02595" target="_blank" rel="noreferrer">arXiv 2412.02595</a> · confiance élevée.</li>
+</ul>
+<p><strong>Où ça casse :</strong></p>
+<ol>
+<li>Réécrire ne crée pas d&#39;information. Un menu « Accueil / Panier » réécrit reste vide. On ne sauve que ce qui contenait une info mal écrite.</li>
+<li>Réécrire coûte du calcul : un modèle doit lire et écrire chaque token.</li>
+<li>Le texte réécrit est du texte synthétique : il prend le style et les angles morts du modèle qui réécrit (lien <span class="lex" tabindex="0" title="Effondrement du modèle — Ce qui arrive quand des modèles s'entraînent génération après génération sur du texte écrit par des modèles : les cas rares disparaissent, puis tout converge vers une réponse moyenne de plus en plus étroite.">Effondrement du modèle</span>).</li>
+<li>Le texte réécrit échappe au dédoublonnage par morceaux de mots : une question de test reformulée n&#39;est plus repérée (<span class="lex" tabindex="0" title="Contamination (benchmark) — Quand les questions d'un benchmark se trouvent déjà dans les données d'entraînement. Le modèle les a lues, son score est gonflé.">Contamination (benchmark)</span>).</li>
+</ol>
+<p><strong>Règle :</strong> nettoyer déplace l&#39;information, il ne la crée pas.</p>
+<h3>2. La Bibliothèque de Babel comme données infinies ?</h3>
+<p>Babel (Borges, 1941) : tous les livres possibles de 410 pages × 40 lignes × 80 caractères, avec 25 symboles. 1 312 000 caractères par livre, 25^1 312 000 ≈ 10^1 834 097 livres. Atomes de l&#39;univers observable ≈ 10^80.</p>
+<p><strong>Pourquoi un modèle n&#39;apprendrait rien :</strong></p>
+<ol>
+<li>Un livre de Babel tiré au hasard = des lettres tirées au hasard.</li>
+<li>Après n&#39;importe quel début, les 25 symboles suivants ont tous la même chance : 1/25 = 4 %.</li>
+<li>Le modèle n&#39;a donc rien à apprendre : sa meilleure stratégie est de dire 4 % partout. Sa perte ne baisse jamais.</li>
+<li>Les vrais livres existent dans Babel, mais en proportion ≈ 0. Pour les trouver, il faut un filtre qui sait déjà ce qu&#39;est une phrase vraie. Ce filtre, c&#39;est déjà la connaissance.</li>
+</ol>
+<p><strong>Règle :</strong> un modèle apprend des régularités. Le hasard pur n&#39;en a aucune. La quantité de texte ne compte que si le texte contient de la structure.</p>
+<p>Croisement : c&#39;est le <span class="lex" tabindex="0" title="Classifieur de qualité — Un petit modèle qui donne une note à chaque page, pour trier un jeu de données trop gros pour être lu par un humain. Un classifieur = un modèle qui range des choses dans des cases.">Classifieur de qualité</span> poussé à l&#39;absurde. Dans Babel, 100 % du travail est le tri.</p>
+<h3>3. Un modèle entraîné sur Babel verrait-il ce qu&#39;on ne voit pas ? Peut-on apprendre à un modèle ce qu&#39;on ne sait pas ?</h3>
+<p><strong>Babel : non, même avec un calcul infini.</strong></p>
+<ol>
+<li>Dans Babel, chaque lettre est tirée au hasard, indépendamment des autres.</li>
+<li>Un modèle entraîné longtemps dessus trouvera des « motifs ». Ce seront des illusions : de la <span class="lex" tabindex="0" title="Mémorisation (mot pour mot) — Le modèle recrache un passage exact de son entraînement. Augmente avec la taille, les doublons et la longueur du prompt.">mémorisation</span> du bruit (lien <a href="#/enquete/9">#9</a>).</li>
+<li>Test : sur un nouveau livre de Babel, sa prédiction retombe à 4 % par symbole. Rien de ce qu&#39;il a « vu » ne se vérifie.</li>
+<li>Babel contient toutes les vérités, mais aussi tous les mensonges, en même quantité. Rien ne permet de les distinguer de l&#39;intérieur.</li>
+</ol>
+<p><strong>Apprendre à un modèle ce qu&#39;on ne sait pas : oui, c&#39;est déjà arrivé, avec une autre source que Babel.</strong></p>
+<ul>
+<li>AlphaTensor (DeepMind, <em>Nature</em>, oct. 2022) : multiplier deux matrices 4 × 4 (en arithmétique modulo 2) en 47 multiplications au lieu de 49 (Strassen, 1969). Premier progrès en 50 ans. <a href="https://doi.org/10.1038/s41586-022-05172-4" target="_blank" rel="noreferrer">Nature</a> · confiance élevée.</li>
+<li>AlphaZero (échecs, appris contre lui-même sans partie humaine) : Schut et al. (DeepMind, <em>PNAS</em>, mars 2025) ont extrait de ses vecteurs internes des concepts absents des parties humaines, puis les ont enseignés à 4 grands maîtres, qui ont progressé. C&#39;est l&#39;idée d&#39;Axel : un 2e système qui explique le 1er. <a href="https://doi.org/10.1073/pnas.2406675122" target="_blank" rel="noreferrer">PNAS</a> · confiance élevée.</li>
+</ul>
+<p><strong>La différence avec Babel :</strong> la source contient une structure que les humains n&#39;ont pas encore extraite (des règles du jeu, la réalité), et il existe un juge qui vérifie (la partie est gagnée, le calcul est juste).</p>
+<p><strong>Règle :</strong> un modèle peut dépasser ce qu&#39;on sait si sa source a de la structure qu&#39;on n&#39;a pas encore trouvée, et un moyen de vérifier. Le hasard pur n&#39;a ni l&#39;un ni l&#39;autre.</p>
+<p>Croisements : Carte de l&#39;IA #19 (apprendre sur des problèmes vérifiables) et #26 (interprétabilité : ouvrir la boîte).</p>
+<h3>4. L&#39;anglais est-il la meilleure langue pour avoir le meilleur modèle ?</h3>
+<p><strong>Hypothèse d&#39;Axel, reformulée : l&#39;anglais domine par la quantité, pas parce qu&#39;il est meilleur.</strong></p>
+<ul>
+<li>Wendler et al. (EPFL, ACL 2024), sur Llama 2 : dans les couches du milieu, le modèle passe par un « espace des concepts » plus proche de l&#39;anglais que des autres langues. Ils y voient un biais venu de données surtout anglaises. <a href="https://arxiv.org/abs/2402.10588" target="_blank" rel="noreferrer">arXiv 2402.10588</a> · confiance élevée.</li>
+<li>Anthropic (mars 2025) : Claude active les mêmes concepts (« petit », « contraire ») quelle que soit la langue ; plus le modèle est gros, plus cet espace est partagé. <a href="https://www.anthropic.com/research/tracing-thoughts-language-model" target="_blank" rel="noreferrer">Anthropic</a> · confiance élevée.</li>
+<li>Harrasse et al. (2025) : des modèles entraînés sans anglais ont le même espace partagé. <a href="https://arxiv.org/abs/2511.10840" target="_blank" rel="noreferrer">arXiv 2511.10840</a> · confiance moyenne (préprint).</li>
+<li>Aryabumi et al. (Cohere, ICLR 2025) : ajouter du code au pré-entraînement améliore le raisonnement en langue naturelle jusqu&#39;à +8,2 % (relatif). <a href="https://arxiv.org/abs/2408.10914" target="_blank" rel="noreferrer">arXiv 2408.10914</a> · confiance élevée.</li>
+</ul>
+<p><strong>Règle :</strong> le modèle ne pense pas « en anglais » mais dans un espace de concepts partagé, que la langue dominante tire vers elle. Ce qui aide le plus n&#39;est pas une langue humaine, mais des données très structurées et vérifiables : le code et les maths, d&#39;où leur sur-dosage chez Llama 3.</p>
+<p>Lien : <a href="#/enquete/12">#12</a> (le français coûte plus de tokens).</p>
+<h3>5. Une langue non humaine, comme l&#39;heptapode B d&#39;<em>Arrival</em> ?</h3>
+<p><strong>L&#39;heptapode B</strong> (Ted Chiang, <em>Story of Your Life</em>, 1998 ; film <em>Arrival</em>, 2016) : une écriture sémasiographique (elle porte le sens sans passer par les sons), sans lien avec la langue parlée (heptapode A). Une phrase entière = un cercle, écrit d&#39;un seul geste, donc il faut connaître la fin avant de commencer. Pas d&#39;ordre des mots ; les nuances passent par la courbure, l&#39;épaisseur ou l&#39;orientation des traits. Dans le film : ≈ 100 logogrammes dessinés par Martine Bertrand et l&#39;équipe de Patrice Vermette, analysés en code par Christopher Wolfram ; linguiste conseillère : Jessica Coon (McGill). C&#39;est une langue inachevée, faite pour l&#39;écran.</p>
+<p><strong>Ce qui existe déjà côté IA :</strong></p>
+<table>
+<thead>
+<tr>
+<th>Trait de l&#39;heptapode B</th>
+<th>Équivalent réel</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Une forme entière = une phrase</td>
+<td>Un vecteur interne qui porte tout un sens</td>
+<td>#11</td>
+</tr>
+<tr>
+<td>Connaître la fin avant d&#39;écrire</td>
+<td>Claude choisit la rime (« rabbit ») avant d&#39;écrire la ligne</td>
+<td><a href="https://www.anthropic.com/research/tracing-thoughts-language-model" target="_blank" rel="noreferrer">Anthropic, mars 2025</a></td>
+</tr>
+<tr>
+<td>Toute la phrase d&#39;un coup</td>
+<td>Modèles de langage à diffusion (LLaDA, Mercury, Gemini Diffusion)</td>
+<td><a href="https://arxiv.org/abs/2506.17298" target="_blank" rel="noreferrer">Mercury, arXiv 2506.17298</a></td>
+</tr>
+<tr>
+<td>Une langue de pensée séparée des mots</td>
+<td>Coconut (Meta, 2024) : raisonner en vecteurs au lieu de mots</td>
+<td><a href="https://arxiv.org/abs/2412.06769" target="_blank" rel="noreferrer">arXiv 2412.06769</a></td>
+</tr>
+<tr>
+<td>Un traducteur pour les humains</td>
+<td>L&#39;interprétabilité (#26 de la Carte)</td>
+<td>Schut et al., <em>PNAS</em> 2025</td>
+</tr>
+</tbody></table>
+<p><strong>Où ça casse :</strong> une pensée en vecteurs ne se relit pas. On perd la possibilité de vérifier ce que le modèle raisonne. Et une forme n&#39;a pas de sens sans contexte (Stephen Wolfram, à propos des logogrammes).</p>
+<p><strong>Règle :</strong> les modèles ont déjà une « langue » interne non humaine (des vecteurs). La question n&#39;est plus de l&#39;inventer, mais de savoir si on les laisse raisonner dedans, au prix de ne plus pouvoir les lire.</p>
+<p>Idée d&#39;enquête : « Les modèles peuvent-ils penser sans mots, et pourquoi c&#39;est un risque ? » (branches 1 et 6).
+Projet prévu : Projet 11 — Apprendre l&#39;heptapode B à une IA (après le projet 10).</p>
+<p><strong>Objection d&#39;Axel (23/11) : les deux limites sont négociables, un contexte peut s&#39;inventer.</strong></p>
+<ul>
+<li>Limite 2 (le contexte) : d&#39;accord en grande partie. Les humains ont déjà inventé des langues avec leur contexte (notation mathématique, formules chimiques, partitions, langages de programmation). Condition : le contexte doit s&#39;accrocher à quelque chose de partagé (le monde, des règles). AlphaZero l&#39;a fait avec des positions d&#39;échecs.</li>
+<li>Limite 1 (la lecture) : négociable en principe, pas aujourd&#39;hui. Anthropic (mars 2025) : quelques heures de travail humain pour comprendre les circuits d&#39;un texte de quelques dizaines de mots. Et le traducteur est lui-même un modèle : qui vérifie le traducteur ?</li>
+</ul>

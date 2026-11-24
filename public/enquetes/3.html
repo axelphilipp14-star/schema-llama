@@ -1,0 +1,202 @@
+<p><strong>Branche :</strong> Grands enjeux (espace) · Carte de l&#39;IA</p>
+<h2>La réponse</h2>
+<p><strong>Parce que l&#39;IA manque d&#39;électricité au sol, et qu&#39;en orbite le soleil en fournit presque sans interruption.</strong> Brancher un gros data center au réseau prend aujourd&#39;hui 2 à 7 ans selon les régions. Dans la bonne orbite, un panneau solaire produit jusqu&#39;à 8 fois plus qu&#39;au sol, sans nuit ni nuages.</p>
+<p>Le refroidissement n&#39;est <strong>pas</strong> un avantage de l&#39;espace : c&#39;est son plus gros problème. Dans le vide, la chaleur ne part qu&#39;en rayonnant, très lentement.</p>
+<p><strong>Est-ce que ça tient ? Pas aujourd&#39;hui.</strong> Les analystes indépendants chiffrent l&#39;orbite entre 3 fois (Wood Mackenzie) et plus de 10 fois (ABI Research) plus chère que le sol. Le calcul ne devient compétitif que si le lancement tombe vers 200 $ le kilo, ce que Google situe au milieu des années 2030.</p>
+<p>Chez SpaceX, il y a une troisième raison, moins technique : le récit orbital a servi à absorber xAI, qui brûlait des milliards, et à vendre la plus grosse introduction en Bourse de l&#39;histoire.</p>
+<p><strong>Confiance :</strong> élevée sur la physique, moyenne sur les coûts (ce sont des modèles d&#39;analystes), faible sur les dates (ce sont des annonces d&#39;entreprises).</p>
+<h2>Ce que l&#39;orbite règle, ce qu&#39;elle aggrave</h2>
+<blockquote>
+<p><strong>Schéma de l&#39;artifact d&#39;origine</strong>
+ ce que l&#39;orbite change pour un data center · 6 facteurs</p>
+</blockquote>
+<p>Un gain net, l&#39;électricité, contre quatre problèmes qui se paient presque tous en kilos à lancer. D&#39;où une seule variable qui décide.</p>
+<h2>Le mécanisme</h2>
+<h3>1. Au sol, le goulot est devenu la prise électrique</h3>
+<p>Les puces se fabriquent en quelques mois, mais un réseau électrique s&#39;étend en plusieurs années. Raccorder un nouveau data center prend 24 à 72 mois, et jusqu&#39;à 5 à 7 ans pour les très gros raccordements dans les régions saturées (<a href="https://inflect.com/blog/data-center-power-shortage-2026-why-grid-capacity-is-now-the-bigger-constraint-than-gpus" target="_blank" rel="noreferrer">Inflect</a>, cabinet du secteur, confiance moyenne). Les data centers commencent donc à produire leur propre électricité, au gaz ou avec des piles à combustible.</p>
+<p>C&#39;est la suite directe de l&#39;enquête #2 : si le calcul gagne toujours (la leçon amère), il faut toujours plus d&#39;électricité pour le faire tourner.</p>
+<h3>2. Ce que l&#39;orbite apporte : du soleil sans nuit</h3>
+<p>Google vise une <strong>orbite héliosynchrone aube-crépuscule</strong> : le satellite suit en permanence la frontière entre le jour et la nuit, donc il ne passe presque jamais à l&#39;ombre. Un panneau y produit jusqu&#39;à 8 fois plus qu&#39;au sol, presque en continu, ce qui évite de lourdes batteries (<a href="https://research.google/blog/exploring-a-space-based-scalable-ai-infrastructure-system-design/" target="_blank" rel="noreferrer">Google Research</a>). En prime, pas de terrain à acheter, pas d&#39;eau à consommer, pas de riverains ni de file d&#39;attente du réseau.</p>
+<h3>3. Ce que l&#39;orbite aggrave</h3>
+<ul>
+<li><strong>La chaleur.</strong> Sur Terre, on évacue la chaleur avec de l&#39;air ou de l&#39;eau qui l&#39;emportent. Dans le vide, il n&#39;y a rien pour l&#39;emporter : la seule sortie est le rayonnement infrarouge. Le livre blanc de Starcloud estime qu&#39;un radiateur double face à 20 °C évacue environ 633 W par m², plus de 1 000 fois moins vite qu&#39;un refroidissement à eau (<a href="https://www.weforum.org/stories/artificial-intelligence/space-data-centres-cooling/" target="_blank" rel="noreferrer">World Economic Forum</a>). La surface de radiateur grandit avec la puissance : le satellite AI1 de SpaceX embarque 160 m² de radiateurs pour 250 kW (<a href="https://thenewstack.io/spacex-and-nvidias-orbital-ai-datacenter-fantasy/" target="_blank" rel="noreferrer">The New Stack</a>).</li>
+<li><strong>Le lancement.</strong> Chaque kilo de panneau, de radiateur et de puce se paie à la montée.</li>
+<li><strong>Les radiations.</strong> Moins grave que prévu : Google a bombardé ses puces TPU de protons. La mémoire a montré des erreurs à partir d&#39;environ 3 fois la dose attendue sur 5 ans, sans panne définitive (<a href="https://research.google/blog/exploring-a-space-based-scalable-ai-infrastructure-system-design/" target="_blank" rel="noreferrer">Google Research</a>).</li>
+<li><strong>Les réparations.</strong> Impossibles : une puce morte en orbite reste morte. S&#39;y ajoutent les débris (une collision peut en déclencher d&#39;autres en cascade) et les tempêtes solaires, qui ont fait retomber 38 satellites Starlink en février 2022 (<a href="https://thenewstack.io/spacex-and-nvidias-orbital-ai-datacenter-fantasy/" target="_blank" rel="noreferrer">The New Stack</a>).</li>
+<li><strong>Le réseau entre puces.</strong> Entraîner un modèle exige que des milliers de puces se parlent en continu, ce que la fibre fait très bien au sol. En orbite, il faut des lasers entre satellites volant à quelques centaines de mètres les uns des autres. Les premiers usages seront donc surtout l&#39;<strong>inférence</strong>, pas l&#39;entraînement.</li>
+</ul>
+<h3>4. L&#39;équation qui décide : le prix du kilo lancé</h3>
+<p>Tout se joue sur une variable. Google estime que si le lancement descend sous 200 $/kg vers le milieu des années 2030, lancer et exploiter un data center orbital coûterait à peu près autant que <strong>l&#39;électricité</strong> d&#39;un data center équivalent au sol (<a href="https://research.google/blog/exploring-a-space-based-scalable-ai-infrastructure-system-design/" target="_blank" rel="noreferrer">Google Research</a>).</p>
+<p>Aujourd&#39;hui, on en est loin :</p>
+<ul>
+<li><strong>Wood Mackenzie</strong> chiffre un data center orbital de 1 GW à environ 170 Md$, plus de 3 fois le prix au sol. Le lancement et les satellites en font environ 60 %, et il faudrait les baisser de 70 % pour atteindre la parité (<a href="https://thenewstack.io/spacex-and-nvidias-orbital-ai-datacenter-fantasy/" target="_blank" rel="noreferrer">The New Stack</a>).</li>
+<li><strong>ABI Research</strong> estime que faire tourner un GPU en orbite pendant un an coûte au moins 10 fois plus cher qu&#39;au sol (<a href="https://spectrum.ieee.org/orbital-data-centers-heat" target="_blank" rel="noreferrer">IEEE Spectrum</a>).</li>
+<li><strong>Starship</strong>, la fusée censée faire chuter ce prix, a déjà coûté plus de 15 Md$ de développement. Le ravitaillement en orbite n&#39;a jamais été tenté, et SpaceX écrit lui-même qu&#39;il faudrait des milliers de lancements par an pour déployer 100 GW de satellites IA par an (<a href="https://www.ajot.com/news/exclusive-spacex-spending-on-starship-tops-15-billion-in-rush-for-airline-like-rocketry" target="_blank" rel="noreferrer">Reuters via AJOT</a>).</li>
+</ul>
+<h3>5. Qui fait quoi</h3>
+<table>
+<thead>
+<tr>
+<th>Acteur</th>
+<th>Où il en est (oct. 2026)</th>
+<th>Son pari</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="https://www.lightreading.com/satellite/with-nvidia-on-board-spacex-orbital-data-centers-to-hit-significant-scale-in-2028" target="_blank" rel="noreferrer">SpaceX / xAI — Starmind</a></td>
+<td>Aucun satellite en orbite. Demande à la FCC pour jusqu&#39;à 1 million de satellites (janv. 2026). Satellite AI1 de 250 kW, premier lancement visé fin 2027</td>
+<td>Contrôler toute la chaîne : fusée, réseau Starlink, puces, modèles Grok</td>
+</tr>
+<tr>
+<td><a href="https://research.google/blog/exploring-a-space-based-scalable-ai-infrastructure-system-design/" target="_blank" rel="noreferrer">Google — Suncatcher</a></td>
+<td>Recherche. 2 prototypes avec Planet prévus début 2027</td>
+<td>Ses propres puces TPU, en essaims serrés reliés par laser</td>
+</tr>
+<tr>
+<td><a href="https://www.unite.ai/?p=455374" target="_blank" rel="noreferrer">Starcloud</a></td>
+<td>Starcloud-1 (60 kg, un GPU H100) en orbite depuis nov. 2025. Valorisée 2,3 Md$ en août 2026</td>
+<td>Viser 88 000 satellites ; premiers clients militaires et opérateurs de satellites (<a href="https://qz.com/orbital-data-center-startups-competitive-landscape-061526" target="_blank" rel="noreferrer">Quartz</a>)</td>
+</tr>
+<tr>
+<td><a href="https://www.livescience.com/space/space-exploration/china-is-building-a-constellation-of-ai-supercomputers-in-space-and-just-launched-the-first-pieces" target="_blank" rel="noreferrer">Chine — Three-Body (ADA Space, Zhejiang Lab)</a></td>
+<td>12 satellites depuis mai 2025, 2 800 visés</td>
+<td>Analyser en orbite les images prises par satellite, au lieu de tout renvoyer au sol</td>
+</tr>
+</tbody></table>
+<p>Attention à la ligne chinoise : ce n&#39;est pas le même projet. Les autres veulent remplacer des data centers terrestres ; la Chine veut surtout traiter sur place des données <strong>déjà</strong> dans l&#39;espace.</p>
+<h3>6. La troisième raison : l&#39;argent</h3>
+<ul>
+<li>xAI a brûlé environ 9,5 Md$ sur les 9 premiers mois de 2025 (<a href="https://www.cnbc.com/2026/02/02/musks-xai-needs-spacex-for-money-data-centers-in-space-are-a-dream.html" target="_blank" rel="noreferrer">CNBC</a>, d&#39;après The Information). SpaceX l&#39;a absorbée en février 2026 en invoquant les data centers orbitaux ; pour CNBC, xAI avait surtout besoin de la trésorerie de SpaceX.</li>
+<li>Le prospectus d&#39;introduction en Bourse annonce le calcul orbital « dès 2028 », mais ses facteurs de risque reconnaissent des technologies non prouvées qui pourraient ne jamais être rentables. L&#39;action, introduite à 135 $ en juin, était à 116 $ fin juillet (<a href="https://www.webull.ca/news-detail/15278174429144064" target="_blank" rel="noreferrer">Benzinga via Webull</a>).</li>
+<li>Sur le marché de prédiction Kalshi, les parieurs donnaient 14 % de chances qu&#39;un data center orbital de 1 MW fonctionne avant janvier 2029 (même source).</li>
+</ul>
+<h2>Ce que ça révèle</h2>
+<p><strong>Avant de lire cette section, écris ta propre version en 3 lignes.</strong> Ensuite compare.</p>
+<ul>
+<li><strong>Le goulot de l&#39;IA a changé de place.</strong> En 2012, il fallait des puces ; en 2026, il faut des mégawatts branchés. Celui qui trouve de l&#39;électricité vite a un avantage, sur Terre comme en orbite.</li>
+<li><strong>Celui qui contrôle le maillon le plus cher contrôle l&#39;économie.</strong> Ici, c&#39;est le lancement. SpaceX est le seul acteur qui possède la fusée, le réseau et les modèles. Les autres dépendent de son prix au kilo.</li>
+<li><strong>Un récit peut financer une entreprise avant d&#39;être vrai.</strong> Le calcul orbital n&#39;existe pas encore à l&#39;échelle, mais il a déjà servi à justifier une fusion et une valorisation record.</li>
+</ul>
+<h3>Anomalies pour ton carnet</h3>
+<ol>
+<li><strong>SpaceX vend l&#39;orbite, mais loue le sol.</strong> Son plus gros contrat d&#39;IA connu : Anthropic lui paie 1,25 Md$ par mois jusqu&#39;en mai 2029 pour des data centers terrestres, Colossus (<a href="https://engadget.com/2178212/the-spacex-ipo-plans-are-now-public" target="_blank" rel="noreferrer">Engadget</a>).</li>
+<li><strong>Google compare des choses différentes.</strong> Son seuil de 200 $/kg met le coût orbital total face au seul coût de <strong>l&#39;électricité</strong> au sol, pas au coût total d&#39;un data center. Même réflexe que l&#39;ARR : un chiffre vrai qui flatte.</li>
+<li><strong>« L&#39;espace est froid ».</strong> Répété par des promoteurs et des médias, contredit par la physique.</li>
+<li><strong>Le satellite grossit sur le papier.</strong> La fiche d&#39;AI1 est passée de 150 kW (juin) à 250 kW (août) sans qu&#39;aucun exemplaire ne soit lancé.</li>
+</ol>
+<h3>Signaux à surveiller</h3>
+<ul>
+<li><strong>Starship</strong> : vols avec de vraies charges, réutilisation régulière, premier ravitaillement en orbite.</li>
+<li><strong>Le prix réellement facturé au kilo</strong>, pas le prix promis.</li>
+<li><strong>Starcloud-2</strong> (fin 2026) et les <strong>prototypes Google</strong> (début 2027) : leurs radiateurs tiennent-ils ?</li>
+<li><strong>Le premier AI1</strong> (visé fin 2027) et la décision de la FCC sur le million de satellites.</li>
+<li><strong>Les réformes du réseau électrique au sol</strong> : si les raccordements accélèrent, l&#39;argument orbital s&#39;affaiblit.</li>
+</ul>
+<h2>Lexique</h2>
+<table>
+<thead>
+<tr>
+<th>Terme</th>
+<th>Ce que ça veut dire</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Orbite basse (LEO)</td>
+<td>Orbite entre environ 500 et 2 000 km d&#39;altitude, celle de Starlink et des projets de calcul orbital</td>
+</tr>
+<tr>
+<td>Orbite héliosynchrone aube-crépuscule</td>
+<td>Orbite qui suit la frontière jour/nuit : le satellite est presque toujours au soleil</td>
+</tr>
+<tr>
+<td>Refroidissement radiatif</td>
+<td>Évacuer la chaleur en émettant de l&#39;infrarouge. Seule méthode possible dans le vide, et très lente</td>
+</tr>
+<tr>
+<td>Radiateur (spatial)</td>
+<td>Grand panneau qui rayonne la chaleur. Sa surface grandit avec la puissance à évacuer</td>
+</tr>
+<tr>
+<td>Coût au kilo lancé</td>
+<td>Prix pour mettre 1 kg en orbite. La variable qui décide si l&#39;orbite est rentable</td>
+</tr>
+<tr>
+<td>File de raccordement</td>
+<td>Liste d&#39;attente pour brancher un gros consommateur au réseau électrique (souvent plusieurs années)</td>
+</tr>
+<tr>
+<td>Intégration verticale</td>
+<td>Contrôler toute la chaîne d&#39;un produit soi-même, comme SpaceX : fusée, réseau, puces, modèles</td>
+</tr>
+<tr>
+<td>Calcul en périphérie (edge)</td>
+<td>Traiter les données là où elles sont captées, au lieu de les envoyer à un data center lointain</td>
+</tr>
+<tr>
+<td>Liaison laser inter-satellites</td>
+<td>Lien optique entre satellites, qui remplace la fibre en orbite</td>
+</tr>
+<tr>
+<td>Syndrome de Kessler</td>
+<td>Cascade de collisions : chaque débris en crée d&#39;autres, jusqu&#39;à rendre une orbite inutilisable</td>
+</tr>
+</tbody></table>
+<h2>Questions ouvertes et prochaines enquêtes</h2>
+<p>La prochaine enquête passe à l&#39;économie : le prix du token.</p>
+<p><strong>Questions que cette enquête laisse ouvertes</strong></p>
+<ul>
+<li>Si les raccordements au réseau deviennent rapides, reste-t-il une raison d&#39;aller en orbite ?</li>
+<li>Qui paie si une cascade de débris rend une orbite inutilisable : l&#39;opérateur, l&#39;État, personne ?</li>
+<li>Peut-on un jour entraîner un modèle en orbite, ou seulement faire de l&#39;inférence ?</li>
+<li>La baisse de l&#39;action SpaceX après l&#39;introduction veut-elle dire que les investisseurs doutent déjà du récit orbital ?</li>
+</ul>
+<p><strong>Prochaines enquêtes, une par branche</strong></p>
+<ul>
+<li><input disabled="" type="checkbox"> <strong>#4 Économie.</strong> Le prix du token : combien, pourquoi il s&#39;effondre, qui en profite</li>
+<li><input disabled="" type="checkbox"> <strong>#5 Où elle va.</strong> Les goulots : électricité, données, puces</li>
+<li><input disabled="" type="checkbox"> <strong>#6 Pouvoir.</strong> Les contrôles à l&#39;export des puces et des modèles</li>
+<li><input disabled="" type="checkbox"> <strong>Grands enjeux, plus tard.</strong> Énergie : l&#39;IA et le retour du nucléaire, la réponse au sol au même problème</li>
+</ul>
+<p><strong>Pour aller plus loin (30 à 45 min)</strong></p>
+<ol>
+<li><strong>Source primaire à lire en entier :</strong> <a href="https://research.google/blog/exploring-a-space-based-scalable-ai-infrastructure-system-design/" target="_blank" rel="noreferrer">le billet de Google sur Project Suncatcher</a>, en anglais, environ 10 min. Note la phrase où Google se protège le plus, et pourquoi.</li>
+<li><strong>Exercice :</strong> un radiateur évacue environ 633 W par m². Calcule la surface nécessaire pour 1 MW, puis pour 1 GW. Compare avec un terrain de foot (environ 7 000 m²). Envoie-moi tes calculs.</li>
+<li><strong>Question bonus :</strong> pourquoi la Chine préfère-t-elle analyser les images satellites en orbite plutôt que de les renvoyer au sol ? Pense à ce qui coûte le plus cher entre calculer et transmettre.</li>
+</ol>
+<h2>Sources</h2>
+<ul>
+<li><a href="https://research.google/blog/exploring-a-space-based-scalable-ai-infrastructure-system-design/" target="_blank" rel="noreferrer">Exploring a space-based, scalable AI infrastructure system design</a>, Google Research, 4 nov. 2025 (source primaire)</li>
+<li><a href="https://spectrum.ieee.org/orbital-data-centers-heat" target="_blank" rel="noreferrer">Why Orbital Data Centers Are Harder Than Silicon Valley Thinks</a>, IEEE Spectrum, 11 juin 2026</li>
+<li><a href="https://thenewstack.io/spacex-and-nvidias-orbital-ai-datacenter-fantasy/" target="_blank" rel="noreferrer">Why space is actually a terrible place to cool a data center</a>, The New Stack, 12 août 2026 (chiffres Wood Mackenzie, fiche AI1)</li>
+<li><a href="https://www.lightreading.com/satellite/with-nvidia-on-board-spacex-orbital-data-centers-to-hit-significant-scale-in-2028" target="_blank" rel="noreferrer">With Nvidia on board, SpaceX orbital data centers to hit &#39;significant scale&#39; in 2028</a>, Light Reading, 25 août 2026</li>
+<li><a href="https://www.ajot.com/news/exclusive-spacex-spending-on-starship-tops-15-billion-in-rush-for-airline-like-rocketry" target="_blank" rel="noreferrer">SpaceX spending on Starship tops $15 billion</a>, Reuters via AJOT, 1er mai 2026</li>
+<li><a href="https://www.cnbc.com/2026/02/02/musks-xai-needs-spacex-for-money-data-centers-in-space-are-a-dream.html" target="_blank" rel="noreferrer">Musk&#39;s xAI needs SpaceX deal for the money</a>, CNBC, 2 févr. 2026</li>
+<li><a href="https://engadget.com/2178212/the-spacex-ipo-plans-are-now-public" target="_blank" rel="noreferrer">The SpaceX IPO plans are now public</a>, Engadget, 2026</li>
+<li><a href="https://www.webull.ca/news-detail/15278174429144064" target="_blank" rel="noreferrer">Musk Touted Data Centers in Space to SpaceX IPO Investors</a>, Benzinga via Webull, 23 juil. 2026</li>
+<li><a href="https://www.weforum.org/stories/artificial-intelligence/space-data-centres-cooling/" target="_blank" rel="noreferrer">Space data centres: cooling</a>, World Economic Forum, 2026</li>
+<li><a href="https://www.unite.ai/?p=455374" target="_blank" rel="noreferrer">Starcloud raises $250M</a>, Unite.AI, août 2026</li>
+<li><a href="https://qz.com/orbital-data-center-startups-competitive-landscape-061526" target="_blank" rel="noreferrer">Orbital data center startups</a>, Quartz, juin 2026</li>
+<li><a href="https://www.livescience.com/space/space-exploration/china-is-building-a-constellation-of-ai-supercomputers-in-space-and-just-launched-the-first-pieces" target="_blank" rel="noreferrer">China is building a constellation of AI supercomputers in space</a>, Live Science, mai 2025</li>
+<li><a href="https://inflect.com/blog/data-center-power-shortage-2026-why-grid-capacity-is-now-the-bigger-constraint-than-gpus" target="_blank" rel="noreferrer">Data Center Power Shortage 2026</a>, Inflect, 2026 (cabinet du secteur, à prendre avec prudence)</li>
+</ul>
+<h2>Termes vus</h2>
+<ul>
+<li><span class="lex" tabindex="0" title="Orbite basse (LEO) — Orbite entre environ 500 et 2 000 km d'altitude, celle de Starlink et des projets de calcul orbital.">Orbite basse (LEO)</span></li>
+<li><span class="lex" tabindex="0" title="Orbite héliosynchrone aube-crépuscule — Orbite qui suit la frontière jour/nuit : le satellite est presque toujours au soleil.">Orbite héliosynchrone aube-crépuscule</span></li>
+<li><span class="lex" tabindex="0" title="Refroidissement radiatif — Évacuer la chaleur en émettant de l'infrarouge. Seule méthode dans le vide, et très lente.">Refroidissement radiatif</span></li>
+<li><span class="lex" tabindex="0" title="Radiateur (spatial) — Grand panneau qui rayonne la chaleur. Sa surface grandit avec la puissance à évacuer.">Radiateur (spatial)</span></li>
+<li><span class="lex" tabindex="0" title="Coût au kilo lancé — Prix pour mettre 1 kg en orbite. La variable qui décide si l'orbite est rentable (seuil Google : ~200 $/kg).">Coût au kilo lancé</span></li>
+<li><span class="lex" tabindex="0" title="File de raccordement — Liste d'attente pour brancher un gros consommateur au réseau électrique, souvent plusieurs années.">File de raccordement</span></li>
+<li><span class="lex" tabindex="0" title="Intégration verticale — Contrôler soi-même toute la chaîne d'un produit, comme SpaceX : fusée, réseau, puces, modèles.">Intégration verticale</span></li>
+<li><span class="lex" tabindex="0" title="Calcul en périphérie (edge) — Traiter les données là où elles sont captées, au lieu de les envoyer à un data center lointain.">Calcul en périphérie (edge)</span></li>
+<li><span class="lex" tabindex="0" title="Liaison laser inter-satellites — Lien optique entre satellites, qui remplace la fibre en orbite.">Liaison laser inter-satellites</span></li>
+<li><span class="lex" tabindex="0" title="Syndrome de Kessler — Cascade de collisions : chaque débris en crée d'autres, jusqu'à rendre une orbite inutilisable.">Syndrome de Kessler</span></li>
+</ul>
+<h2>Anomalies relevées</h2>
+<ul>
+<li></li>
+</ul>
+<h2>Croisements avec d&#39;autres branches</h2>
+<ul>
+<li></li>
+</ul>

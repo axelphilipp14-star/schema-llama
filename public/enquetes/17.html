@@ -1,0 +1,561 @@
+<p><strong>Branche :</strong> Comment ça marche · bloc D, l&#39;entraînement · Carte de l&#39;IA · Schéma du modèle · avant : <a href="#/enquete/16">#16</a> · après : #18
+<strong>Exercices :</strong> Enquête 17 — Exercices</p>
+<blockquote>
+<p><strong>La question</strong>
+Si on met 10 fois plus de calcul dans un modèle, devient-il 10 fois meilleur ? Et jusqu&#39;où ça marche ?</p>
+</blockquote>
+<hr>
+<h2>1. Intro — le concept en clair</h2>
+<p><strong>Tu révises un examen.</strong></p>
+<ul>
+<li>La 1re heure, tu progresses énormément : tu apprends les bases.</li>
+<li>La 10e heure, tu progresses encore, mais beaucoup moins.</li>
+<li>Même en révisant 1 000 heures, tu n&#39;auras pas 20/20 partout : certaines questions sont imprévisibles.</li>
+<li>Si tu as un temps limité, tu dois choisir : lire tout le manuel vite, ou peu de pages à fond. Le mieux, c&#39;est entre les deux.</li>
+</ul>
+<p><strong>Un modèle d&#39;IA, c&#39;est pareil.</strong></p>
+<ul>
+<li>Les « heures de révision » = le <strong>calcul</strong> qu&#39;on met dans l&#39;entraînement (#16).</li>
+<li>La « note » = la <strong>perte</strong> : le chiffre qui dit à quel point le modèle se trompe en devinant le mot suivant. Plus elle est basse, mieux c&#39;est.</li>
+<li>Une <strong>loi d&#39;échelle</strong>, c&#39;est la règle mesurée qui dit : « si tu mets tant de calcul, ta perte descendra à tant ».</li>
+</ul>
+<p><strong>Comment ça marche, en 4 phrases.</strong></p>
+<ol>
+<li>Plus de calcul fait toujours baisser la perte, mais chaque ×10 rapporte moins que le précédent.</li>
+<li>La perte ne descend jamais sous un plancher.</li>
+<li>Avec un budget fixe, il faut partager entre la taille du modèle et ce qu&#39;il lit. Le meilleur est au milieu.</li>
+<li>En pratique, les labos font des modèles plus petits qui lisent énormément, parce qu&#39;ils coûtent moins cher à faire répondre.</li>
+</ol>
+<p><strong>À quoi ça sert.</strong></p>
+<ul>
+<li><strong>Prédire avant de payer.</strong> Un entraînement coûte des dizaines de millions de dollars (#16). La loi d&#39;échelle dit d&#39;avance ce qu&#39;on obtiendra.</li>
+<li><strong>Choisir la taille du modèle</strong> pour un budget donné.</li>
+<li><strong>Voir où sont les murs</strong> : jusqu&#39;où on peut monter.</li>
+</ul>
+<blockquote>
+<p><strong>La réponse en une ligne</strong>
+Non, pas 10 fois meilleur : chaque ×10 de calcul fait faire un pas plus petit que le précédent, vers un plancher qu&#39;on n&#39;atteint jamais.</p>
+</blockquote>
+<hr>
+<h2>2. Développement</h2>
+<h3>Partie 1 — Chaque ×10 rapporte moins (la loi d&#39;échelle)</h3>
+<p><strong>En clair.</strong> Tu vides une piscine avec un seau magique. À chaque tour, tu enlèves <strong>la moitié</strong> de l&#39;eau qui reste. 1er tour : énormément d&#39;eau. 5e tour : un petit filet. Tu enlèves toujours la même <strong>proportion</strong>, mais une quantité de plus en plus petite.</p>
+<p><strong>Exemple.</strong> Un modèle jouet. Perte = plancher (1) + ce qu&#39;il peut encore apprendre. Ce qu&#39;il peut encore apprendre est divisé par 2 à chaque ×10 de calcul.</p>
+<table>
+<thead>
+<tr>
+<th>Calcul</th>
+<th>Ce qui reste à apprendre</th>
+<th>Perte = 1 + …</th>
+<th>Gain</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>8</td>
+<td>9</td>
+<td>—</td>
+</tr>
+<tr>
+<td>10</td>
+<td>4</td>
+<td>5</td>
+<td>4</td>
+</tr>
+<tr>
+<td>100</td>
+<td>2</td>
+<td>3</td>
+<td>2</td>
+</tr>
+<tr>
+<td>1 000</td>
+<td>1</td>
+<td>2</td>
+<td>1</td>
+</tr>
+<tr>
+<td>10 000</td>
+<td>0,5</td>
+<td>1,5</td>
+<td>0,5</td>
+</tr>
+</tbody></table>
+<ul>
+<li>Le calcul est × 10 à chaque ligne.</li>
+<li>Le gain est ÷ 2 à chaque ligne : 4, 2, 1, 0,5.</li>
+<li>10 000 fois plus de calcul, et la perte passe seulement de 9 à 1,5.</li>
+</ul>
+<p><strong>Dans la vraie vie.</strong> DeepMind (2022) a entraîné plus de 400 modèles et en a tiré une formule. Avec cette formule (<em>calcul fait par Claude, déduit</em>) :</p>
+<table>
+<thead>
+<tr>
+<th>Calcul (FLOP)</th>
+<th>Taille du modèle</th>
+<th>Perte</th>
+<th>Écart au plancher</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>10²¹</td>
+<td>≈ 3 Md</td>
+<td>2,34</td>
+<td>0,65</td>
+</tr>
+<tr>
+<td>10²³</td>
+<td>≈ 29 Md</td>
+<td>2,01</td>
+<td>0,32</td>
+</tr>
+<tr>
+<td>10²⁵</td>
+<td>≈ 290 Md</td>
+<td>1,85</td>
+<td>0,16</td>
+</tr>
+<tr>
+<td>10²⁷</td>
+<td>≈ 2 900 Md</td>
+<td>1,77</td>
+<td>0,08</td>
+</tr>
+</tbody></table>
+<ul>
+<li>Chaque ×10 de calcul divise l&#39;écart au plancher par ≈ 1,4. C&#39;est le seau magique, avec ÷ 1,4 au lieu de ÷ 2.</li>
+<li>Llama 3 405B (3,8 × 10²⁵ FLOP, #16) est autour de la 3e ligne.</li>
+</ul>
+<p><strong>À quoi ça sert.</strong> Un labo entraîne des petits modèles pas chers, trace la courbe, puis la prolonge pour savoir ce que donnera le gros modèle à 100 M$. C&#39;est ce qu&#39;a fait Meta pour Llama 3.</p>
+<p><strong>Le piège.</strong></p>
+<ul>
+<li><strong>Ce n&#39;est pas une loi de la nature.</strong> C&#39;est une courbe mesurée puis prolongée. Kaplan (OpenAI, 2020) l&#39;a vue tenir sur plus de 7 ordres de grandeur (×10 000 000). Rien ne garantit la suite.</li>
+<li><strong>La perte n&#39;est pas l&#39;intelligence.</strong> Elle mesure « deviner le mot suivant », pas « savoir coder ». Meta a dû construire une 2e étape pour passer de la perte aux résultats d&#39;examens.</li>
+</ul>
+<h3>Partie 2 — Le plancher (la perte irréductible)</h3>
+<p><strong>En clair.</strong> « Ce midi, j&#39;ai mangé des … ». Pâtes ? Frites ? Crêpes ? Même quelqu&#39;un qui connaît parfaitement le français ne peut pas deviner ce que <strong>toi</strong> tu as mangé. Il se trompera souvent, même parfait. Ce reste d&#39;erreur, c&#39;est le <strong>plancher</strong>.</p>
+<p><strong>Exemple.</strong> La perte d&#39;un modèle se découpe en 3 morceaux :</p>
+<table>
+<thead>
+<tr>
+<th>Morceau</th>
+<th>D&#39;où vient l&#39;erreur</th>
+<th>Ce qui la fait baisser</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Le plancher</td>
+<td>Le texte est en partie imprévisible</td>
+<td>✖ rien</td>
+</tr>
+<tr>
+<td>Erreur due à la taille</td>
+<td>Le modèle est trop petit pour tout retenir</td>
+<td>✔ plus de paramètres</td>
+</tr>
+<tr>
+<td>Erreur due aux données</td>
+<td>Le modèle n&#39;a pas assez lu</td>
+<td>✔ plus de tokens lus</td>
+</tr>
+</tbody></table>
+<p>Un modèle a une perte de 1,95 = plancher 1,69 + taille 0,10 + données 0,16.</p>
+<ol>
+<li>On le rend infiniment grand : l&#39;erreur due à la taille tombe à 0.</li>
+<li>Les données n&#39;ont pas changé : 0,16 reste.</li>
+<li>Perte au mieux = 1,69 + 0 + 0,16 = <strong>1,85</strong>, pas 1,69.</li>
+</ol>
+<p>Pour toucher le plancher, il faut <strong>les deux</strong> : un modèle infini <strong>et</strong> des données infinies.</p>
+<p><strong>Dans la vraie vie.</strong> La formule de DeepMind (« Chinchilla », 2022) :</p>
+<p><strong>Perte = 1,69 + 406,4 ÷ N^0,34 + 410,7 ÷ D^0,28</strong></p>
+<ul>
+<li>1,69 = le plancher.</li>
+<li>N = le nombre de paramètres. D = le nombre de tokens lus.</li>
+<li>Pas besoin de calculer « N^0,34 ». Retiens seulement : plus N est grand, plus ce morceau est petit, mais lentement.</li>
+<li>Llama 3 405B : 1,69 + 0,05 + 0,08 ≈ <strong>1,82</strong> (<em>déduit</em>). Il ne reste que 0,13 au-dessus du plancher.</li>
+</ul>
+<p><strong>À quoi ça sert.</strong> Savoir <strong>quel morceau</strong> fait le plus d&#39;erreurs. Si c&#39;est la taille, on grossit le modèle. Si ce sont les données, on lui fait lire plus.</p>
+<p><strong>Le piège.</strong></p>
+<ul>
+<li><strong>Le plancher dépend des textes.</strong> Le code, très prévisible, a un plancher plus bas que les conversations.</li>
+<li><strong>La formule est contestée.</strong> Epoch AI (2024) a refait les calculs. Ils trouvent un plancher plus haut et un programme arrêté trop tôt chez DeepMind.</li>
+<li><strong>Près du plancher ≠ intelligence maximale.</strong> Les dernières erreurs sont souvent les plus dures (un calcul, un raisonnement). Un petit gain de perte peut cacher un gros gain de capacités.</li>
+</ul>
+<h3>Partie 3 — Partager le calcul (le calcul optimal)</h3>
+<p><strong>En clair.</strong> Tu as 10 heures avant l&#39;examen.</p>
+<ul>
+<li>10 heures à relire <strong>1 seule page</strong> : tu la connais par cœur, mais tu ne sais rien du reste.</li>
+<li>10 heures à survoler <strong>tout le manuel</strong> en 5 minutes par chapitre : tu as tout vu, rien retenu.</li>
+<li>Le mieux : entre les deux.</li>
+</ul>
+<p>Pour un modèle : le budget de calcul est fixe (calcul = 6 × N × D, #16). Si on fait un modèle plus gros (N monte), il lit moins (D baisse). Et l&#39;inverse.</p>
+<p><strong>Exemple.</strong> Budget : N × D = 1 000. Perte jouet = 1 + 10 ÷ N + 20 ÷ D.</p>
+<table>
+<thead>
+<tr>
+<th>N (taille)</th>
+<th>D = 1 000 ÷ N</th>
+<th>10 ÷ N</th>
+<th>20 ÷ D</th>
+<th>Perte = 1 + … + …</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>5</td>
+<td>200</td>
+<td>2</td>
+<td>0,1</td>
+<td>3,1</td>
+</tr>
+<tr>
+<td>10</td>
+<td>100</td>
+<td>1</td>
+<td>0,2</td>
+<td>2,2</td>
+</tr>
+<tr>
+<td><strong>20</strong></td>
+<td><strong>50</strong></td>
+<td><strong>0,5</strong></td>
+<td><strong>0,4</strong></td>
+<td><strong>1,9</strong> ✔</td>
+</tr>
+<tr>
+<td>50</td>
+<td>20</td>
+<td>0,2</td>
+<td>1</td>
+<td>2,2</td>
+</tr>
+<tr>
+<td>100</td>
+<td>10</td>
+<td>0,1</td>
+<td>2</td>
+<td>3,1</td>
+</tr>
+</tbody></table>
+<ul>
+<li>Trop petit (5) : il lit beaucoup, mais ne retient pas.</li>
+<li>Trop gros (100) : il a de la place, mais n&#39;a presque rien lu.</li>
+<li>Le meilleur est au milieu. Même budget : 1,9 au lieu de 3,1.</li>
+</ul>
+<blockquote>
+<p><strong>La méthode pour ne pas se tromper</strong></p>
+<ol>
+<li>Écrire la ligne complète avant de calculer : <strong>1 + __ + __</strong>. Ne jamais oublier le plancher.</li>
+<li>Dans chaque trou, vérifier qu&#39;on divise par la <strong>bonne lettre</strong> (N dans le 1er, D dans le 2e).</li>
+<li>N&#39;utiliser que les nombres de l&#39;énoncé, jamais ceux d&#39;un exemple d&#39;avant.</li>
+</ol>
+</blockquote>
+<p><strong>Dans la vraie vie : Gopher contre Chinchilla (DeepMind, 2022).</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Gopher</th>
+<th>Chinchilla</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Taille</td>
+<td>280 Md paramètres</td>
+<td>70 Md (4 fois moins)</td>
+</tr>
+<tr>
+<td>Lecture</td>
+<td>300 Md tokens</td>
+<td>1 400 Md (≈ 4 fois plus)</td>
+</tr>
+<tr>
+<td>Tokens par paramètre</td>
+<td>≈ 1</td>
+<td>≈ 20</td>
+</tr>
+<tr>
+<td>Budget de calcul</td>
+<td>le même</td>
+<td>le même</td>
+</tr>
+<tr>
+<td>Note à MMLU (examen à choix multiples)</td>
+<td>7 points de moins</td>
+<td>67,5 % ✔</td>
+</tr>
+</tbody></table>
+<ul>
+<li>Gopher était trop gros pour ce qu&#39;il avait lu, comme le N = 100 du jouet.</li>
+<li>La règle de DeepMind : quand on double la taille, on double ce qu&#39;il lit. Soit <strong>≈ 20 tokens par paramètre</strong>.</li>
+</ul>
+<p><strong>À quoi ça sert.</strong> Ne pas jeter de l&#39;argent dans un modèle trop gros. Gopher et GPT-3 étaient tous les deux « sous-entraînés ».</p>
+<p><strong>Le piège.</strong></p>
+<ul>
+<li><strong>La règle d&#39;avant disait le contraire.</strong> Kaplan (2020) conseillait de très gros modèles sur peu de données. Chinchilla l&#39;a renversée 2 ans plus tard.</li>
+<li><strong>Le 20 n&#39;est pas universel.</strong> Meta refait la mesure sur ses données : ≈ <strong>41 tokens par paramètre</strong> pour Llama 3 (16 550 Md ÷ 402 Md, <em>déduit</em>).</li>
+<li><strong>Près du meilleur point, la courbe est plate.</strong> Se tromper un peu de taille coûte peu. C&#39;est ce qui permet la partie 4.</li>
+</ul>
+<h3>Partie 4 — Sur-entraîner exprès, et jusqu&#39;où</h3>
+<p><strong>En clair.</strong> Deux élèves ont la même note. Le 1er répond à l&#39;oral en 10 secondes, le 2e en 50 secondes. Si l&#39;oral dure toute l&#39;année, tu préfères le 1er, même s&#39;il a dû réviser un peu plus longtemps.</p>
+<p>Pour un modèle : faire répondre coûte ≈ <strong>2 × paramètres</strong> opérations (FLOP) par token produit (#16). Un modèle plus petit répond moins cher, à chaque fois.</p>
+<p><strong>Exemple.</strong> A et B ont la même perte. A a 10 paramètres, B en a 40. Chacun produit 1 000 tokens.</p>
+<ol>
+<li>A : 2 × 10 × 1 000 = 20 000 FLOP.</li>
+<li>B : 2 × 40 × 1 000 = 80 000 FLOP.</li>
+<li>Même qualité : B coûte 4 fois plus. Et un modèle répond des milliards de fois.</li>
+</ol>
+<p><strong>Dans la vraie vie : Llama 3 8B (Meta, 2024).</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Chinchilla 70B</th>
+<th>Llama 3 8B</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Tokens par paramètre</td>
+<td>20</td>
+<td>≈ 1 900 (≈ 100 fois plus)</td>
+</tr>
+<tr>
+<td>Calcul d&#39;entraînement</td>
+<td>≈ 5,9 × 10²³</td>
+<td>≈ 7,2 × 10²³ (un peu plus)</td>
+</tr>
+<tr>
+<td>Perte (formule de Chinchilla)</td>
+<td>≈ 1,94</td>
+<td>≈ 1,95 (presque pareil)</td>
+</tr>
+<tr>
+<td>Coût d&#39;un token produit</td>
+<td>140 Md FLOP</td>
+<td>16 Md FLOP ✔ (≈ 9 fois moins)</td>
+</tr>
+</tbody></table>
+<p><em>Calculs de Claude avec la formule de Chinchilla ; pour le 8B, hors de la zone mesurée par DeepMind : prudence.</em></p>
+<p>Faire lire au modèle bien plus que les 20 tokens par paramètre, exprès, ça s&#39;appelle le <strong>sur-entraînement</strong>. Meta l&#39;écrit : ses petits modèles sont entraînés bien au-delà de l&#39;optimal, et ils sont meilleurs <strong>à coût de réponse égal</strong>.</p>
+<p><strong>À quoi ça sert.</strong> Faire des modèles bon marché à faire tourner : sur un téléphone, sur un serveur pas cher… ou à bord d&#39;un satellite, où chaque watt compte (projet 9).</p>
+<p><strong>Jusqu&#39;où : les 3 murs.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Mur</th>
+<th>Ce qui bloque</th>
+<th>Où on en est</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1. Le plancher</td>
+<td>Chaque ×10 rapporte moins (parties 1 et 2)</td>
+<td>Écart ÷ 1,4 par ×10</td>
+</tr>
+<tr>
+<td>2. Les données</td>
+<td>Il n&#39;y a pas assez de texte humain</td>
+<td>≈ 300 000 Md tokens, entièrement utilisés entre 2026 et 2032 (Epoch AI, 2024)</td>
+</tr>
+<tr>
+<td>3. L&#39;argent</td>
+<td>Chaque ×10 de calcul = facture ×10</td>
+<td>Coût du run final × 2,4 par an (#16)</td>
+</tr>
+</tbody></table>
+<p><strong>Le piège.</strong></p>
+<ul>
+<li><strong>Sur-entraîner consomme les données plus vite</strong> : 100 fois plus de lecture par paramètre. C&#39;est exactement ce qui rapproche le mur 2.</li>
+<li><strong>Remplacer le texte humain par du texte de modèles</strong> mène à l&#39;<span class="lex" tabindex="0" title="Effondrement du modèle — Ce qui arrive quand des modèles s'entraînent génération après génération sur du texte écrit par des modèles : les cas rares disparaissent, puis tout converge vers une réponse moyenne de plus en plus étroite.">effondrement du modèle</span> (#15).</li>
+<li><strong>Depuis fin 2024</strong>, les labos cherchent un autre axe : faire « réfléchir » le modèle plus longtemps au moment de répondre. C&#39;est l&#39;enquête #19.</li>
+</ul>
+<hr>
+<h2>3. Conclusion</h2>
+<p><strong>Ce qu&#39;il faut retenir.</strong></p>
+<ol>
+<li>Plus de calcul = toujours un peu mieux, mais chaque ×10 rapporte moins.</li>
+<li>Perte = plancher + erreur due à la taille + erreur due aux données. Le calcul ne réduit que les 2 dernières.</li>
+<li>À budget fixe : grandir taille et lecture <strong>ensemble</strong>. Chinchilla : ≈ 20 tokens par paramètre.</li>
+<li>On sur-entraîne exprès des petits modèles, parce qu&#39;ils coûtent moins cher à faire répondre.</li>
+<li>Trois murs : le plancher, les données, l&#39;argent.</li>
+</ol>
+<pre><code class="language-mermaid">flowchart LR
+  C[&quot;Budget de calcul&lt;br/&gt;C = 6 × N × D&quot;] --&gt; N[&quot;N = taille&quot;]
+  C --&gt; D[&quot;D = tokens lus&quot;]
+  N --&gt; L[&quot;Perte = plancher&lt;br/&gt;+ erreur taille&lt;br/&gt;+ erreur données&quot;]
+  D --&gt; L
+  L --&gt; R[&quot;Chaque ×10 de calcul&lt;br/&gt;= un pas plus petit&quot;]
+  R --&gt; M1[&quot;Mur 1 : le plancher&quot;]
+  R --&gt; M2[&quot;Mur 2 : les données&quot;]
+  R --&gt; M3[&quot;Mur 3 : l&#39;argent&quot;]
+</code></pre>
+<blockquote>
+<p><strong>Formules à apprendre par cœur</strong></p>
+<ul>
+<li><strong>Calcul d&#39;entraînement = 6 × N × D</strong> (N = paramètres, D = tokens lus)</li>
+<li><strong>Perte = plancher + erreur due à la taille + erreur due aux données</strong></li>
+<li><strong>Chaque ×10 de calcul → l&#39;écart au plancher ÷ un nombre fixe</strong> (≈ 1,4 chez Chinchilla)</li>
+<li><strong>Calcul optimal : ≈ 20 tokens par paramètre</strong> (Chinchilla ; Meta trouve ≈ 41)</li>
+<li><strong>Coût d&#39;un token produit ≈ 2 × N FLOP</strong></li>
+<li><strong>Stock de texte humain ≈ 300 000 Md tokens</strong> (Epoch, 2024)</li>
+</ul>
+</blockquote>
+<blockquote>
+<p><strong>Vocabulaire à apprendre par cœur</strong></p>
+<ul>
+<li><strong><span class="lex" tabindex="0" title="Loi d'échelle — Une formule mesurée qui dit de combien la perte baisse quand on augmente le calcul, la taille (N) ou les données (D). C'est une **loi de puissance** : chaque ×10 divise l'écart au plancher par un nombre fixe.">Loi d&#39;échelle</span></strong> : la règle mesurée qui dit de combien la perte baisse quand on met plus de calcul. Chaque ×10 rapporte moins.</li>
+<li><strong>Loi de puissance</strong> : multiplier l&#39;entrée par 10 divise la sortie par un nombre fixe.</li>
+<li><strong><span class="lex" tabindex="0" title="Perte irréductible — Le plancher de la perte : ce qui reste même avec un modèle infini et des données infinies, parce que le texte a une part imprévisible (« ce midi j'ai mangé des … »).">Perte irréductible</span></strong> (le plancher) : l&#39;erreur qui reste même avec un modèle infini et des données infinies.</li>
+<li><strong><span class="lex" tabindex="0" title="Calcul optimal (compute-optimal) — Pour un budget de calcul fixé (C ≈ 6ND), le partage entre taille du modèle (N) et tokens lus (D) qui donne la perte la plus basse. Trop gros = il n'a pas assez lu ; trop petit = il ne retient pas tout.">Calcul optimal (compute-optimal)</span></strong> : le meilleur partage taille / lecture pour un budget fixe.</li>
+<li><strong><span class="lex" tabindex="0" title="Ratio Chinchilla — ~20 tokens par paramètre : le meilleur modèle pour un budget d'entraînement donné (Chinchilla : 70B, 1 400 Md tokens). Dépassé exprès pour baisser le coût d'usage.">Ratio Chinchilla</span></strong> : ≈ 20 tokens lus par paramètre.</li>
+<li><strong><span class="lex" tabindex="0" title="Sur-entraînement (overtraining) — Faire lire à un modèle beaucoup plus de tokens que le calcul optimal. On paie plus à l'entraînement pour avoir un modèle plus petit, donc moins cher à chaque réponse (Inférence ≈ 2 × paramètres FLOP par token).">Sur-entraînement (overtraining)</span></strong> : lire bien plus que l&#39;optimal, exprès, pour un modèle plus petit et moins cher à faire répondre. ≠ <span class="lex" tabindex="0" title="Surapprentissage (overfitting) — Le modèle apprend le bruit de ses exemples au lieu de la règle : très bon à l'entraînement, moins bon sur du neuf.">surapprentissage</span> (apprendre par cœur).</li>
+<li><strong><span class="lex" tabindex="0" title="Fonction de perte (loss) — Le chiffre unique qui mesure à quel point le modèle se trompe sur des exemples. Apprendre = le faire baisser.">Perte</span></strong> : le chiffre qui mesure à quel point le modèle se trompe en devinant le token suivant. Plus bas = mieux.</li>
+</ul>
+</blockquote>
+<hr>
+<h2>Dossier (pour plus tard)</h2>
+<h3>Ce que ça révèle</h3>
+<ul>
+<li>Le progrès des modèles est en partie <strong>calculable d&#39;avance</strong>. C&#39;est ce qui a permis aux labos de lever des milliards : on savait ce que le prochain ×10 rapporterait.</li>
+<li>Mais chaque ×10 rapporte moins. Pour garder le rythme, il faut des ×10 de plus en plus chers.</li>
+<li>La vraie question économique n&#39;est pas « le plus gros modèle » mais « <strong>le meilleur modèle pour un coût de réponse donné</strong> ». D&#39;où des petits modèles qui lisent énormément.</li>
+</ul>
+<h4>Signaux à surveiller</h4>
+<table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Où on en est (vérifié le 24/11/2026)</th>
+<th>Ce qui le ferait bouger</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Le calcul des modèles de pointe</td>
+<td>× 5 par an depuis 2020 (Epoch AI, page mise à jour le 5/02/2026)</td>
+<td>Un ralentissement net : les labos parient moins sur le pré-entraînement</td>
+</tr>
+<tr>
+<td>Le plus gros data center connu</td>
+<td>≈ 1 100 000 équivalents H100 (page Epoch consultée le 24/11 ; 800 000 noté en #16)</td>
+<td>Plus de 2 M</td>
+</tr>
+<tr>
+<td>Le stock de texte humain</td>
+<td>≈ 300 000 Md tokens, entièrement utilisé entre 2026 et 2032 (Epoch, 2024)</td>
+<td>Une mise à jour d&#39;Epoch, ou un modèle qui dit avoir tout lu</td>
+</tr>
+<tr>
+<td>Les tokens par paramètre</td>
+<td>Chinchilla 20 ; Llama 3 405B ≈ 39 ; Llama 3 8B ≈ 1 900 (déduit)</td>
+<td>Un labo qui publie sa propre loi avec un ratio très différent</td>
+</tr>
+<tr>
+<td>Le coût de recherche autour du run final</td>
+<td>Le run final ne fait qu&#39;une minorité du calcul de R&amp;D (Epoch, mars 2026, d&#39;après les entrées en bourse de MiniMax et Z.ai)</td>
+<td>Des chiffres d&#39;un labo occidental</td>
+</tr>
+</tbody></table>
+<p>Confiance : élevée sur Kaplan, Hoffmann (Chinchilla), le papier Llama 3, Epoch. Les tableaux calculés avec la formule de Chinchilla sont <strong>déduits</strong>, et la formule est elle-même contestée (Epoch, 2024).</p>
+<h3>Termes vus</h3>
+<ul>
+<li>Nouveaux : <span class="lex" tabindex="0" title="Loi d'échelle — Une formule mesurée qui dit de combien la perte baisse quand on augmente le calcul, la taille (N) ou les données (D). C'est une **loi de puissance** : chaque ×10 divise l'écart au plancher par un nombre fixe.">Loi d&#39;échelle</span> · <span class="lex" tabindex="0" title="Perte irréductible — Le plancher de la perte : ce qui reste même avec un modèle infini et des données infinies, parce que le texte a une part imprévisible (« ce midi j'ai mangé des … »).">Perte irréductible</span> · <span class="lex" tabindex="0" title="Calcul optimal (compute-optimal) — Pour un budget de calcul fixé (C ≈ 6ND), le partage entre taille du modèle (N) et tokens lus (D) qui donne la perte la plus basse. Trop gros = il n'a pas assez lu ; trop petit = il ne retient pas tout.">Calcul optimal (compute-optimal)</span> · <span class="lex" tabindex="0" title="Sur-entraînement (overtraining) — Faire lire à un modèle beaucoup plus de tokens que le calcul optimal. On paie plus à l'entraînement pour avoir un modèle plus petit, donc moins cher à chaque réponse (Inférence ≈ 2 × paramètres FLOP par token).">Sur-entraînement (overtraining)</span></li>
+<li>Déjà vus, approfondis : <span class="lex" tabindex="0" title="Ratio Chinchilla — ~20 tokens par paramètre : le meilleur modèle pour un budget d'entraînement donné (Chinchilla : 70B, 1 400 Md tokens). Dépassé exprès pour baisser le coût d'usage.">Ratio Chinchilla</span> · <span class="lex" tabindex="0" title="Rendement logarithmique — Chaque facteur 10 de ressources donne le même gain. 16× plus de calcul ne vaut qu'environ 13 mois d'avance.">Rendement logarithmique</span> · <span class="lex" tabindex="0" title="Fonction de perte (loss) — Le chiffre unique qui mesure à quel point le modèle se trompe sur des exemples. Apprendre = le faire baisser.">Fonction de perte (loss)</span></li>
+<li>Déjà vus, reliés : <span class="lex" tabindex="0" title="C ≈ 6ND — Calcul d'entraînement ≈ 6 × paramètres × tokens. Retombe pile sur les 3,8 × 10²⁵ de Llama 3.">C ≈ 6ND</span> · <span class="lex" tabindex="0" title="FLOP — Une seule opération de calcul sur des nombres à virgule : une multiplication ou une addition. On compte le travail total d'un entraînement en FLOP. « FLOP/s » = opérations par seconde : la vitesse d'une puce.">FLOP</span> · <span class="lex" tabindex="0" title="Paramètres — Les nombres réglés pendant l'entraînement, où sont stockées les connaissances.">Paramètres</span> · <span class="lex" tabindex="0" title="Token — Morceau de texte d'environ 4 caractères en anglais. C'est l'unité de lecture, d'écriture et de facturation.">Token</span> · <span class="lex" tabindex="0" title="Inférence — Chaque fois que le modèle répond. Ça coûte à chaque requête.">Inférence</span> · <span class="lex" tabindex="0" title="Pré-entraînement — La phase où le modèle apprend à prédire la suite sur un corpus géant.">Pré-entraînement</span> · <span class="lex" tabindex="0" title="Données synthétiques — Du texte écrit par un modèle d'IA, utilisé pour entraîner un autre modèle (ou le même).">Données synthétiques</span> · <span class="lex" tabindex="0" title="Effondrement du modèle — Ce qui arrive quand des modèles s'entraînent génération après génération sur du texte écrit par des modèles : les cas rares disparaissent, puis tout converge vers une réponse moyenne de plus en plus étroite.">Effondrement du modèle</span> · <span class="lex" tabindex="0" title="Équivalent H100 — Unité pour comparer du calcul : une puce comptée en fraction ou multiple d'une Nvidia H100.">Équivalent H100</span></li>
+</ul>
+<h3>Anomalies relevées</h3>
+<ul>
+<li><strong>La « loi » a été renversée en 2 ans.</strong> Kaplan (2020) : gros modèles, peu de données. Chinchilla (2022) : grandir les deux ensemble. Ça contredit l&#39;idée qu&#39;une loi d&#39;échelle est une règle stable. Piste : ce sont des mesures, qui dépendent de la façon d&#39;entraîner (Kaplan n&#39;ajustait pas le taux d&#39;apprentissage selon la durée, d&#39;après la lecture courante ; <em>à vérifier dans le papier</em>).</li>
+<li><strong>Le ratio optimal change selon qui mesure.</strong> Chinchilla : ≈ 20 tokens par paramètre. Meta, pour Llama 3 : ≈ 41 (déduit de 402 Md / 16 550 Md). Et Epoch dit que la formule publiée par DeepMind ne redonne même pas son propre 20. Piste : le ratio dépend de la qualité des données (Bi et al., 2024, cités par Epoch).</li>
+</ul>
+<h3>Croisements avec d&#39;autres branches</h3>
+<ul>
+<li><strong>Spatial, IA en orbite (projet 9).</strong> À bord d&#39;un satellite, chaque watt compte. Le bloc 4 dit quel modèle embarquer : un petit modèle sur-entraîné. Llama 3 8B coûte ≈ 16 Md FLOP par token, contre ≈ 810 Md pour le 405B (<em>déduit</em>, 2 × N). 50 fois moins de calcul par réponse.</li>
+<li><strong>Spatial, data centers en orbite.</strong> Si chaque ×10 de calcul rapporte moins, l&#39;argument « il faut toujours plus de calcul d&#39;entraînement » s&#39;affaiblit. Mais le calcul d&#39;inférence, lui, grandit avec le nombre d&#39;utilisateurs. Question pour la case X3 : l&#39;orbite sert-elle plutôt à entraîner ou à répondre ?</li>
+<li><strong>Économie.</strong> Le run final ne fait qu&#39;une minorité du calcul de R&amp;D (Epoch, mars 2026). Ça répond en partie à la question ouverte 2 de #16 : le vrai coût d&#39;un modèle est bien plus haut que son run final.</li>
+<li><strong>Pouvoir.</strong> Les lois sur l&#39;IA (UE, États-Unis…) visent les modèles par leur calcul d&#39;entraînement en FLOP. Si le progrès vient d&#39;ailleurs (sur-entraînement de petits modèles, calcul au moment de répondre), ces seuils visent mal (<em>Governing AI Beyond the Pretraining Frontier</em>, 2025).</li>
+</ul>
+<h3>Questions ouvertes</h3>
+<ol>
+<li>Les lois d&#39;échelle tiennent-elles encore au-delà de 10²⁶ FLOP ? Aucun labo de pointe ne publie ses courbes depuis 2024.</li>
+<li>Le texte produit par des modèles peut-il remplacer le texte humain sans effondrement ?</li>
+<li>Les « capacités émergentes » (Wei et al., 2022 : une capacité qui apparaît d&#39;un coup à une certaine taille) sont-elles réelles, ou un effet de la façon de mesurer (Schaeffer et al., 2023) ? <em>Non relu, confiance moyenne.</em></li>
+<li>Quel ratio tokens par paramètre pour un modèle fait pour tourner en orbite ?</li>
+</ol>
+<h3>Prochaine enquête</h3>
+<ul>
+<li><strong>#18 — Fine-tuning et RLHF.</strong> Le pré-entraînement donne un modèle qui devine le token suivant. Comment en fait-on un assistant qui répond aux questions et refuse certaines choses ?</li>
+</ul>
+<h3>Approfondissement</h3>
+<ul>
+<li><strong>Source primaire.</strong> Hoffmann et al., <em>Training Compute-Optimal Large Language Models</em> (2022), <a href="https://arxiv.org/abs/2203.15556" target="_blank" rel="noreferrer">arXiv 2203.15556</a>. Lire l&#39;abstract, puis la figure 1 (où tombent GPT-3, Gopher, Chinchilla) et le tableau 3 (taille → tokens conseillés). À déposer dans <code>Bibliothèque/PDF/</code> sous <code>2022 Hoffmann - Chinchilla compute-optimal.pdf</code>.</li>
+<li><strong>Exercice Kaggle, 20 min.</strong> Entraîne ton mini-GPT 3 fois avec le même calcul (même produit taille × tokens), mais 3 tailles différentes. Note la perte finale. Trace les 3 points. Trouves-tu un minimum au milieu, comme au bloc 3 ?</li>
+<li><strong>Question bonus.</strong> Avec 10 fois plus de calcul, au ratio de Chinchilla, par combien multiplie-t-on N ? Et D ? (indice : 6 × N × D, et N et D grandissent ensemble)</li>
+</ul>
+<h3>Sources</h3>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Ce qu&#39;elle apporte</th>
+<th>Confiance</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Kaplan et al., <a href="https://arxiv.org/abs/2001.08361" target="_blank" rel="noreferrer">Scaling Laws for Neural Language Models</a>, OpenAI, 2020</td>
+<td>La perte suit une loi de puissance en taille, données et calcul, sur plus de 7 ordres de grandeur ; à budget fixe, très gros modèles sur relativement peu de données</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Hoffmann et al., <a href="https://arxiv.org/abs/2203.15556" target="_blank" rel="noreferrer">Training Compute-Optimal Large Language Models</a>, DeepMind, 2022</td>
+<td>Plus de 400 modèles, 70 M à 16 Md de paramètres, 5 à 500 Md de tokens ; doubler la taille = doubler les tokens ; Chinchilla 70B contre Gopher 280B, même budget, 4 fois plus de données ; MMLU 67,5 %, plus de 7 points au-dessus de Gopher</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Formule de Chinchilla, L = 1,69 + 406,4/N^0,34 + 410,7/D^0,28, citée par <a href="https://epoch.ai/publications/chinchilla-scaling-a-replication-attempt" target="_blank" rel="noreferrer">Epoch AI</a> et <a href="https://leonericsson.github.io/blog/2023-08-01-chinchilla" target="_blank" rel="noreferrer">L. Ericsson</a></td>
+<td>Les tableaux des blocs 1, 2 et 4 (déduits)</td>
+<td>Moyenne (formule contestée)</td>
+</tr>
+<tr>
+<td>Besiroglu et al., <a href="https://arxiv.org/abs/2404.10102" target="_blank" rel="noreferrer">Chinchilla Scaling: A replication attempt</a>, Epoch AI, 2024</td>
+<td>Plancher et exposant plus hauts ; optimiseur arrêté trop tôt ; la formule publiée ne redonne pas le ratio de 20</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Meta, The Llama 3 Herd of Models, 2024, section 3.2.1 (fiche ; PDF dans <code>Bibliothèque/PDF/</code>)</td>
+<td>Loi d&#39;échelle propre : 402 Md sur 16,55 T tokens pour 3,8 × 10²⁵ ; courbes plates près du minimum ; les petits modèles entraînés bien au-delà de l&#39;optimal ; la perte ne prédit pas directement les examens</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Villalobos et al., <a href="https://epoch.ai/blog/will-we-run-out-of-data-limits-of-llm-scaling-based-on-human-generated-data" target="_blank" rel="noreferrer">Will we run out of data?</a>, Epoch AI, juin 2024</td>
+<td>Stock ≈ 300 T tokens (100 à 1 000 T) ; entièrement utilisé entre 2026 et 2032, plus tôt si sur-entraînement</td>
+<td>Élevée (projection)</td>
+</tr>
+<tr>
+<td>Epoch AI, <a href="https://epoch.ai/trends-in-ai" target="_blank" rel="noreferrer">Trends in AI</a>, mis à jour le 5/02/2026</td>
+<td>Calcul × 5 par an depuis 2020 ; plus gros data center ≈ 1 100 000 équivalents H100</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Epoch AI, <a href="https://epoch.ai/gradient-updates/r-and-d-vs-training-compute" target="_blank" rel="noreferrer">Final training runs account for a minority of R&amp;D compute spending</a>, 23/03/2026</td>
+<td>Le run final, minorité du calcul de R&amp;D (MiniMax, Z.ai)</td>
+<td>Moyenne (2 labos chinois)</td>
+</tr>
+<tr>
+<td><a href="https://techcrunch.com/2024/11/20/ai-scaling-laws-are-showing-diminishing-returns-forcing-ai-labs-to-change-course" target="_blank" rel="noreferrer">TechCrunch</a>, 20/11/2024 ; <a href="https://arxiv.org/abs/2502.15719" target="_blank" rel="noreferrer">Governing AI Beyond the Pretraining Frontier</a>, 2025</td>
+<td>Rendements décroissants rapportés fin 2024, virage vers le calcul au moment de répondre ; les seuils réglementaires en FLOP</td>
+<td>Moyenne (presse, sources anonymes)</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>Ce qui manque</strong></p>
+<ul>
+<li>Aucune courbe de loi d&#39;échelle publiée par OpenAI, Anthropic ou Google depuis 2024.</li>
+<li>Les tableaux « perte selon le calcul » et « Chinchilla contre Llama 3 8B » sont <strong>calculés</strong> avec une formule contestée, et en dehors de sa zone de mesure pour Llama 3 8B.</li>
+<li>Le nombre exact de tokens de Llama 3 8B : « environ 15 T » pour toute la famille (papier Meta).</li>
+<li>Les capacités émergentes : pas relu les papiers sources.</li>
+</ul>
+</blockquote>
+<blockquote>
+<p><strong>Pour plus tard (hors du fil)</strong>
+<strong>Lire une perte en probabilité.</strong> Une perte L correspond à une probabilité moyenne (au sens de la moyenne géométrique) d&#39;environ e^(−L) donnée au bon token. Perte 2,34 → ≈ 10 %. Perte 1,77 → ≈ 17 %. Plancher 1,69 → ≈ 18 %. <em>Déduit.</em></p>
+<p><strong>Les exposants.</strong> Kaplan : perte ∝ N^(−0,076) et D^(−0,095) (lecture courante du papier, à vérifier dans la section 1.2). Chinchilla : N et D grandissent tous les deux comme la racine carrée du calcul.</p>
+<p><strong>Les autres lois d&#39;échelle.</strong> Il en existe pour l&#39;inférence (plus de temps de réflexion = meilleure réponse), pour les données répétées (relire le même texte 4 fois ≈ presque aussi bien que du neuf, Muennighoff et al., 2023, <em>non relu</em>), pour les modèles d&#39;images.</p>
+</blockquote>

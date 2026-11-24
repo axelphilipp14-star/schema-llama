@@ -1,0 +1,331 @@
+<p><strong>Branche :</strong> Comment ça marche · Carte de l&#39;IA</p>
+<h2>Avant de commencer : le sujet en clair</h2>
+<p><em>À lire en premier. 3 minutes, sans jargon. La partie sérieuse commence à « La question ».</em></p>
+<h3>Où on en est</h3>
+<ul>
+<li><strong>#7</strong> : apprendre = faire baisser la perte en ajustant des réglages.</li>
+<li><strong>#8</strong> : on sait calculer, pour chaque réglage, dans quel sens le bouger (la règle de la chaîne).</li>
+<li><strong>#9</strong> : faire baisser la perte ne suffit pas, il faut juger sur du neuf.</li>
+<li><strong>#10, aujourd&#39;hui</strong> : on ouvre la boîte. De quoi est fait un réseau, brique par brique ? Réponse courte : de briques très bêtes, et d&#39;un petit « pli » entre elles qui fait tout.</li>
+</ul>
+<h3>L&#39;histoire en une image : la règle pliante</h3>
+<p>Prends des règles droites en plastique et colle-les bout à bout. Avec 2 règles ou avec 100, tu obtiens toujours… une longue règle droite. Tu ne peux dessiner aucune forme.</p>
+<p>Maintenant, mets une <strong>charnière</strong> entre chaque règle, comme un mètre de menuisier. Avec 2 segments, tu fais un coude. Avec 100, tu suis presque n&#39;importe quel contour.</p>
+<p>Un réseau de neurones, c&#39;est exactement ça. Chaque neurone est un segment droit. La fonction d&#39;activation, c&#39;est la charnière.</p>
+<table>
+<thead>
+<tr>
+<th>Dans l&#39;histoire</th>
+<th>Dans l&#39;IA</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Un segment de règle droit</td>
+<td>Un <strong>neurone</strong> : il multiplie et additionne, c&#39;est une droite</td>
+</tr>
+<tr>
+<td>L&#39;inclinaison et la position du segment</td>
+<td>Les <strong>poids</strong> et le <strong>biais</strong>, les réglages appris (#7)</td>
+</tr>
+<tr>
+<td>Les segments collés bout à bout</td>
+<td>Les <strong>couches</strong> empilées</td>
+</tr>
+<tr>
+<td>Coller sans charnière : toujours une droite</td>
+<td>Empiler sans activation : 100 couches = 1 seule</td>
+</tr>
+<tr>
+<td>La charnière</td>
+<td>La <strong>fonction d&#39;activation</strong></td>
+</tr>
+<tr>
+<td>Plier pour suivre un contour</td>
+<td>Apprendre une forme compliquée (reconnaître un chat, prédire un mot)</td>
+</tr>
+</tbody></table>
+<h3>Les 4 mots à avoir en tête</h3>
+<ul>
+<li><strong>Neurone (artificiel)</strong> : un mini-calcul. Il prend des nombres, multiplie chacun par un poids, additionne, ajoute un biais.</li>
+<li><strong>Couche</strong> : beaucoup de neurones côte à côte qui regardent les mêmes entrées. On empile les couches.</li>
+<li><strong>Linéaire</strong> : qui donne une droite. Multiplier puis additionner, c&#39;est linéaire.</li>
+<li><strong>Fonction d&#39;activation</strong> : le petit calcul appliqué après chaque neurone. Il doit <strong>plier</strong> la droite (être non linéaire), sinon il ne sert à rien.</li>
+</ul>
+<h3>Le fil de l&#39;enquête, en 5 étapes</h3>
+<ol>
+<li><strong>La brique</strong> : un neurone = somme pondérée + biais. Rien de plus.</li>
+<li><strong>Le piège</strong> : empiler des neurones sans activation ne sert à rien. Ton exercice : y = 6x − 1, une droite.</li>
+<li><strong>La charnière</strong> : une activation qui plie (ReLU) suffit à résoudre le OU exclusif, impossible pour une droite.</li>
+<li><strong>Pourquoi ReLU a gagné</strong> : la sigmoïde étouffe le gradient couche après couche. Lien direct avec la règle de la chaîne (#8).</li>
+<li><strong>Aujourd&#39;hui</strong> : les LLM utilisent une activation choisie par essais, et son inventeur admet ne pas savoir pourquoi elle marche.</li>
+</ol>
+<h2>La question</h2>
+<p><strong>Un neurone artificiel ne fait qu&#39;une somme pondérée. Pourquoi empiler des dizaines de couches de ces sommes ne sert à rien sans une petite fonction glissée entre chaque couche, et qu&#39;est-ce que cette fonction doit avoir ?</strong></p>
+<p><strong>Réponse :</strong> une somme pondérée est <strong>linéaire</strong> : elle donne une droite (ou un plan). Une droite d&#39;une droite reste une droite. Donc 100 couches sans activation se réduisent exactement à <strong>une seule</strong> couche : y = 3(2x + 1) − 4 = 6x − 1. La fonction d&#39;activation doit <strong>plier</strong> le signal, être non linéaire. Avec un pli par neurone, l&#39;empilement peut dessiner presque n&#39;importe quelle forme : deux neurones ReLU suffisent pour le OU exclusif, impossible avec une droite. Deuxième exigence, liée à la règle de la chaîne (#8) : sa <strong>pente</strong> ne doit pas écraser le gradient. La sigmoïde plafonne à 0,25 par couche, ReLU laisse passer 1. C&#39;est pour ça que ReLU (puis ses cousines GELU et SwiGLU) a remplacé la sigmoïde.</p>
+<p>Nuance : le neurone artificiel n&#39;a presque rien de biologique. Le nom vient de 1943 ; un vrai neurone est bien plus complexe. Pense « petite calculette », pas « cerveau ».</p>
+<h2>Schéma central</h2>
+<blockquote>
+<p><strong>Schéma de l&#39;artifact d&#39;origine</strong>
+schéma central · un neurone, puis 2 couches sans et avec activation</p>
+</blockquote>
+<p>En haut : tout ce que fait un neurone. Seule la case bleue n&#39;est pas une droite. En bas : sans elle, l&#39;empilement reste une droite ; avec elle, chaque neurone ajoute un coude.</p>
+<h2>Le mécanisme, pas à pas</h2>
+<h3>1. La brique : un neurone</h3>
+<p>Un neurone reçoit des nombres (x1, x2, …), multiplie chacun par un <strong>poids</strong> (w1, w2, …), additionne, ajoute un <strong>biais</strong> b. Puis il passe le résultat dans la <strong>fonction d&#39;activation</strong> f.</p>
+<pre><code class="language-latex">z = w_1 x_1 + w_2 x_2 + \dots + b \qquad \text{sortie} = f(z)
+</code></pre>
+<ul>
+<li>Les poids disent quelle entrée compte, et dans quel sens (positif = pousse, négatif = freine).</li>
+<li>Le biais déplace le seuil : il décide à partir de quand le neurone « s&#39;allume ».</li>
+<li>Poids et biais sont les <strong>paramètres</strong> que la descente de gradient ajuste (#7, #8). L&#39;activation, elle, est fixée à l&#39;avance par les chercheurs.</li>
+</ul>
+<h3>2. Une couche, un réseau</h3>
+<p>Une <strong>couche</strong> = des milliers de neurones qui lisent les mêmes entrées en parallèle, chacun avec ses propres poids. Les couches entre l&#39;entrée et la sortie s&#39;appellent <strong>couches cachées</strong>. Un empilement de couches de ce type s&#39;appelle un <strong>MLP</strong> (perceptron multicouche).</p>
+<p>Dans un LLM, chaque bloc du transformer contient un MLP. Ordre de grandeur, Llama 3 8B : 32 blocs, et dans chacun un MLP de 14 336 neurones qui lisent des vecteurs de 4 096 nombres. Avec SwiGLU (section 6), ça fait 3 matrices de 4 096 × 14 336 par bloc, soit <strong>environ 5,6 milliards de paramètres sur 8, à peu près 70 %</strong>. Calcul fait par moi à partir des dimensions publiées ; confiance moyenne-haute.</p>
+<p>Donc l&#39;essentiel des « connaissances » d&#39;un LLM est stocké dans ces neurones tout bêtes, pas dans l&#39;attention.</p>
+<h3>3. Le piège : sans activation, tout s&#39;effondre</h3>
+<p>Ton exercice, pas à pas :</p>
+<ol>
+<li>Couche 1 : h = 2x + 1.</li>
+<li>Couche 2 : y = 3h − 4.</li>
+<li>On remplace h par ce qu&#39;il vaut : y = 3 × (2x + 1) − 4.</li>
+<li>On développe : y = 6x + 3 − 4 = <strong>6x − 1</strong>.</li>
+</ol>
+<p>Résultat : encore une droite. Les deux couches équivalent à <strong>un seul</strong> neurone de poids 6 et de biais −1. La 2e couche n&#39;a rien ajouté.</p>
+<p>C&#39;est vrai quel que soit le nombre de couches et de neurones : multiplier puis additionner, répété 100 fois, reste « multiplier puis additionner ». Sans activation, un réseau de 126 couches comme Llama 3 405B serait mathématiquement une seule couche.</p>
+<h3>4. La charnière : ReLU plie la droite</h3>
+<p>ReLU fait la chose la plus simple qui casse la droite : <code>ReLU(z) = max(0, z)</code>. Négatif → 0. Positif → on laisse passer. C&#39;est un <strong>coude</strong>.</p>
+<p>Preuve sur le OU exclusif (le problème de Minsky et Papert, 1969, lien avec l&#39;hiver de l&#39;IA en #2). Deux neurones cachés, puis une sortie :</p>
+<ul>
+<li>h1 = ReLU(x1 + x2)</li>
+<li>h2 = ReLU(x1 + x2 − 1)</li>
+<li>sortie = h1 − 2 × h2</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>x1</th>
+<th>x2</th>
+<th>h1</th>
+<th>h2</th>
+<th>Sortie</th>
+<th>Voulu</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0 (−1 → 0)</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody></table>
+<p>Tout est juste. Enlève les ReLU : la sortie devient (x1 + x2) − 2(x1 + x2 − 1) = 2 − x1 − x2. Elle donne 2, 1, 1, 0 : faux en (0,0). Le ReLU qui transforme −1 en 0 sur la première ligne, c&#39;est <strong>le</strong> pli qui sauve tout.</p>
+<p>En général, chaque neurone ReLU ajoute un coude possible. Assez de coudes = n&#39;importe quelle forme. C&#39;est le <strong>théorème d&#39;approximation universelle</strong> (Cybenko, 1989, démontré pour la sigmoïde) : un réseau à <strong>une seule</strong> couche cachée peut approcher n&#39;importe quelle fonction continue, à condition d&#39;avoir assez de neurones. Pourquoi empiler alors ? Telgarsky (2016) montre que certaines fonctions qu&#39;un réseau profond fait avec peu de neurones demandent un nombre de neurones <strong>exponentiel</strong> à un réseau peu profond. La profondeur = des plis de plis, beaucoup plus économes.</p>
+<h3>5. Pourquoi ReLU a remplacé la sigmoïde</h3>
+<p>La sigmoïde est aussi non linéaire, donc elle résout le piège de la section 3. Son problème est ailleurs : sa pente ne dépasse jamais <strong>0,25</strong>, et devient presque 0 dès que z est grand ou très négatif (elle « sature »).</p>
+<p>Or la règle de la chaîne (#8, ta Q1 du quiz) <strong>multiplie</strong> les pentes locales en remontant les couches. Avec la sigmoïde, dans le meilleur cas :</p>
+<ul>
+<li>2 couches : 0,25 × 0,25 = 0,06</li>
+<li>10 couches : 0,25^10 ≈ 0,000001 (un millionième)</li>
+</ul>
+<p>Les premières couches ne reçoivent presque plus de signal : c&#39;est le <strong>gradient qui disparaît</strong> (#8). ReLU a une pente de <strong>1</strong> quand il est allumé : le signal passe intact.</p>
+<p>Le résultat qui a fait basculer le domaine : dans le papier AlexNet (2012), un réseau à 4 couches avec ReLU atteint 25 % d&#39;erreur d&#39;entraînement sur CIFAR-10 <strong>6 fois plus vite</strong> que le même réseau avec tanh, une cousine de la sigmoïde. Les auteurs précisent que l&#39;écart varie selon l&#39;architecture. Confiance : haute (figure 1 du papier).</p>
+<p>Bonus : <code>max(0, z)</code> ne coûte presque rien à calculer.</p>
+<p>Défaut de ReLU : un neurone dont z reste toujours négatif sort toujours 0, avec une pente 0. Il ne reçoit plus jamais de gradient et ne peut plus réapprendre : c&#39;est un <strong>neurone mort</strong>.</p>
+<h3>6. Ce qu&#39;utilisent les LLM aujourd&#39;hui</h3>
+<table>
+<thead>
+<tr>
+<th>Époque</th>
+<th>Activation</th>
+<th>Idée</th>
+<th>Exemples</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1980-2010</td>
+<td>Sigmoïde, tanh</td>
+<td>Courbe en S, sature</td>
+<td>Premiers réseaux</td>
+</tr>
+<tr>
+<td>2012 →</td>
+<td>ReLU</td>
+<td>Coude net, max(0, z)</td>
+<td>AlexNet, la plupart des réseaux d&#39;images</td>
+</tr>
+<tr>
+<td>2016 →</td>
+<td>GELU</td>
+<td>ReLU arrondi, pas de coupure nette</td>
+<td>GPT-2, BERT</td>
+</tr>
+<tr>
+<td>2020 →</td>
+<td>SwiGLU</td>
+<td>Deux projections multipliées : l&#39;une sert de « porte » à l&#39;autre</td>
+<td>PaLM, Llama 2 et 3</td>
+</tr>
+</tbody></table>
+<p>SwiGLU (Shazeer, Google, 2020) ne se contente plus de plier : il calcule deux versions du signal et en utilise une pour doser l&#39;autre. D&#39;où 3 matrices au lieu de 2 dans le MLP. Shazeer l&#39;a trouvée en testant des variantes, pas en la déduisant. Voir l&#39;anomalie plus bas.</p>
+<h2>Ce que ça révèle</h2>
+<p><em>Écris ta ligne dans ton carnet avant de lire celle-ci.</em></p>
+<p><strong>La puissance d&#39;un réseau ne vient pas de ses neurones, qui sont presque tous bêtes, mais du petit pli entre eux. Sans pli, la profondeur ne vaut rien.</strong></p>
+<p>Trois conséquences qui sortent directement du mécanisme :</p>
+<ol>
+<li><strong>Un LLM, c&#39;est surtout des multiplications.</strong> Un neurone = multiplier et additionner ; une couche = une grosse multiplication de matrices ; l&#39;activation coûte presque rien à côté. C&#39;est exactement l&#39;opération que les GPU font en masse. D&#39;où la place des puces dans l&#39;économie (#4) et la géopolitique (#6) de l&#39;IA.</li>
+<li><strong>Les choix d&#39;architecture se font souvent par essais.</strong> ReLU, GELU, SwiGLU : chaque passage a été gagné par des mesures, pas par une théorie. Les labos testent, gardent ce qui fait baisser la perte, et expliquent après, quand ils y arrivent.</li>
+<li><strong>La profondeur ne marche que si le gradient traverse.</strong> Un pli qui écrase la pente (sigmoïde) bloque l&#39;apprentissage des premières couches. Pour empiler 126 couches, il faut aussi d&#39;autres astuces : les connexions résiduelles et la normalisation (#14).</li>
+</ol>
+<h2>Anomalie pour ton carnet</h2>
+<p><strong>L&#39;activation des LLM actuels n&#39;a pas d&#39;explication, de l&#39;aveu de son inventeur.</strong> Noam Shazeer (co-auteur du transformer) teste en 2020 des variantes de MLP. SwiGLU gagne. Il conclut qu&#39;il n&#39;offre aucune explication à son succès, et l&#39;attribue, avec humour, à la « divine benevolence ». Pourtant PaLM, Llama 2 et Llama 3 l&#39;adoptent. Llama 3 405B, 126 couches, repose sur une brique dont on sait qu&#39;elle marche, sans savoir pourquoi.</p>
+<p>C&#39;est la même famille que les anomalies de #9 (double descente, grokking) : la pratique est en avance sur la théorie.</p>
+<h2>Signaux à surveiller</h2>
+<ul>
+<li><strong>Une vraie explication des GLU.</strong> Des papiers de 2026 proposent des pistes (par exemple côté stabilité de l&#39;optimisation). Si l&#39;une est confirmée, on pourra concevoir la prochaine activation au lieu de la chercher à tâtons. Confiance : moyenne que la question soit encore ouverte fin 2026 (je n&#39;ai pas tout lu).</li>
+<li><strong>L&#39;activation dans les fiches techniques des nouveaux modèles ouverts.</strong> À ce jour (2 nov. 2026), SwiGLU domine chez les modèles dont l&#39;architecture est publiée. Un changement signalerait une découverte.</li>
+<li><strong>Ce que représente un neurone isolé.</strong> Un neurone de LLM réagit souvent à plusieurs concepts sans rapport. C&#39;est un des grands sujets de l&#39;interprétabilité (#26).</li>
+</ul>
+<h2>Croisement</h2>
+<p><strong>Branche 3, Économie.</strong> Environ 70 % des paramètres de Llama 3 8B sont dans les MLP. Or en #4, écrire un token = relire tous les paramètres en mémoire. Donc l&#39;essentiel du coût du decode, c&#39;est relire ces neurones. C&#39;est précisément cette partie que le <em>mixture of experts</em> découpe pour n&#39;en activer qu&#39;une fraction par token (#21) : une baisse de coût qui vient directement de l&#39;architecture d&#39;aujourd&#39;hui.</p>
+<h2>Lexique</h2>
+<table>
+<thead>
+<tr>
+<th>Terme</th>
+<th>Ce que ça veut dire</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Neurone artificiel</td>
+<td>Mini-calcul : multiplie chaque entrée par un poids, additionne, ajoute un biais, passe le tout dans l&#39;activation</td>
+</tr>
+<tr>
+<td>Poids / biais</td>
+<td>Les réglages appris d&#39;un neurone. Poids = l&#39;importance de chaque entrée. Biais = où se place le seuil</td>
+</tr>
+<tr>
+<td>Linéaire / non linéaire</td>
+<td>Linéaire = donne une droite (multiplier, additionner). Une droite d&#39;une droite reste une droite</td>
+</tr>
+<tr>
+<td>Fonction d&#39;activation</td>
+<td>Le calcul fixe après chaque neurone. Doit plier la droite, sinon 100 couches = 1</td>
+</tr>
+<tr>
+<td>Couche cachée</td>
+<td>Toute couche entre l&#39;entrée et la sortie</td>
+</tr>
+<tr>
+<td>MLP (perceptron multicouche)</td>
+<td>Couches de neurones empilées avec activation. Dans un LLM, la partie qui porte ~70 % des paramètres</td>
+</tr>
+<tr>
+<td>Sigmoïde</td>
+<td>Activation en S, entre 0 et 1. Pente max 0,25 : étouffe le gradient dans un réseau profond</td>
+</tr>
+<tr>
+<td>ReLU</td>
+<td>max(0, z). Coude net, pente 1 quand allumé. Standard depuis AlexNet (2012)</td>
+</tr>
+<tr>
+<td>Neurone mort</td>
+<td>Neurone ReLU toujours à 0 : pente 0, il ne réapprend plus jamais</td>
+</tr>
+<tr>
+<td>GELU / SwiGLU</td>
+<td>Successeurs de ReLU dans les LLM. SwiGLU (Llama, PaLM) utilise une projection comme « porte » de l&#39;autre</td>
+</tr>
+<tr>
+<td>OU exclusif (XOR)</td>
+<td>1 si une seule entrée vaut 1. Impossible avec une droite, faisable avec 2 neurones ReLU</td>
+</tr>
+<tr>
+<td>Théorème d&#39;approximation universelle</td>
+<td>Une couche cachée avec assez de neurones approche toute fonction continue (Cybenko, 1989). Ne dit pas combien de neurones</td>
+</tr>
+</tbody></table>
+<h2>Questions ouvertes et prochaines enquêtes</h2>
+<ul>
+<li>Pourquoi SwiGLU marche mieux que ReLU ou GELU ? Personne n&#39;a de réponse établie.</li>
+<li>Un neurone de LLM « représente »-t-il quelque chose ? Souvent plusieurs concepts à la fois. → #26.</li>
+<li>Profondeur contre largeur : pourquoi 126 couches de 16 384 et pas 30 couches beaucoup plus larges ? Telgarsky donne un début de réponse théorique, les labos tranchent par mesures (lois d&#39;échelle, #17).</li>
+</ul>
+<p><strong>Suite logique :</strong> #11 Les embeddings. Tu sais maintenant ce qu&#39;un neurone fait avec des nombres. Mais un LLM lit des mots. Comment un mot devient-il une liste de nombres qui a un sens, au point que « roi » − « homme » + « femme » tombe près de « reine » ?</p>
+<h2>Approfondissement (à faire aujourd&#39;hui, ~45 min)</h2>
+<ol>
+<li><strong>Exercice (20 min) : le OU exclusif en code.</strong> Colle ce code dans Google Colab et lance-le. Puis, <strong>avant</strong> de relancer, écris dans ton carnet ce que donnera la ligne « avec ReLU » si tu remplaces le <code>- 1</code> de h2 par <code>- 0.5</code>. Lance, compare, et envoie-moi ta prédiction et le résultat.</li>
+</ol>
+<pre><code class="language-python">import numpy as np
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+relu = lambda z: np.maximum(0, z)
+s = X[:, 0] + X[:, 1]
+h1, h2 = relu(s), relu(s - 1)
+print(&#39;avec ReLU :&#39;, h1 - 2 * h2)
+print(&#39;sans ReLU :&#39;, s - 2 * (s - 1))
+print(&#39;voulu     :&#39;, [0, 1, 1, 0])
+</code></pre>
+<ol start="2">
+<li><strong>Source primaire (15 min).</strong> Le papier de Shazeer, « GLU Variants Improve Transformer » (4 pages). Lis l&#39;introduction, regarde le tableau 1 (quelle variante a la perte la plus basse ?) et trouve la dernière phrase de la conclusion.</li>
+<li><strong>Question bonus (10 min, papier).</strong> Un réseau avec une seule entrée x, une couche cachée de 3 neurones ReLU, une sortie. Combien de coudes, au maximum, peut avoir sa courbe ? Et avec 1 000 neurones ? Qu&#39;est-ce que ça te dit sur le théorème de Cybenko ?</li>
+</ol>
+<h2>Sources</h2>
+<p>Consultées le 2 nov. 2026. Les calculs (exercice, OU exclusif, 0,25^10, part des paramètres MLP) sont faits par moi à partir de ces sources.</p>
+<ul>
+<li><a href="https://courses.cs.duke.edu/fall16/compsci527/papers/Krizhevsky%20et%20al%20DNN%20ImageNet%202012.pdf" target="_blank" rel="noreferrer">Krizhevsky, Sutskever, Hinton — ImageNet Classification with Deep Convolutional Neural Networks (AlexNet), NIPS 2012</a> : figure 1, ReLU 6 fois plus rapide que tanh sur CIFAR-10, écart variable selon l&#39;architecture</li>
+<li><a href="https://doi.org/10.1007/BF02551274" target="_blank" rel="noreferrer">Cybenko — Approximation by superpositions of a sigmoidal function, 1989</a> : une couche cachée suffit à approcher toute fonction continue</li>
+<li><a href="https://proceedings.mlr.press/v49/telgarsky16.html" target="_blank" rel="noreferrer">Telgarsky — Benefits of depth in neural networks, COLT 2016</a> : certaines fonctions demandent un nombre exponentiel de neurones à un réseau peu profond</li>
+<li><a href="https://arxiv.org/abs/2002.05202" target="_blank" rel="noreferrer">Shazeer — GLU Variants Improve Transformer, 2020</a> : SwiGLU, et l&#39;aveu d&#39;absence d&#39;explication en conclusion</li>
+<li><a href="https://arxiv.org/abs/2407.21783" target="_blank" rel="noreferrer">Meta — The Llama 3 Herd of Models, 2024</a> et <a href="https://www.emergentmind.com/topics/llama-3-architecture" target="_blank" rel="noreferrer">résumé des dimensions (Emergent Mind)</a> : 8B = 32 couches, 4 096 de large, MLP de 14 336, SwiGLU ; 405B = 126 couches, 16 384 de large</li>
+<li><a href="https://arxiv.org/abs/1606.08415" target="_blank" rel="noreferrer">Hendrycks, Gimpel — Gaussian Error Linear Units (GELU), 2016</a></li>
+<li>Minsky, Papert — <em>Perceptrons</em>, MIT Press, 1969 (livre, déjà cité en #2) : limites du perceptron à une couche, dont le OU exclusif</li>
+</ul>
+<h2>Termes vus</h2>
+<ul>
+<li><span class="lex" tabindex="0" title="Neurone artificiel — Mini-calcul : multiplie chaque entrée par un poids, additionne, ajoute un biais, passe le tout dans l'activation.">Neurone artificiel</span></li>
+<li><span class="lex" tabindex="0" title="Poids - biais — Les réglages appris d'un neurone. Poids = importance de chaque entrée. Biais = où se place le seuil.">Poids - biais</span></li>
+<li><span class="lex" tabindex="0" title="Linéaire - non linéaire — Linéaire = donne une droite (multiplier, additionner). Une droite d'une droite reste une droite.">Linéaire - non linéaire</span></li>
+<li><span class="lex" tabindex="0" title="Fonction d'activation — Calcul fixe après chaque neurone. Doit plier la droite, sinon 100 couches = 1.">Fonction d&#39;activation</span></li>
+<li><span class="lex" tabindex="0" title="Couche cachée — Toute couche entre l'entrée et la sortie.">Couche cachée</span></li>
+<li><span class="lex" tabindex="0" title="MLP (perceptron multicouche) — Couches de neurones empilées avec activation. Dans un LLM, porte ~70 % des paramètres (Llama 3 8B).">MLP (perceptron multicouche)</span></li>
+<li><span class="lex" tabindex="0" title="Sigmoïde — Activation en S, entre 0 et 1. Pente max 0,25 : étouffe le gradient dans un réseau profond.">Sigmoïde</span></li>
+<li><span class="lex" tabindex="0" title="ReLU — max(0, z). Coude net, pente 1 quand allumé. Standard depuis AlexNet (2012).">ReLU</span></li>
+<li><span class="lex" tabindex="0" title="Neurone mort — Neurone ReLU toujours à 0 : pente 0, il ne réapprend plus jamais.">Neurone mort</span></li>
+<li><span class="lex" tabindex="0" title="GELU - SwiGLU — Successeurs de ReLU dans les LLM. SwiGLU (Llama, PaLM) utilise une projection comme « porte » de l'autre. Trouvée par essais, sans explication.">GELU - SwiGLU</span></li>
+<li><span class="lex" tabindex="0" title="OU exclusif (XOR) — 1 si une seule entrée vaut 1. Impossible avec une droite, faisable avec 2 neurones ReLU.">OU exclusif (XOR)</span></li>
+<li><span class="lex" tabindex="0" title="Théorème d'approximation universelle — Une couche cachée avec assez de neurones approche toute fonction continue. Ne dit pas combien de neurones ; la profondeur est bien plus économe.">Théorème d&#39;approximation universelle</span></li>
+</ul>
+<h2>Anomalies relevées</h2>
+<ul>
+<li></li>
+</ul>
+<h2>Croisements avec d&#39;autres branches</h2>
+<ul>
+<li></li>
+</ul>

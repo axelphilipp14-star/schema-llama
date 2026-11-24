@@ -14,10 +14,17 @@ import { Fps } from './ui/Fps'
 import { LabelOverlay, LabelProjector } from './scene/labels'
 import { Timeline } from './ui/Timeline'
 import { BlockPanel, JourneyPanel } from './ui/Panels'
+import { EnquetePage, useRoute } from './ui/EnquetePage'
 
 const TRACE_ID = new URLSearchParams(location.search).get('trace') ?? 'dev-1b-satellite'
 
 export default function App() {
+  const route = useRoute()
+  if (route.page === 'enquete') return <EnquetePage id={route.id} />
+  return <Schema />
+}
+
+function Schema() {
   const [trace, setTrace] = useState<Trace | null>(null)
   const [err, setErr] = useState<string | null>(null)
   const view = useStore((s) => s.view)

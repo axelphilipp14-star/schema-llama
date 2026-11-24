@@ -1,0 +1,271 @@
+<p><strong>Branche :</strong> Comment ça marche · bloc C, le transformer · Carte de l&#39;IA</p>
+<h2>La question</h2>
+<blockquote>
+<p>Le modèle ne voit jamais ton texte. Il voit une suite de numéros tirés d&#39;une liste figée de 100 000 à 200 000 morceaux. Qui a fabriqué cette liste, comment — et pourquoi le même texte coûte-t-il jusqu&#39;à deux fois plus cher en français qu&#39;en anglais ?</p>
+</blockquote>
+<p><strong>→ La réponse.</strong> Personne ne l&#39;a écrite à la main, et rien dedans n&#39;est aléatoire. La liste est <strong>apprise par un algorithme de compression</strong>, <span class="lex" tabindex="0" title="BPE (Byte Pair Encoding) — Fabriquer un vocabulaire en fusionnant encore et encore la paire de morceaux la plus fréquente d'un corpus. Né comme algorithme de compression (Gage, 1994), adapté au texte par Sennrich en 2016.">BPE</span>, sur un corpus choisi par le labo — et cet apprentissage se fait <strong>avant l&#39;entraînement du modèle, séparément, sur d&#39;autres données</strong>. BPE part des caractères bruts et répète des dizaines de milliers de fois le même geste : trouver la paire de morceaux la plus fréquente, la fusionner, recommencer. Ce qui est fréquent dans ce corpus finit en un seul <span class="lex" tabindex="0" title="Token — Morceau de texte d'environ 4 caractères en anglais. C'est l'unité de lecture, d'écriture et de facturation.">token</span> ; ce qui est rare reste en miettes.</p>
+<p>L&#39;écart entre langues ne vient pas de la longueur des mots. Il vient de <strong>ce qu&#39;il y avait dans le corpus de comptage</strong>. Seul l&#39;identifiant du token est arbitraire, et il ne coûte rien à personne.</p>
+<h2>Le sujet en clair</h2>
+<h3>Où on en est</h3>
+<p><a href="#/enquete/10">#10</a> : le neurone, la brique de calcul. <a href="#/enquete/11">#11</a> : l&#39;<span class="lex" tabindex="0" title="Embedding — Le vecteur de départ d'un token, le même quel que soit le contexte (il code le mot et sa position).">embedding</span>, le vecteur qu&#39;un token reçoit en entrant dans le modèle. Mais une marche a été sautée : <strong>d&#39;où sort le token ?</strong> Avant qu&#39;il y ait un vecteur, il faut un morceau de texte à qui le donner.</p>
+<p>C&#39;est la toute première opération de la chaîne, celle qui se passe avant que le modèle n&#39;existe — et la seule partie d&#39;un LLM qui n&#39;apprend pas pendant l&#39;entraînement.</p>
+<h3>L&#39;analogie : l&#39;atelier d&#39;imprimerie</h3>
+<p>Un imprimeur composait ses pages avec des blocs de plomb rangés dans un meuble à casiers, la <strong>casse</strong>. Un bloc par lettre — mais pas seulement. Un bon atelier fabriquait aussi des blocs tout faits pour les suites qui reviennent sans arrêt : « tion », « ment », « que ».</p>
+<p>Ces blocs, personne ne les choisissait au hasard. L&#39;atelier <strong>comptait</strong> ce qui revenait dans ses textes et taillait des blocs pour les suites les plus fréquentes. Un atelier parisien et un atelier londonien finissaient avec des casses différentes. Et le jour où l&#39;atelier parisien recevait un texte allemand, il n&#39;avait aucun bloc adapté : tout se composait lettre par lettre.</p>
+<table>
+<thead>
+<tr>
+<th>Dans l&#39;atelier</th>
+<th>Dans le modèle</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>La casse, le meuble à casiers</td>
+<td>Le vocabulaire</td>
+</tr>
+<tr>
+<td>Un bloc de plomb (« a », « tion », « the »)</td>
+<td>Un token</td>
+</tr>
+<tr>
+<td>Le numéro du casier</td>
+<td>L&#39;identifiant du token</td>
+</tr>
+<tr>
+<td>Compter ce qui revient, puis tailler les blocs</td>
+<td>Entraîner le tokenizer</td>
+</tr>
+<tr>
+<td>Composer une page en piochant dans les casiers</td>
+<td>Tokeniser un texte</td>
+</tr>
+<tr>
+<td>Un texte allemand dans une casse française</td>
+<td>Du français dans un tokenizer anglophone</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>Le point exact où ça se joue</strong>
+Le numéro du casier est arbitraire. Le contenu des casiers ne l&#39;est pas du tout.</p>
+</blockquote>
+<h3>Les 4 mots</h3>
+<p><span class="lex" tabindex="0" title="Tokenizer — L'outil qui découpe le texte en tokens. En changer change le nombre de tokens pour le même texte (+30 % depuis Claude 4.7).">Tokenizer</span> · <span class="lex" tabindex="0" title="Vocabulaire — La liste de tous les tokens que le modèle connaît (128 256 chez Llama 3).">Vocabulaire</span> · <span class="lex" tabindex="0" title="BPE (Byte Pair Encoding) — Fabriquer un vocabulaire en fusionnant encore et encore la paire de morceaux la plus fréquente d'un corpus. Né comme algorithme de compression (Gage, 1994), adapté au texte par Sennrich en 2016.">BPE (Byte Pair Encoding)</span> · <span class="lex" tabindex="0" title="Fertilité (tokenizer) — Nombre moyen de tokens par mot dans une langue. Plus elle est haute, plus la langue coûte cher et plus la précision baisse.">Fertilité (tokenizer)</span></p>
+<h2>Le schéma central</h2>
+<pre><code class="language-mermaid">flowchart TD
+  subgraph T1[&quot;TEMPS 1 - une seule fois, avant que le modèle existe&quot;]
+    A[&quot;Corpus de texte&lt;br/&gt;choisi par le labo&quot;] --&gt; B[&quot;Fusionner la paire&lt;br/&gt;la plus fréquente du corpus&quot;]
+    B --&gt;|&quot;x des dizaines de milliers&quot;| B
+  end
+  B --&gt; V&quot;VOCABULAIRE - 100 277 morceaux, figés&quot;
+  subgraph T2[&quot;TEMPS 2 - à chaque texte que tu envoies&quot;]
+    C[&quot;Ton texte&quot;] --&gt; D[&quot;Découper avec&lt;br/&gt;ces morceaux-là, et pas d&#39;autres&quot;]
+    D --&gt; N[&quot;Suite de numéros&quot;]
+  end
+  V --&gt; D
+  N --&gt; E[&quot;Table d&#39;embeddings - enquête 11&quot;]
+</code></pre>
+<p>Le vocabulaire est le pivot : fabriqué une fois dans le temps 1, consulté des milliards de fois dans le temps 2, jamais modifié entre les deux. Un modèle ne peut pas inventer un token absent de la liste, même s&#39;il a lu le mot mille fois pendant son entraînement.</p>
+<h2>Le mécanisme</h2>
+<h3>Étape 1 — les deux extrêmes ne marchent pas</h3>
+<p>Mesuré par Sennrich en 2016 sur 100 millions de tokens d&#39;allemand :</p>
+<table>
+<thead>
+<tr>
+<th>Découpage</th>
+<th>Longueur du texte</th>
+<th>Taille du vocabulaire</th>
+<th>Mots impossibles à écrire</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Mots entiers</td>
+<td>100 M tokens</td>
+<td>1 750 000</td>
+<td>1 079</td>
+</tr>
+<tr>
+<td>Caractères</td>
+<td>550 M tokens (×5,5)</td>
+<td>3 000</td>
+<td>0</td>
+</tr>
+<tr>
+<td><strong>BPE</strong></td>
+<td><strong>112 M tokens (+12 %)</strong></td>
+<td><strong>63 000</strong></td>
+<td><strong>0</strong></td>
+</tr>
+</tbody></table>
+<p>Mots entiers : vocabulaire ingérable, et malgré ça des mots qu&#39;on ne peut pas écrire du tout. Caractères : plus aucun mot impossible, mais un texte 5,5 fois plus long — et la <span class="lex" tabindex="0" title="Fenêtre de contexte — Tout ce que le modèle voit pour une réponse, réponse comprise.">fenêtre de contexte</span> est facturée au token. <strong>BPE tranche ce compromis.</strong></p>
+<p>Mon mini-GPT Molière est à l&#39;extrême « caractères » : 89 symboles, aucun mot impossible, mais 5 ou 6 tokens par mot.</p>
+<h3>Étape 2 — l&#39;algorithme, en cinq lignes</h3>
+<ol>
+<li>Écrire chaque mot comme une suite de caractères, plus un <span class="lex" tabindex="0" title="Symbole de fin de mot — La marque qui empêche les fusions de traverser une frontière entre deux mots, et distingue `chat` en fin de mot de `chat` dans `chaton`.">symbole de fin de mot</span> <code>·</code>.</li>
+<li>Compter toutes les paires de symboles voisins, pondérées par la fréquence des mots.</li>
+<li><span class="lex" tabindex="0" title="Fusion (merge) — Une opération BPE : deux symboles voisins deviennent un. Vocabulaire = caractères de départ + nombre de fusions. Le nombre de fusions est le seul réglage.">Fusionner</span> la paire la plus fréquente en un nouveau symbole.</li>
+<li>Recommencer. <strong>Taille du vocabulaire = caractères de départ + nombre de fusions.</strong></li>
+<li>Ne jamais fusionner par-dessus une frontière entre deux mots.</li>
+</ol>
+<p>Le nombre de fusions est le <strong>seul réglage</strong> : un <span class="lex" tabindex="0" title="Hyperparamètre — Réglage choisi par un humain avant l'entraînement (taux d'apprentissage, taille des lots, nb de tokens). Les paramètres, eux, sont appris.">hyperparamètre</span>, au sens de <a href="#/enquete/7">#7</a>. Sennrich en faisait 59 500. GPT-4 en fait environ 100 000.</p>
+<h3>Étape 3 — à la main</h3>
+<p>Corpus : <code>chat</code> ×6, <code>chats</code> ×4, <code>chaton</code> ×2, <code>chapeau</code> ×3.</p>
+<table>
+<thead>
+<tr>
+<th>Fusion</th>
+<th>Paire gagnante</th>
+<th>Compte</th>
+<th>État du corpus après</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td><code>c h a t ·</code> / <code>c h a t s ·</code> / <code>c h a t o n ·</code> / <code>c h a p e a u ·</code></td>
+</tr>
+<tr>
+<td>1</td>
+<td><code>c</code> + <code>h</code></td>
+<td>15</td>
+<td><code>ch a t ·</code> / <code>ch a t s ·</code> / <code>ch a t o n ·</code> / <code>ch a p e a u ·</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>ch</code> + <code>a</code></td>
+<td>15</td>
+<td><code>cha t ·</code> / <code>cha t s ·</code> / <code>cha t o n ·</code> / <code>cha p e a u ·</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>cha</code> + <code>t</code></td>
+<td>12</td>
+<td><code>chat ·</code> / <code>chat s ·</code> / <code>chat o n ·</code> / <code>cha p e a u ·</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>chat</code> + <code>·</code></td>
+<td>6</td>
+<td><strong><code>chat·</code></strong> / <code>chat s ·</code> / <code>chat o n ·</code> / <code>cha p e a u ·</code></td>
+</tr>
+</tbody></table>
+<p>Quatre fusions. <strong>« chat » est un seul token, « chapeau » est encore en cinq morceaux.</strong> Pas parce qu&#39;il est plus long — parce qu&#39;il est plus rare. Personne n&#39;a décidé ça : c&#39;est tombé du comptage.</p>
+<p><code>chaton</code> hérite de <code>chat</code> sans avoir jamais eu son propre bloc : un mot jamais vu reste écrivable à partir des morceaux des autres. C&#39;est le <span class="lex" tabindex="0" title="Vocabulaire ouvert - fermé — Fermé : une liste de mots, et tout ce qui n'y est pas devient « inconnu ». Ouvert : n'importe quelle chaîne est écrivable à partir des morceaux. BPE rend le vocabulaire ouvert à taille fixe.">vocabulaire ouvert</span>.</p>
+<h3>Étape 4 — d&#39;où vient la facture française</h3>
+<p>Remplace ce corpus par celui d&#39;un tokenizer réel : des centaines de milliards de mots, massivement anglophones. Les 100 000 fusions partent toutes sur <code>the</code>, <code> of</code>, <code>ing</code>, <code>tion</code>. Quand arrive le tour de « voudrais », il ne reste plus de place : chez Sennrich, le rang de fréquence 500 000 n&#39;apparaît que <strong>deux fois</strong> dans le corpus.</p>
+<p>Mesuré par Petrov en 2023, à contenu identique : <strong>×2,00 en français sur le tokenizer de GPT-2, ×1,60 sur celui de GPT-4.</strong> « voudrais » part en trois morceaux (<code>v</code> + <code>oud</code> + <code>rais</code>), « billet » en deux (<code>bil</code> + <code>let</code>).</p>
+<p><strong>La preuve que ce n&#39;est pas la longueur :</strong> le texte français n&#39;a pas raccourci entre GPT-2 et GPT-4, et la facture est pourtant passée de 2,00 à 1,60. Seul le corpus de comptage avait changé.</p>
+<h3>Étape 5 — ce que ce découpage casse ailleurs</h3>
+<p><strong>Compter les lettres.</strong> Le modèle ne reçoit jamais les lettres de « strawberry ». Il reçoit deux ou trois numéros et doit se <em>rappeler</em> ce qu&#39;il y a dedans au lieu de le <em>lire</em>.</p>
+<p><strong>L&#39;arithmétique.</strong> Un nombre est découpé par fréquence, pas par unités et dizaines. Les colonnes d&#39;une addition ne sont pas alignées dans ce que voit le modèle.</p>
+<p><strong>Les <span class="lex" tabindex="0" title="Token fantôme (glitch token) — Un token présent dans le vocabulaire mais quasi absent du corpus du modèle : son embedding n'a jamais vraiment été appris. Symptôme de l'écart entre les deux corpus.">tokens fantômes</span>.</strong> Deux corpus différents, celui du tokenizer et celui du modèle. Un morceau peut exister dans la liste sans que le modèle l&#39;ait vraiment vu : son embedding reste quasi inchangé depuis son initialisation aléatoire. En 2023, des chercheurs ont trouvé dans GPT-2 et GPT-3 des pseudos de forums devenus des tokens uniques ; demander au modèle de les répéter produisait des réponses incohérentes. Le défaut n&#39;est pas dans le modèle, il est dans l&#39;écart entre les deux corpus.</p>
+<h2>Ce que ça révèle</h2>
+<ol>
+<li><strong>C&#39;est le seul morceau d&#39;un LLM qui n&#39;apprend rien.</strong> Des milliards de paramètres s&#39;ajustent pendant l&#39;entraînement. Le découpage est figé avant le premier gradient.</li>
+<li><strong>Un comptage décide du prix d&#39;une langue pour toute la vie du modèle.</strong> Personne n&#39;a décidé que le français coûterait 60 % de plus. C&#39;est tombé d&#39;un corpus. Une décision technique mineure, non assumée, aux conséquences économiques durables.</li>
+<li><strong>L&#39;anomalie :</strong> aucune convergence sur la taille du vocabulaire après dix ans. Voir Carnet d&#39;anomalies.</li>
+<li><strong>Un levier bon marché.</strong> Changer de tokenizer ne demande ni GPU ni capital. Mais c&#39;est un gain de coût, pas un <span class="lex" tabindex="0" title="Fossé (moat) — Ce qui empêche un concurrent de copier ton avantage (données exclusives, expertise d'un domaine, réseau).">fossé</span> : n&#39;importe qui le refait en une semaine.</li>
+</ol>
+<h3>Signaux à surveiller</h3>
+<table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Où on en est (nov. 2026)</th>
+<th>Ce qui le ferait bouger</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Taille des vocabulaires</td>
+<td>≈50 000 (GPT-2, 2019) → 100 277 (GPT-4, 2023) → 200 019 (o200k, 2024) → 128 256 (Llama 3, 2024)</td>
+<td>Une convergence, ou un papier qui explique l&#39;optimum</td>
+</tr>
+<tr>
+<td>Écart français</td>
+<td>×2,00 (GPT-2) → ×1,60 (GPT-4), Petrov 2023</td>
+<td>À remesurer moi-même sur les modèles 2026 : personne ne republie ce chiffre</td>
+</tr>
+<tr>
+<td>Modèles sans tokenizer</td>
+<td>BLT (Meta, déc. 2024) égale Llama 3 à 8 Md de paramètres sur octets bruts</td>
+<td><strong>Le signal fort</strong> : un modèle de frontière commercial sans tokenizer rendrait tout ce mécanisme obsolète</td>
+</tr>
+</tbody></table>
+<p>Confiance : élevée sur les tailles de vocabulaire et le ratio français (papiers et tokenizers publics). Moyenne sur le troisième signal — résultat de recherche, aucun déploiement commercial connu.</p>
+<h2>Termes vus</h2>
+<ul>
+<li><span class="lex" tabindex="0" title="BPE (Byte Pair Encoding) — Fabriquer un vocabulaire en fusionnant encore et encore la paire de morceaux la plus fréquente d'un corpus. Né comme algorithme de compression (Gage, 1994), adapté au texte par Sennrich en 2016.">BPE (Byte Pair Encoding)</span></li>
+<li><span class="lex" tabindex="0" title="Sous-mot — Un morceau plus petit qu'un mot et plus grand qu'un caractère. L'unité qui tranche le compromis entre vocabulaire énorme et texte interminable.">Sous-mot</span></li>
+<li><span class="lex" tabindex="0" title="Fusion (merge) — Une opération BPE : deux symboles voisins deviennent un. Vocabulaire = caractères de départ + nombre de fusions. Le nombre de fusions est le seul réglage.">Fusion (merge)</span></li>
+<li><span class="lex" tabindex="0" title="Fertilité (tokenizer) — Nombre moyen de tokens par mot dans une langue. Plus elle est haute, plus la langue coûte cher et plus la précision baisse.">Fertilité (tokenizer)</span></li>
+<li><span class="lex" tabindex="0" title="Vocabulaire ouvert - fermé — Fermé : une liste de mots, et tout ce qui n'y est pas devient « inconnu ». Ouvert : n'importe quelle chaîne est écrivable à partir des morceaux. BPE rend le vocabulaire ouvert à taille fixe.">Vocabulaire ouvert - fermé</span></li>
+<li><span class="lex" tabindex="0" title="Symbole de fin de mot — La marque qui empêche les fusions de traverser une frontière entre deux mots, et distingue `chat` en fin de mot de `chat` dans `chaton`.">Symbole de fin de mot</span></li>
+<li><span class="lex" tabindex="0" title="Entraînement du tokenizer — La phase de comptage et de fusion, menée **avant** l'entraînement du modèle et sur d'autres données. C'est le seul morceau d'un LLM qui n'apprend rien ensuite.">Entraînement du tokenizer</span></li>
+<li><span class="lex" tabindex="0" title="Token fantôme (glitch token) — Un token présent dans le vocabulaire mais quasi absent du corpus du modèle : son embedding n'a jamais vraiment été appris. Symptôme de l'écart entre les deux corpus.">Token fantôme (glitch token)</span></li>
+<li><span class="lex" tabindex="0" title="Taux de compression — Caractères ÷ tokens. Plus il est haut, plus de texte tient dans la même fenêtre de contexte.">Taux de compression</span></li>
+<li><span class="lex" tabindex="0" title="Modèle sans tokenizer (byte-level) — Architecture qui travaille directement sur les octets bruts, sans vocabulaire fixe : ByT5, puis BLT (Meta, déc. 2024), qui égale Llama 3 à 8 Md de paramètres.">Modèle sans tokenizer (byte-level)</span></li>
+</ul>
+<h2>Anomalies relevées</h2>
+<ul>
+<li>Les tailles de vocabulaire ne convergent pas après dix ans, alors que Sennrich qualifiait déjà ce choix d&#39;« un peu arbitraire » en 2016. Versée au Carnet d&#39;anomalies.</li>
+</ul>
+<h2>Croisements avec d&#39;autres branches</h2>
+<ul>
+<li><strong>Économie.</strong> La taxe par langue est un coût d&#39;inférence réel (<a href="#/enquete/4">#4</a>, prix par tâche). Ouvre-t-elle un marché pour des modèles régionaux, ou est-ce trop petit pour faire changer un client de fournisseur ?</li>
+</ul>
+<h2>Questions ouvertes</h2>
+<ol>
+<li>Sur quel corpus, avec quelle part de français, les tokenizers de Claude, GPT ou Mistral apprennent-ils leurs fusions ? Aucun labo ne le publie.</li>
+<li>Quelle est la taille de vocabulaire optimale, et pourquoi personne ne converge ?</li>
+<li>Un tokenizer entraîné surtout sur du français inverserait-il la prime ? Mistral est le cas à tester : labo français, <span class="lex" tabindex="0" title="Modèle à poids ouverts — Modèle dont les réglages (poids) sont publiés et réutilisables par tous. Voir aussi Open source (modèle).">poids ouverts</span>, tokenizer inspectable.</li>
+<li>Si le tokenizer disparaît, qu&#39;advient-il de la <span class="lex" tabindex="0" title="Table d'embeddings — Une ligne par token du vocabulaire. Lire un mot = aller chercher sa ligne. Chez Llama 3 : 128 256 lignes × 4 096 nombres ≈ 525 millions de paramètres.">table d&#39;embeddings</span> et de ses 525 millions de paramètres ?</li>
+</ol>
+<h2>Prochaine enquête</h2>
+<ul>
+<li><strong>#13 — L&#39;attention en détail.</strong> Le token a son vecteur. Comment regarde-t-il les autres ? Chaîne complète : découpage (#12) → <span class="lex" tabindex="0" title="Embedding — Le vecteur de départ d'un token, le même quel que soit le contexte (il code le mot et sa position).">embedding</span> (#11) → <span class="lex" tabindex="0" title="Attention — Le calcul où chaque token regarde ceux qui le précèdent et absorbe une partie de leur sens.">attention</span> (#13).</li>
+</ul>
+<h2>Approfondissement</h2>
+<ul>
+<li><strong>Source primaire.</strong> Sennrich 2016, section 3.2, algorithme 1 : le code Python de BPE en une douzaine de lignes, page 3. À recopier à la main.</li>
+<li><strong>Exercice, 45 min sur Kaggle.</strong> Entraîner un BPE sur le texte de Molière du mini-GPT. 500 fusions. Mesurer le <span class="lex" tabindex="0" title="Taux de compression — Caractères ÷ tokens. Plus il est haut, plus de texte tient dans la même fenêtre de contexte.">taux de compression</span> avant et après, regarder les 50 premières fusions apprises.</li>
+<li><strong>Question bonus.</strong> À quelle fusion <code>que</code> devient-il un token entier dans Molière ? Dans les 10 premières, entre 10 et 100, ou plus tard ? Écrire le pari avant de lancer.</li>
+</ul>
+<h2>Sources</h2>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Ce qu&#39;elle apporte</th>
+<th>Confiance</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Sennrich, Haddow, Birch, <a href="https://arxiv.org/abs/1508.07909" target="_blank" rel="noreferrer">Neural Machine Translation of Rare Words with Subword Units</a>, ACL 2016 — PDF</td>
+<td>L&#39;algorithme, le tableau 1, l&#39;exemple des fusions</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Petrov, La Malfa, Torr, Bibi, <a href="https://arxiv.org/abs/2305.15425" target="_blank" rel="noreferrer">Language Model Tokenizers Introduce Unfairness Between Languages</a>, NeurIPS 2023 — PDF</td>
+<td>Les ratios par langue</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Pagnoni et al., <a href="https://arxiv.org/abs/2412.09871" target="_blank" rel="noreferrer">Byte Latent Transformer</a>, Meta, déc. 2024</td>
+<td>Le modèle sans tokenizer</td>
+<td>Moyenne — pas de déploiement commercial</td>
+</tr>
+<tr>
+<td>Gage, <em>A New Algorithm for Data Compression</em>, 1994</td>
+<td>L&#39;origine de BPE</td>
+<td>Moyenne — de seconde main</td>
+</tr>
+<tr>
+<td><a href="https://tiktokenizer.vercel.app" target="_blank" rel="noreferrer">tiktokenizer.vercel.app</a></td>
+<td>Les découpages mesurés moi-même</td>
+<td>Élevée</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>Ce qui manque</strong>
+La composition des corpus de tokenizer n&#39;est publiée par aucun labo. « Le français était minoritaire » est une déduction à partir de l&#39;effet mesuré (Petrov) et du mécanisme connu (Sennrich), pas une donnée publiée.</p>
+</blockquote>

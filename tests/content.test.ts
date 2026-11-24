@@ -15,7 +15,7 @@ describe('coffre → contenu (E9)', () => {
   const dir = mkdtempSync(join(tmpdir(), 'schema-llama-'))
   const vault = join(dir, 'vault')
   cpSync('tests/fixtures/vault', vault, { recursive: true })
-  const env = { VAULT: vault, PIECES: 'tests/fixtures/pieces.json', TRANSLATIONS: join(dir, 'tr.json'), CONTENT_OUT: dir }
+  const env = { VAULT: vault, PIECES: 'tests/fixtures/pieces.json', TRANSLATIONS: join(dir, 'tr.json'), CONTENT_OUT: dir, PAGES_OUT: join(dir, 'pages') }
   const read = (f: string) => JSON.parse(readFileSync(join(dir, f), 'utf8'))
 
   it('extrait le texte tel quel, avec les définitions du Lexique, sans « Mes notes »', () => {
@@ -48,4 +48,20 @@ describe('coffre → contenu (E9)', () => {
     expect(en.analogie).toBeNull() // pas d'anglais périmé
     expect(en.question).toBe("EN:Est-ce que la fiche suit l'enquête ?") // le reste est gardé
   })
+
+  it('pages : une par enquête, suivi personnel retiré, liens convertis, HTML brut neutralisé', () => {
+    run(env)
+    const idx = read('enquetes.json').enquetes.map((e: { id: string }) => e.id)
+    expect(idx).toEqual(['98', '99'])
+    const html = readFileSync(join(dir, 'pages', '99.html'), 'utf8')
+    for (const secret of ['HYPOTHÈSE PERSONNELLE', 'BILAN PERSONNEL', 'TOUJOURS PERSONNEL', 'Mes notes', 'NOTE PRIVÉE']) expect(html).not.toContain(secret)
+    expect(html).toContain('Source publique.') // la section suivante revient bien
+    expect(html).toContain('href="#/enquete/98"')
+    expect(html).toMatch(/<span class="lex"[^>]*title="Miroir — Une surface qui renvoie la lumière\."/)
+    expect(html).toContain('Prospection') // note non publiée : texte simple…
+    expect(html).not.toMatch(/href="[^"]*Prospection/) // …sans lien
+    expect(html).not.toContain('<script>')
+    expect(html).toContain('<strong>Le point clé</strong>')
+  })
 })
+

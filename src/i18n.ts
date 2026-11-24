@@ -52,7 +52,8 @@ const fr = {
   source: (dtype: string, date: string) => `Source : trace ${dtype}, ${date}. Couleurs de l'attention en échelle racine ; hauteurs du flux en échelle log.`,
   dims: (d: string, h: number, kv: number, m: string, V: string) => `Dimensions lues dans la trace : ${d} · ${h} têtes · ${kv} K/V · MLP ${m} · vocabulaire ${V}.`,
   builtWith: 'Built with Llama',
-  fiche: { title: 'Fiche', clair: 'En clair', analogie: 'L’image', piege: 'Le piège', mots: 'Mots à retenir', lire: 'Lire l’enquête', obsidian: 'dans Obsidian', artifact: 'version longue', pending: 'Traduction en attente pour une partie de cette fiche : le texte français est affiché.', source: 'Texte tiré des enquêtes d’Axel (coffre Obsidian), recopié tel quel.' },
+  pages: { title: 'Les enquêtes', back: '← Retour au schéma', intro: 'Les enquêtes d’Axel, sources du texte du schéma. Générées depuis son coffre Obsidian ; le suivi personnel (quiz, bilans, hypothèses) n’est pas publié.', frOnly: '', source: 'Texte de l’enquête tel qu’écrit dans le coffre Obsidian d’Axel. Survole un terme souligné pour sa définition.', all: 'Toutes les enquêtes', mermaidErr: 'Ce schéma n’a pas pu être dessiné : sa syntaxe Mermaid contient une erreur dans la note du coffre. Le code est affiché tel quel.' },
+  fiche: { title: 'Fiche', clair: 'En clair', analogie: 'L’image', piege: 'Le piège', mots: 'Mots à retenir', lire: 'Lire l’enquête', obsidian: 'ouvrir dans Obsidian', artifact: 'version longue', pending: 'Traduction en attente pour une partie de cette fiche : le texte français est affiché.', source: 'Texte tiré des enquêtes d’Axel (coffre Obsidian), recopié tel quel.' },
   blk: {
     stepName: { norm1: '① RMSNorm', qkv: '② Q, K, V', scores: '③ Scores Q·K', softmax: '④ Softmax', mix: '⑤ Mélange des V', heads: '⑥ Toutes les têtes', add1: '⑦ Addition', mlp: '⑧ MLP (SwiGLU)', add2: '⑨ Addition' },
     explain: {
@@ -147,7 +148,8 @@ const en: Dict = {
   source: (dtype, date) => `Source: ${dtype} trace, ${date}. Attention colours on a square-root scale; stream heights on a log scale.`,
   dims: (d, h, kv, m, V) => `Dimensions read from the trace: ${d} · ${h} heads · ${kv} K/V · MLP ${m} · vocabulary ${V}.`,
   builtWith: 'Built with Llama',
-  fiche: { title: 'Card', clair: 'In plain words', analogie: 'The picture', piege: 'The catch', mots: 'Words to remember', lire: 'Read the investigation', obsidian: 'in Obsidian', artifact: 'long version', pending: 'Translation pending for part of this card: the French text is shown.', source: 'Text taken from Axel’s investigations (Obsidian vault), copied as is; translated into English.' },
+  pages: { title: 'The investigations', back: '← Back to the diagram', intro: 'Axel’s investigations, the source of the diagram’s text. Generated from his Obsidian vault; personal tracking (quizzes, reviews, hypotheses) is not published.', frOnly: 'This investigation is written in French. Each piece of the diagram has an English card summarising it.', source: 'Text of the investigation as written in Axel’s Obsidian vault. Hover an underlined term for its definition.', all: 'All investigations', mermaidErr: 'This diagram could not be drawn: its Mermaid syntax has an error in the vault note. The code is shown as is.' },
+  fiche: { title: 'Card', clair: 'In plain words', analogie: 'The picture', piege: 'The catch', mots: 'Words to remember', lire: 'Read the investigation', obsidian: 'open in Obsidian', artifact: 'long version', pending: 'Translation pending for part of this card: the French text is shown.', source: 'Text taken from Axel’s investigations (Obsidian vault), copied as is; translated into English.' },
   blk: {
     stepName: { norm1: '① RMSNorm', qkv: '② Q, K, V', scores: '③ Q·K scores', softmax: '④ Softmax', mix: '⑤ Mixing the Vs', heads: '⑥ All heads', add1: '⑦ Addition', mlp: '⑧ MLP (SwiGLU)', add2: '⑨ Addition' },
     explain: {

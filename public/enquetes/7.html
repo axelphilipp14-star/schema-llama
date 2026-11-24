@@ -1,0 +1,177 @@
+<p><strong>Branche :</strong> Comment ça marche · Carte de l&#39;IA</p>
+<h2>La question, et la réponse</h2>
+<p><strong>Qu&#39;est-ce qu&#39;« apprendre » veut dire pour une machine ?</strong></p>
+<p><strong>Réponse :</strong> apprendre, c&#39;est régler des millions ou milliards de nombres (les <strong>paramètres</strong>) pour faire baisser un seul chiffre : l&#39;<strong>erreur</strong> du modèle sur des exemples. Le modèle prédit, on mesure à quel point il se trompe, on calcule dans quel sens tourner chaque bouton pour se tromper un peu moins, on tourne d&#39;un petit pas. Et on recommence des milliards de fois.</p>
+<p>Physiquement, la seule chose qui change pendant l&#39;apprentissage, ce sont ces nombres. Le texte ne reste pas dans le modèle : il passe, il pousse les boutons, il repart. Et une fois l&#39;entraînement fini, les nombres sont figés : quand tu parles à Claude, il n&#39;apprend rien au sens strict.</p>
+<p>Confiance : élevée sur le mécanisme (c&#39;est le socle du domaine depuis les années 1980), moyenne sur les ordres de grandeur de stockage plus bas (calculs approximatifs, signalés).</p>
+<h2>La boucle en un graphique</h2>
+<blockquote>
+<p><strong>Schéma de l&#39;artifact d&#39;origine</strong>
+ calculé pour cette enquête · modèle jouet, 3 exemples, 10 tours par taux d&#39;apprentissage</p>
+</blockquote>
+<p>Même modèle, même départ, seule la taille du pas change. Le bon pas descend vite ; le pas trop grand enjambe la bonne valeur à chaque tour et descend lentement. Le détail de la boucle est juste en dessous.</p>
+<h2>Le mécanisme</h2>
+<h3>La boucle, sur un modèle à un seul bouton</h3>
+<p>Prends le modèle le plus bête possible : il reçoit un nombre x et répond <code>w × x</code>. Il a <strong>un seul paramètre</strong>, w. On veut qu&#39;il apprenne la règle « doubler », à partir de 3 exemples : 1→2, 2→4, 3→6. Il ne connaît pas la règle, il ne voit que les exemples.</p>
+<ol>
+<li><strong>Départ au hasard.</strong> w = 0,5. Le modèle répond 0,5 / 1 / 1,5 au lieu de 2 / 4 / 6.</li>
+<li><strong>Mesurer l&#39;erreur.</strong> On calcule un seul chiffre qui dit « à quel point c&#39;est faux » : la <strong>fonction de perte</strong>. Ici, la moyenne des écarts au carré = 10,5.</li>
+<li><strong>Trouver le sens.</strong> Le <strong>gradient</strong> répond à : si je monte w d&#39;un poil, la perte monte ou descend, et de combien ? Ici il vaut −14 : monter w fait baisser l&#39;erreur, fortement.</li>
+<li><strong>Faire un petit pas.</strong> w ← w − (taux d&#39;apprentissage × gradient) = 0,5 − 0,05 × (−14) = 1,2. Le <strong>taux d&#39;apprentissage</strong> (0,05) est la taille du pas, choisie par un humain.</li>
+<li><strong>Recommencer.</strong> Perte 10,5 → 2,99 → 0,85 → 0,24… Au 9e pas, w ≈ 1,99. Le modèle a « appris » à doubler.</li>
+</ol>
+<p>Ce que ça montre : personne n&#39;a écrit « multiplie par 2 ». La règle est sortie de la boucle erreur → ajustement. C&#39;est exactement l&#39;idée de 3Blue1Brown : apprendre, c&#39;est juste chercher le point le plus bas d&#39;une fonction (la perte), en descendant la pente pas à pas (<a href="https://www.3blue1brown.com/lessons/gradient-descent/" target="_blank" rel="noreferrer">3Blue1Brown</a>).</p>
+<h3>Le piège du pas trop grand</h3>
+<p>Même modèle, même départ, mais un pas de 0,2 au lieu de 0,05 : w saute 0,5 → 3,3 → 0,87 → 2,98 → 1,15… Il enjambe la bonne réponse à chaque fois et oscille. Trop petit, ça converge mais lentement. Google le dit dans son cours : le taux d&#39;apprentissage est le réglage sur lequel les praticiens passent beaucoup de temps (<a href="https://developers.google.com/machine-learning/crash-course/linear-regression/gradient-descent" target="_blank" rel="noreferrer">Google ML Crash Course</a>). Le graphique plus haut montre les deux courbes.</p>
+<h3>La même boucle, dans un LLM</h3>
+<p>Rien ne change dans le principe. Trois choses changent d&#39;échelle :</p>
+<ul>
+<li><strong>Les boutons.</strong> Pas 1 mais des milliards. Le réseau à chiffres de 3Blue1Brown en a 13 002 ; Llama 3, le plus gros modèle ouvert de Meta, en a 405 milliards (<a href="https://arxiv.org/abs/2407.21783" target="_blank" rel="noreferrer">Meta, Llama 3</a>).</li>
+<li><strong>La perte.</strong> Pour un LLM, l&#39;exemple est « ce texte, et le token qui suit vraiment ». La perte est l&#39;<strong>entropie croisée</strong> : −ln(probabilité donnée au vrai token suivant). Le modèle donnait 90 % au bon token → perte 0,11. Il donnait 1 % → perte 4,6. Plus il était sûr de se tromper, plus il est puni.</li>
+<li><strong>Le gradient.</strong> Avec 405 milliards de boutons, on ne peut pas tester chaque bouton un par un. La <strong>rétropropagation</strong> calcule tous les gradients d&#39;un coup, en remontant le réseau à l&#39;envers. C&#39;est l&#39;enquête #8.</li>
+</ul>
+<p>Et on ne calcule pas la perte sur tout le corpus avant chaque pas : on prend un <strong>lot</strong> d&#39;exemples, on fait un pas, on prend le lot suivant. Le corpus entier de Llama 3, c&#39;est 15,6 billions de tokens, passés en lots.</p>
+<h3>Le coût : une formule simple qui tombe juste</h3>
+<p>Le calcul d&#39;entraînement d&#39;un transformer vaut environ 6 × paramètres × tokens :</p>
+<pre><code class="language-latex">C \approx 6 \, N \, D
+</code></pre>
+<p>Pour Llama 3 405B : 6 × 405 × 10⁹ × 15,6 × 10¹² ≈ 3,8 × 10²⁵ opérations. Meta annonce exactement 3,8 × 10²⁵ (<a href="https://arxiv.org/abs/2407.21783" target="_blank" rel="noreferrer">Meta, Llama 3</a>). Le 6 vient de : 2 opérations par paramètre pour prédire (passe avant), environ 4 pour calculer le gradient (passe arrière).</p>
+<h3>Ce qui est appris, et ce qui est choisi</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Paramètres</th>
+<th>Hyperparamètres</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Qui les fixe</td>
+<td>La boucle d&#39;apprentissage</td>
+<td>Des humains, avant de lancer</td>
+</tr>
+<tr>
+<td>Combien</td>
+<td>Des milliards</td>
+<td>Une poignée</td>
+</tr>
+<tr>
+<td>Exemples</td>
+<td>Les poids et biais du réseau</td>
+<td>Taux d&#39;apprentissage, taille des lots, nombre de paramètres, nombre de tokens</td>
+</tr>
+<tr>
+<td>Après l&#39;entraînement</td>
+<td>Figés, c&#39;est le modèle</td>
+<td>Disparaissent, ils ont servi à le fabriquer</td>
+</tr>
+</tbody></table>
+<h2>Ce que ça révèle</h2>
+<p><strong>1. Le modèle ne garde pas le texte, il le compresse.</strong> Llama 3 405B pèse environ 810 Go (405 milliards de nombres × 2 octets). Ses 15,6 billions de tokens de texte font de l&#39;ordre de 60 To (≈ 4 octets par token). Le modèle est ~75 fois plus petit que ce qu&#39;il a lu ; pour Llama 3 8B, c&#39;est ~3 700 fois. Il ne peut pas tout retenir mot pour mot, donc la boucle le pousse à garder les régularités : grammaire, faits fréquents, raisonnements qui reviennent. Confiance moyenne sur les ratios (calcul approximatif), élevée sur l&#39;ordre de grandeur. Suite logique : enquête #9 (mémoriser ou généraliser).</p>
+<p><strong>2. L&#39;anomalie : Meta « surentraîne » exprès ses petits modèles.</strong> La règle Chinchilla dit ~20 tokens par paramètre pour le meilleur modèle à calcul donné (<a href="https://arxiv.org/abs/2203.15556" target="_blank" rel="noreferrer">DeepMind, 2022</a>). Llama 3 8B en a reçu ~15 000 milliards, soit ~1 900 tokens par paramètre, presque 100 fois la règle. Meta l&#39;assume dans son papier : les petits modèles entraînés bien plus longtemps que l&#39;optimum font mieux à coût d&#39;usage égal (<a href="https://arxiv.org/abs/2407.21783" target="_blank" rel="noreferrer">Meta, Llama 3</a>). La règle optimise le coût d&#39;entraînement, payé une fois. Les labos optimisent le coût d&#39;usage, payé à chaque token, pendant des années.</p>
+<p><strong>3. Les poids sont figés quand tu parles au modèle.</strong> Ton message passe dans la boucle « prédire », jamais dans la boucle « erreur → ajustement ». La « mémoire » d&#39;un assistant, c&#39;est du texte remis dans la fenêtre de contexte, pas un apprentissage. Ce que tu appelles « il a appris de moi », c&#39;est en réalité « il relit tes notes ».</p>
+<p><strong>Croisement → Économie (enquête #4, le prix du token).</strong> Le point 2 relie les deux branches : entraîner plus longtemps un plus petit modèle coûte plus cher une fois, mais baisse le prix de chaque token servi. Une partie de la chute des prix que tu as vue en #4 vient de ce choix fait pendant l&#39;apprentissage.</p>
+<h3>Signaux à surveiller</h3>
+<ul>
+<li><strong>Apprentissage continu.</strong> Si un modèle commercial se met à ajuster ses poids après sa sortie, à partir de son usage, le point 3 tombe. Ça changerait la confidentialité, la personnalisation et le coût. À noter dans ton carnet d&#39;anomalies si tu le vois annoncé.</li>
+<li><strong>Le ratio tokens / paramètre des nouveaux modèles ouverts.</strong> Un ratio qui monte = les labos parient sur l&#39;usage massif et l&#39;inférence pas chère.</li>
+<li><strong>Le mur des données.</strong> Si les labos manquent de bon texte humain, la quantité de tokens ne peut plus monter. Regarde ce qui le remplace : données synthétiques, apprentissage par essais (enquêtes #15 et #19).</li>
+</ul>
+<h2>Lexique</h2>
+<table>
+<thead>
+<tr>
+<th>Terme</th>
+<th>Ce que ça veut dire</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Fonction de perte (loss)</td>
+<td>Le chiffre unique qui mesure à quel point le modèle se trompe sur des exemples. Apprendre = le faire baisser</td>
+</tr>
+<tr>
+<td>Entropie croisée</td>
+<td>La perte des LLM : −ln(probabilité donnée au vrai token suivant). 90 % → 0,11 ; 1 % → 4,6</td>
+</tr>
+<tr>
+<td>Gradient</td>
+<td>Pour chaque paramètre : dans quel sens le bouger, et combien ça change la perte</td>
+</tr>
+<tr>
+<td>Descente de gradient</td>
+<td>Répéter : calculer le gradient, faire un petit pas dans le sens qui baisse la perte</td>
+</tr>
+<tr>
+<td>Taux d&#39;apprentissage</td>
+<td>La taille du pas. Trop grand, ça oscille ; trop petit, ça traîne</td>
+</tr>
+<tr>
+<td>Hyperparamètre</td>
+<td>Un réglage choisi par un humain avant l&#39;entraînement (taux d&#39;apprentissage, taille des lots…). À ne pas confondre avec les paramètres, qui sont appris</td>
+</tr>
+<tr>
+<td>Lot (mini-batch)</td>
+<td>Le paquet d&#39;exemples sur lequel on calcule un pas. On ne regarde jamais tout le corpus d&#39;un coup</td>
+</tr>
+<tr>
+<td>Passe avant / passe arrière</td>
+<td>Avant : le modèle prédit. Arrière : on calcule les gradients en remontant le réseau</td>
+</tr>
+<tr>
+<td>C ≈ 6ND</td>
+<td>Calcul d&#39;entraînement ≈ 6 × paramètres × tokens. Retombe pile sur les 3,8 × 10²⁵ de Llama 3</td>
+</tr>
+<tr>
+<td>Ratio Chinchilla</td>
+<td>~20 tokens par paramètre : le meilleur modèle pour un budget d&#39;entraînement donné. Les labos le dépassent exprès pour baisser le coût d&#39;usage</td>
+</tr>
+</tbody></table>
+<h2>Questions ouvertes et suite</h2>
+<h3>Questions ouvertes</h3>
+<ul>
+<li>Avec 405 milliards de boutons, comment calcule-t-on tous les gradients sans tester chaque bouton un par un ? → enquête #8.</li>
+<li>La descente peut s&#39;arrêter dans une « vallée » qui n&#39;est pas la plus basse. Pourquoi ça ne bloque pas les gros réseaux en pratique ?</li>
+<li>Si le modèle compresse 75 à 3 700 fois, qu&#39;est-ce qu&#39;il garde, qu&#39;est-ce qu&#39;il jette, et pourquoi recrache-t-il parfois du texte mot pour mot ? → enquête #9.</li>
+</ul>
+<h3>Prochaines enquêtes</h3>
+<ul>
+<li><strong>#8</strong> La rétropropagation pas à pas, sur un mini réseau.</li>
+<li><strong>#9</strong> Mémoriser ou généraliser : le surapprentissage.</li>
+</ul>
+<h3>Approfondissement (20 à 40 min)</h3>
+<ul>
+<li><strong>Source primaire à lire :</strong> le chapitre 2 de 3Blue1Brown, en texte ou en vidéo (<a href="https://www.3blue1brown.com/lessons/gradient-descent/" target="_blank" rel="noreferrer">lien</a>). C&#39;est la meilleure base pour l&#39;enquête #8.</li>
+<li><strong>Exercice :</strong> refais à la main 3 pas du modèle jouet avec un pas de 0,1 (départ w = 0,5, gradient au départ −14). Avant de calculer, parie : ça converge proprement, ça oscille, ou entre les deux ? Puis joue avec le curseur du cours de Google (<a href="https://developers.google.com/machine-learning/crash-course/linear-regression/gradient-descent-exercise" target="_blank" rel="noreferrer">exercice interactif</a>).</li>
+<li><strong>Question bonus :</strong> pourquoi on ne prend pas tout simplement « le % de bonnes réponses » comme perte ? Indice : regarde ce que la descente de gradient a besoin de savoir à chaque pas.</li>
+</ul>
+<h2>Sources</h2>
+<p>Toutes ouvertes le 28 oct. 2026.</p>
+<ul>
+<li><a href="https://www.3blue1brown.com/lessons/gradient-descent/" target="_blank" rel="noreferrer">Grant Sanderson (3Blue1Brown), <em>Gradient descent, how neural networks learn</em></a>, 2017 : définition de l&#39;apprentissage comme minimisation de la perte, 13 002 paramètres, taux d&#39;apprentissage.</li>
+<li><a href="https://arxiv.org/abs/2407.21783" target="_blank" rel="noreferrer">Meta, <em>The Llama 3 Herd of Models</em></a>, 2024 : 405 milliards de paramètres, 15,6 billions de tokens, 3,8 × 10²⁵ opérations, petits modèles entraînés au-delà de l&#39;optimum.</li>
+<li><a href="https://arxiv.org/abs/2203.15556" target="_blank" rel="noreferrer">Hoffmann et al. (DeepMind), <em>Training Compute-Optimal Large Language Models</em></a>, 2022 : plus de 400 modèles testés, doubler la taille = doubler les tokens, Chinchilla 70B bat Gopher 280B.</li>
+<li><a href="https://developers.google.com/machine-learning/crash-course/linear-regression/gradient-descent" target="_blank" rel="noreferrer">Google, <em>Machine Learning Crash Course</em> : descente de gradient</a> : départ au hasard, boucle perte → pas, réglage du taux.</li>
+<li>Modèle jouet « doubler » : calculé par moi pour cette enquête, refaisable à la main.</li>
+<li>Ratios de stockage (×75, ×3 700) : mon calcul à partir des chiffres de Meta, hypothèses 2 octets par paramètre et ~4 octets par token. Approximatif.</li>
+</ul>
+<h2>Termes vus</h2>
+<ul>
+<li><span class="lex" tabindex="0" title="Fonction de perte (loss) — Le chiffre unique qui mesure à quel point le modèle se trompe sur des exemples. Apprendre = le faire baisser.">Fonction de perte (loss)</span></li>
+<li><span class="lex" tabindex="0" title="Entropie croisée — La perte des LLM : −ln(probabilité donnée au vrai token suivant). 90 % → 0,11 ; 1 % → 4,6.">Entropie croisée</span></li>
+<li><span class="lex" tabindex="0" title="Gradient — Pour chaque paramètre : dans quel sens le bouger ET de combien (sa taille compte, pas seulement son signe).">Gradient</span></li>
+<li><span class="lex" tabindex="0" title="Descente de gradient — Répéter : w ← w − taux × gradient. Chaque pas baisse un peu la perte.">Descente de gradient</span></li>
+<li><span class="lex" tabindex="0" title="Taux d'apprentissage — La taille du pas (un HYPERparamètre). Trop grand, ça oscille ; trop petit, ça traîne.">Taux d&#39;apprentissage</span></li>
+<li><span class="lex" tabindex="0" title="Hyperparamètre — Réglage choisi par un humain avant l'entraînement (taux d'apprentissage, taille des lots, nb de tokens). Les paramètres, eux, sont appris.">Hyperparamètre</span></li>
+<li><span class="lex" tabindex="0" title="Lot (mini-batch) — Le paquet d'exemples sur lequel on calcule un pas. On ne regarde jamais tout le corpus d'un coup.">Lot (mini-batch)</span></li>
+<li><span class="lex" tabindex="0" title="Passe avant - passe arrière — Avant : le modèle prédit. Arrière : on calcule les gradients en remontant le réseau.">Passe avant - passe arrière</span></li>
+<li><span class="lex" tabindex="0" title="C ≈ 6ND — Calcul d'entraînement ≈ 6 × paramètres × tokens. Retombe pile sur les 3,8 × 10²⁵ de Llama 3.">C ≈ 6ND</span></li>
+<li><span class="lex" tabindex="0" title="Ratio Chinchilla — ~20 tokens par paramètre : le meilleur modèle pour un budget d'entraînement donné (Chinchilla : 70B, 1 400 Md tokens). Dépassé exprès pour baisser le coût d'usage.">Ratio Chinchilla</span></li>
+</ul>
+<h2>Anomalies relevées</h2>
+<ul>
+<li></li>
+</ul>
+<h2>Croisements avec d&#39;autres branches</h2>
+<ul>
+<li></li>
+</ul>

@@ -1,0 +1,749 @@
+<p><strong>Branche :</strong> Comment ça marche · bloc C, le transformer · Carte de l&#39;IA · suite de <a href="#/enquete/13-bis">#13 bis</a></p>
+<blockquote>
+<p><strong>Comment lire cette enquête</strong>
+4 idées, une par bloc. Chaque bloc suit le même ordre : un rappel, un exemple chiffré, ce qu&#39;on observe, la règle. Puis une question ✋, réponse repliée.
+Les encadrés « À faire à la main » se font avec la calculatrice du téléphone.</p>
+</blockquote>
+<h2>Le sujet en clair</h2>
+<h3>Où on en est</h3>
+<ul>
+<li><a href="#/enquete/1">#1</a> : une <span class="lex" tabindex="0" title="Couche — Un tour attention + transformation. On en empile des dizaines (96 chez GPT-3).">couche</span> = un tour d&#39;attention + une « transformation ». On empile des dizaines de couches.</li>
+<li><a href="#/enquete/13">#13</a> et <a href="#/enquete/13-bis">#13 bis</a> : on a ouvert l&#39;attention en entier.</li>
+<li>Aujourd&#39;hui : tout le reste de la couche. Trois pièces :<ul>
+<li>le MLP, c&#39;est la « transformation » de #1 ;</li>
+<li>la normalisation ;</li>
+<li>la connexion résiduelle.</li>
+</ul>
+</li>
+<li>Ici, « bloc » et « couche » veulent dire la même chose. Llama 3 8B en empile 32.</li>
+<li>Après #14, on a vu toutes les pièces d&#39;un transformer. Le bloc C de la Carte est fini.</li>
+</ul>
+<h3>L&#39;analogie : un Google Doc relu par 64 personnes</h3>
+<p>Un document partagé passe de main en main, entre 32 paires de relecteurs.</p>
+<ul>
+<li>Le 1er de chaque paire lit les autres paragraphes. Puis il ajoute une note au sien.</li>
+<li>Le 2e travaille un seul paragraphe, sans regarder les autres. Il ajoute aussi une note.</li>
+<li><strong>Règle 1 : personne n&#39;efface.</strong> Tout le monde écrit en mode suggestion.</li>
+<li><strong>Règle 2 : avant de lire, chacun règle le zoom de son écran.</strong> Le texte est peut-être en taille 3, ou en taille 300. Le zoom le rend lisible. Il ne change pas le document.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Dans le Google Doc</th>
+<th>Dans le transformer</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Le document qui passe de main en main</td>
+<td>Le flux résiduel</td>
+</tr>
+<tr>
+<td>Un paragraphe</td>
+<td>Le vecteur d&#39;un token</td>
+</tr>
+<tr>
+<td>Le relecteur qui lit les autres paragraphes</td>
+<td>L&#39;attention</td>
+</tr>
+<tr>
+<td>Le relecteur qui travaille un paragraphe seul</td>
+<td>Le MLP</td>
+</tr>
+<tr>
+<td>Ajouter une suggestion, ne jamais effacer</td>
+<td>La connexion résiduelle</td>
+</tr>
+<tr>
+<td>Régler le zoom avant de lire</td>
+<td>La normalisation (<span class="lex" tabindex="0" title="RMSNorm — Ramener un vecteur à une taille typique de 1, sans changer sa forme. Puis chaque case est multipliée par un gain appris.">RMSNorm</span>)</td>
+</tr>
+<tr>
+<td>Le zoom ne touche pas au document</td>
+<td>On normalise une copie, pas le flux (pre-norm)</td>
+</tr>
+<tr>
+<td>32 paires de relecteurs</td>
+<td>32 blocs chez Llama 3 8B</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>Le point exact où ça se joue</strong>
+Personne n&#39;efface. Chaque couche ajoute sa petite correction au même document. C&#39;est ce qui permet d&#39;empiler 32 couches, ou 126.</p>
+</blockquote>
+<h3>Les 4 mots</h3>
+<ul>
+<li><strong><span class="lex" tabindex="0" title="Connexion résiduelle — On ajoute la sortie d'une couche à son entrée, au lieu de la remplacer : sortie = entrée + correction.">Connexion résiduelle</span></strong> : on ajoute la sortie d&#39;une couche à son entrée, au lieu de la remplacer. Sortie = entrée + correction.</li>
+<li><strong><span class="lex" tabindex="0" title="Flux résiduel — Le vecteur d'un token qui traverse tous les blocs. Chaque couche lit une copie normalisée, puis ajoute sa contribution avec un « + ».">Flux résiduel</span></strong> : le vecteur d&#39;un token qui traverse tous les blocs. Chaque couche le lit, puis y ajoute sa contribution.</li>
+<li><strong><span class="lex" tabindex="0" title="RMSNorm — Ramener un vecteur à une taille typique de 1, sans changer sa forme. Puis chaque case est multipliée par un gain appris.">RMSNorm</span></strong> : ramener un vecteur à une taille typique de 1, sans changer sa forme. Puis des gains appris remettent du relief.</li>
+<li><strong><span class="lex" tabindex="0" title="Facteur d'expansion — De combien le MLP d'un bloc élargit le vecteur avant de le resserrer.">Facteur d&#39;expansion</span></strong> : le MLP élargit le vecteur, puis le resserre. 4 096 → 14 336 → 4 096 chez Llama 3 8B, soit × 3,5.</li>
+</ul>
+<p>Déjà vus, utilisés ici : <span class="lex" tabindex="0" title="Vecteur — Liste de nombres qui représente le sens d'un token.">Vecteur</span> · <span class="lex" tabindex="0" title="Neurone artificiel — Mini-calcul : multiplie chaque entrée par un poids, additionne, ajoute un biais, passe le tout dans l'activation.">Neurone artificiel</span> · <span class="lex" tabindex="0" title="ReLU — max(0, z). Coude net, pente 1 quand allumé. Standard depuis AlexNet (2012).">ReLU</span> · <span class="lex" tabindex="0" title="Règle de la chaîne — L'effet d'un élément lointain sur la sortie = produit des effets locaux le long du chemin.">Règle de la chaîne</span> · <span class="lex" tabindex="0" title="Gradient qui disparaît - explose — Le produit de nombreux facteurs tend vers 0 ou vers l'infini : les premières couches n'apprennent plus, ou l'entraînement casse.">gradient qui disparaît</span> · <span class="lex" tabindex="0" title="Écart-type — La racine de la variance : la taille typique d'un écart à la moyenne.">Écart-type</span> · <span class="lex" tabindex="0" title="Softmax — Transforme des scores en pourcentages qui font 100 %. Sert à l'attention et au tirage du token suivant.">Softmax</span> · <span class="lex" tabindex="0" title="Key — Ce qu'un token « affiche » pour être trouvé par les queries des autres.">Key</span> · <span class="lex" tabindex="0" title="Value — Ce qu'un token transmet une fois trouvé, ajouté au vecteur de celui qui le regarde.">Value</span>.</p>
+<h3>Le fil de l&#39;enquête</h3>
+<ol>
+<li>Ajouter au lieu de remplacer : la connexion résiduelle.</li>
+<li>Remettre à la bonne taille : la normalisation.</li>
+<li>Le MLP : chaque token travaille seul.</li>
+<li>Le bloc assemblé, répété 32 fois.</li>
+</ol>
+<h2>La question</h2>
+<blockquote>
+<p>Dans un bloc de transformer, à quoi servent les trois pièces autour de l&#39;attention : le MLP, la normalisation et la connexion résiduelle ?</p>
+</blockquote>
+<p><strong>→ La réponse.</strong></p>
+<ul>
+<li>L&#39;attention fait circuler l&#39;information <em>entre</em> les tokens.</li>
+<li>Le MLP travaille <em>chaque token seul</em>. Il contient l&#39;essentiel des paramètres : ≈ 70 % chez Llama 3 8B.</li>
+<li>La connexion résiduelle <em>ajoute</em> au lieu de remplacer. Elle garde une route directe pour l&#39;information et pour la pente.</li>
+<li>La normalisation remet chaque copie à une taille typique de 1, avant chaque couche.</li>
+<li>Sans ces deux dernières, on ne sait pas entraîner 32 couches. Encore moins 126.</li>
+</ul>
+<h2>Le schéma central</h2>
+<pre><code class="language-mermaid">flowchart TB
+  IN[&quot;Vecteur du token&lt;br/&gt;(flux résiduel)&quot;] --&gt; N1[&quot;RMSNorm&lt;br/&gt;copie ramenée à la taille 1&quot;]
+  N1 --&gt; ATT[&quot;Attention&lt;br/&gt;regarde les autres tokens&quot;]
+  ATT --&gt; P1((&quot;+&quot;))
+  IN --&gt;|&quot;route directe&quot;| P1
+  P1 --&gt; N2[&quot;RMSNorm&lt;br/&gt;nouvelle copie&quot;]
+  N2 --&gt; MLP[&quot;MLP&lt;br/&gt;chaque token seul&lt;br/&gt;4 096 → 14 336 → 4 096&quot;]
+  MLP --&gt; P2((&quot;+&quot;))
+  P1 --&gt;|&quot;route directe&quot;| P2
+  P2 --&gt; OUT[&quot;Bloc suivant&lt;br/&gt;32 fois chez Llama 3 8B&quot;]
+</code></pre>
+<p>À lire : la route directe ne passe par aucun calcul. Chaque sous-couche lit une copie normalisée, calcule, puis ajoute son résultat avec un « + ».</p>
+<h2>Le mécanisme</h2>
+<h3>Bloc 1 — Ajouter au lieu de remplacer</h3>
+<p><strong>Rappel.</strong> En #13, l&#39;attention produit un mélange de values pour chaque token. Question : qu&#39;en fait-on ?</p>
+<p><strong>Exemple.</strong> Le vecteur de « elle » entre dans la couche : (2 ; 1). L&#39;attention sort un mélange : (0,5 ; −0,5).</p>
+<table>
+<thead>
+<tr>
+<th>Choix</th>
+<th>Calcul</th>
+<th>Résultat</th>
+<th>Ce qui reste de (2 ; 1)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Remplacer</td>
+<td>on garde seulement le mélange</td>
+<td>(0,5 ; −0,5)</td>
+<td>✖ rien</td>
+</tr>
+<tr>
+<td>Ajouter</td>
+<td>(2 + 0,5 ; 1 − 0,5)</td>
+<td>(2,5 ; 0,5)</td>
+<td>✔ tout, plus la correction</td>
+</tr>
+</tbody></table>
+<p><strong>Ce qu&#39;on observe.</strong></p>
+<ul>
+<li>En remplaçant, le token perd ce qu&#39;il était.</li>
+<li>En ajoutant, la couche n&#39;a qu&#39;à apprendre une petite correction.</li>
+<li>Si la couche ne sert à rien pour ce token, elle sort (0 ; 0). Le token passe intact.</li>
+</ul>
+<p><strong>Et la pente ?</strong> Rappel de <a href="#/enquete/8">#8</a> : l&#39;effet d&#39;un réglage lointain sur l&#39;erreur = le produit des effets locaux le long du chemin. C&#39;est la <span class="lex" tabindex="0" title="Règle de la chaîne — L'effet d'un élément lointain sur la sortie = produit des effets locaux le long du chemin.">règle de la chaîne</span>.</p>
+<p>Exemple : 3 couches. Chacune a un effet local de 0,1.</p>
+<p>Sans connexion résiduelle :</p>
+<ul>
+<li>il n&#39;y a qu&#39;une route, qui traverse les 3 couches ;</li>
+<li>0,1 × 0,1 × 0,1 = 0,001 ;</li>
+<li>les premières couches ne reçoivent presque aucun signal. C&#39;est le <span class="lex" tabindex="0" title="Gradient qui disparaît - explose — Le produit de nombreux facteurs tend vers 0 ou vers l'infini : les premières couches n'apprennent plus, ou l'entraînement casse.">gradient qui disparaît</span>.</li>
+</ul>
+<p>Avec connexion résiduelle :</p>
+<ul>
+<li>chaque couche fait « entrée + correction » ;</li>
+<li>son effet local devient 1 + 0,1 = 1,1 ;</li>
+<li>1,1 × 1,1 × 1,1 = 1,331 ;</li>
+<li>ce total se découpe en routes :</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Routes</th>
+<th>Couches traversées</th>
+<th>Calcul</th>
+<th>Valeur</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1 route directe</td>
+<td>0</td>
+<td>1</td>
+<td><strong>1</strong></td>
+</tr>
+<tr>
+<td>3 routes</td>
+<td>1</td>
+<td>3 × 0,1</td>
+<td>0,3</td>
+</tr>
+<tr>
+<td>3 routes</td>
+<td>2</td>
+<td>3 × 0,01</td>
+<td>0,03</td>
+</tr>
+<tr>
+<td>1 route</td>
+<td>3</td>
+<td>0,1 × 0,1 × 0,1</td>
+<td>0,001</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td></td>
+<td></td>
+<td><strong>1,331</strong></td>
+</tr>
+</tbody></table>
+<p>La route directe vaut toujours 1. Le signal arrive jusqu&#39;aux premières couches.</p>
+<blockquote>
+<p><strong>Règle</strong>
+Ajouter au lieu de remplacer garde une route directe. L&#39;information et la pente traversent toutes les couches.</p>
+</blockquote>
+<p><strong>D&#39;où ça vient.</strong> He et al. (Microsoft, 2015), pour des réseaux qui reconnaissent des images. Avant : un réseau de 56 couches faisait <em>pire</em> qu&#39;un réseau de 20, même sur ses exemples d&#39;entraînement. Avec la connexion résiduelle : 152 couches, et la 1re place au concours ImageNet 2015. Le transformer (2017) a repris l&#39;idée telle quelle.</p>
+<blockquote>
+<p><strong>✋ Question d&#39;arrêt</strong>
+Une couche n&#39;a rien d&#39;utile à ajouter pour un token. Que doit-elle sortir ? Que devient le vecteur du token ?</p>
+</blockquote>
+<blockquote>
+<p><strong>Réponse</strong>
+Elle sort (0 ; 0). Le vecteur du token passe intact : entrée + 0 = entrée.
+Sans connexion résiduelle, elle devrait apprendre à recopier exactement son entrée. C&#39;est beaucoup plus dur à apprendre que « sortir 0 ».</p>
+</blockquote>
+<blockquote>
+<p><strong>À faire à la main</strong>
+5 couches, effet local de 0,2 chacune.</p>
+<ol>
+<li>Sans connexion résiduelle : calcule 0,2 × 0,2 × 0,2 × 0,2 × 0,2.</li>
+<li>Avec : combien vaut la route directe ?</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><strong>Solution</strong></p>
+<ol>
+<li>0,2⁵ = 0,00032.</li>
+<li>La route directe vaut 1.
+La route qui traverse tout est environ 3 000 fois plus faible que la route directe.</li>
+</ol>
+</blockquote>
+<h3>Bloc 2 — Remettre à la bonne taille : RMSNorm</h3>
+<p><strong>Rappel.</strong> Chaque couche ajoute quelque chose au vecteur. Après 32 couches, sa taille a pu beaucoup grandir. Et en #13 bis : des nombres trop grands donnent des scores énormes. Le <span class="lex" tabindex="0" title="Softmax — Transforme des scores en pourcentages qui font 100 %. Sert à l'attention et au tirage du token suivant.">softmax</span> sature.</p>
+<p><strong>Exemple.</strong> Deux vecteurs. Même forme, mais b est 10 fois plus grand.</p>
+<ul>
+<li>a = (1 ; 7 ; 1 ; 7)</li>
+<li>b = (10 ; 70 ; 10 ; 70)</li>
+</ul>
+<p>RMSNorm sur a, étape par étape :</p>
+<ol>
+<li>Mettre chaque case au carré : 1 ; 49 ; 1 ; 49.</li>
+<li>Faire la moyenne : 100 ÷ 4 = 25.</li>
+<li>Prendre la racine : √25 = 5. C&#39;est la taille typique d&#39;une case.</li>
+<li>Diviser chaque case par 5 : (0,2 ; 1,4 ; 0,2 ; 1,4).</li>
+</ol>
+<p>Sur b : carrés 100 ; 4 900 ; 100 ; 4 900. Moyenne 2 500. Racine 50. On divise par 50.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>a</th>
+<th>b</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Avant</td>
+<td>(1 ; 7 ; 1 ; 7)</td>
+<td>(10 ; 70 ; 10 ; 70)</td>
+</tr>
+<tr>
+<td>Taille typique (étapes 1 à 3)</td>
+<td>5</td>
+<td>50</td>
+</tr>
+<tr>
+<td>Après RMSNorm</td>
+<td>(0,2 ; 1,4 ; 0,2 ; 1,4)</td>
+<td>(0,2 ; 1,4 ; 0,2 ; 1,4)</td>
+</tr>
+</tbody></table>
+<p><strong>Ce qu&#39;on observe.</strong></p>
+<ul>
+<li>La taille disparaît. La forme reste.</li>
+<li>Après RMSNorm, la taille typique d&#39;une case vaut 1.</li>
+</ul>
+<p><strong>Les gains.</strong> Dernière étape : chaque case est multipliée par un gain, appris pendant l&#39;entraînement.</p>
+<ul>
+<li>Gains (1 ; 1 ; 2 ; 0,5) → (0,2 ; 1,4 ; 0,4 ; 0,7).</li>
+<li>Le modèle remet du relief là où il en veut.</li>
+<li>Chez Llama 3 8B : 4 096 gains par RMSNorm.</li>
+</ul>
+<p><strong>Le nom.</strong> RMS = <em>root mean square</em> = racine de la moyenne des carrés. Ce sont exactement les étapes 1 à 3. C&#39;est presque l&#39;<span class="lex" tabindex="0" title="Écart-type — La racine de la variance : la taille typique d'un écart à la moyenne.">écart-type</span> de #13 bis, mais mesuré autour de 0 au lieu de la moyenne.</p>
+<blockquote>
+<p><strong>Règle</strong>
+RMSNorm divise un vecteur par sa taille typique. Chaque couche reçoit des nombres de taille 1, quelle que soit la profondeur.</p>
+</blockquote>
+<blockquote>
+<p><strong>✋ Question d&#39;arrêt</strong>
+Après RMSNorm (gains à 1), que deviennent (3 ; 3 ; 3 ; 3) et (−3 ; −3 ; −3 ; −3) ? Qu&#39;est-ce que la normalisation garde, et qu&#39;est-ce qu&#39;elle jette ?</p>
+</blockquote>
+<blockquote>
+<p><strong>Réponse</strong>
+Taille typique : √((9 + 9 + 9 + 9) ÷ 4) = 3 pour les deux.
+Résultats : (1 ; 1 ; 1 ; 1) et (−1 ; −1 ; −1 ; −1).
+Elle garde la forme et les signes. Elle jette la taille.</p>
+</blockquote>
+<blockquote>
+<p><strong>À faire à la main</strong></p>
+<ol>
+<li>Normalise (1 ; 5 ; 5 ; 7), puis (3 ; 15 ; 15 ; 21).</li>
+<li>Applique les gains (2 ; 1 ; 1 ; 0) au résultat.</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><strong>Solution</strong></p>
+<ol>
+<li>Carrés : 1 + 25 + 25 + 49 = 100. Moyenne 25. Racine 5. → (0,2 ; 1 ; 1 ; 1,4).
+Carrés : 9 + 225 + 225 + 441 = 900. Moyenne 225. Racine 15. → (0,2 ; 1 ; 1 ; 1,4). Pareil.</li>
+<li>(0,4 ; 1 ; 1 ; 0). Un gain de 0 éteint une case pour la couche qui suit.</li>
+</ol>
+</blockquote>
+<h3>Bloc 3 — Le MLP : chaque token travaille seul</h3>
+<p><strong>Rappel de <a href="#/enquete/10">#10</a>.</strong> Un <span class="lex" tabindex="0" title="Neurone artificiel — Mini-calcul : multiplie chaque entrée par un poids, additionne, ajoute un biais, passe le tout dans l'activation.">neurone</span> multiplie chaque entrée par un poids, additionne, puis passe le résultat dans une activation. <span class="lex" tabindex="0" title="ReLU — max(0, z). Coude net, pente 1 quand allumé. Standard depuis AlexNet (2012).">ReLU</span> : un nombre négatif devient 0. Un MLP = deux couches de neurones.</p>
+<p><strong>Exemple.</strong> Le vecteur d&#39;un token : x = (1 ; 2). Le MLP a 4 neurones au milieu. On passe de 2 cases à 4 : on élargit.</p>
+<p>Étape 1 — chaque neurone du milieu teste x avec ses poids.</p>
+<table>
+<thead>
+<tr>
+<th>Neurone</th>
+<th>Poids</th>
+<th>Calcul</th>
+<th>Après ReLU</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>n1</td>
+<td>(1 ; 1)</td>
+<td>1 + 2 = 3</td>
+<td><strong>3</strong></td>
+</tr>
+<tr>
+<td>n2</td>
+<td>(1 ; −1)</td>
+<td>1 − 2 = −1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>n3</td>
+<td>(0 ; 1)</td>
+<td>0 + 2 = 2</td>
+<td><strong>2</strong></td>
+</tr>
+<tr>
+<td>n4</td>
+<td>(−1 ; 0)</td>
+<td>−1 + 0 = −1</td>
+<td>0</td>
+</tr>
+</tbody></table>
+<p>Étape 2 — chaque neurone a un vecteur de 2 cases à écrire. On resserre. Il l&#39;écrit avec la force de son activation.</p>
+<table>
+<thead>
+<tr>
+<th>Neurone</th>
+<th>Activation</th>
+<th>Vecteur qu&#39;il écrit</th>
+<th>Contribution</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>n1</td>
+<td>3</td>
+<td>(0,1 ; 0)</td>
+<td>(0,3 ; 0)</td>
+</tr>
+<tr>
+<td>n2</td>
+<td>0</td>
+<td>(0 ; 1)</td>
+<td>(0 ; 0)</td>
+</tr>
+<tr>
+<td>n3</td>
+<td>2</td>
+<td>(0 ; 0,1)</td>
+<td>(0 ; 0,2)</td>
+</tr>
+<tr>
+<td>n4</td>
+<td>0</td>
+<td>(1 ; 1)</td>
+<td>(0 ; 0)</td>
+</tr>
+<tr>
+<td><strong>Somme</strong></td>
+<td></td>
+<td></td>
+<td><strong>(0,3 ; 0,2)</strong></td>
+</tr>
+</tbody></table>
+<p>Étape 3 — connexion résiduelle : (1 ; 2) + (0,3 ; 0,2) = (1,3 ; 2,2).</p>
+<p><strong>Ce qu&#39;on observe.</strong></p>
+<ul>
+<li>Chaque neurone du milieu est un détecteur. Il s&#39;allume si le token ressemble à son motif. Comme une <span class="lex" tabindex="0" title="Key — Ce qu'un token « affiche » pour être trouvé par les queries des autres.">key</span>.</li>
+<li>Un neurone allumé écrit son vecteur. Comme une <span class="lex" tabindex="0" title="Value — Ce qu'un token transmet une fois trouvé, ajouté au vecteur de celui qui le regarde.">value</span>.</li>
+<li>Les neurones éteints (0) n&#39;écrivent rien.</li>
+<li>Aucun autre token n&#39;intervient. C&#39;est la grande différence avec l&#39;attention.</li>
+</ul>
+<p><strong>Les vraies tailles, Llama 3 8B.</strong></p>
+<ul>
+<li>4 096 cases → 14 336 neurones → 4 096 cases. <span class="lex" tabindex="0" title="Facteur d'expansion — De combien le MLP d'un bloc élargit le vecteur avant de le resserrer.">Facteur d&#39;expansion</span> : 3,5.</li>
+<li>L&#39;activation n&#39;est pas ReLU mais <span class="lex" tabindex="0" title="GELU - SwiGLU — Successeurs de ReLU dans les LLM. SwiGLU (Llama, PaLM) utilise une projection comme « porte » de l'autre. Trouvée par essais, sans explication.">SwiGLU</span> (#10). C&#39;est une variante plus douce, avec une 3e matrice qui sert de « porte ».</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Attention</th>
+<th>MLP</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Regarde les autres tokens</td>
+<td>✔</td>
+<td>✖</td>
+</tr>
+<tr>
+<td>Paramètres par bloc</td>
+<td>≈ 42 millions</td>
+<td>≈ 176 millions</td>
+</tr>
+<tr>
+<td>Part d&#39;un bloc</td>
+<td>≈ 19 %</td>
+<td>≈ 81 %</td>
+</tr>
+<tr>
+<td>Part du modèle entier</td>
+<td>≈ 17 %</td>
+<td>≈ 70 %</td>
+</tr>
+</tbody></table>
+<p>Le reste du modèle (≈ 13 %) : les tables d&#39;embeddings d&#39;entrée et de sortie. <em>Calcul à partir des tailles publiées par Meta, pas une mesure.</em></p>
+<blockquote>
+<p><strong>Règle</strong>
+Le MLP élargit, filtre, resserre. Chaque neurone dit : « si je reconnais ce motif, j&#39;ajoute ceci ». C&#39;est la pièce qui porte la plupart des paramètres.</p>
+</blockquote>
+<blockquote>
+<p><strong>✋ Question d&#39;arrêt</strong>
+Pendant le MLP, le token « elle » peut-il voir que « sonde » est 3 tokens plus tôt ? Pourquoi ?</p>
+</blockquote>
+<blockquote>
+<p><strong>Réponse</strong>
+Non. Le MLP ne voit que le vecteur de son propre token.
+L&#39;information sur « sonde » n&#39;arrive dans le vecteur de « elle » que si une attention l&#39;y a ajoutée avant.</p>
+</blockquote>
+<blockquote>
+<p><strong>À faire à la main</strong>
+Même MLP, avec x = (2 ; 1).</p>
+<ol>
+<li>Quels neurones s&#39;allument ?</li>
+<li>Quel vecteur sort du MLP ?</li>
+<li>Que vaut le flux après l&#39;addition ?</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><strong>Solution</strong></p>
+<ol>
+<li>n1 : 2 + 1 = 3. n2 : 2 − 1 = 1. n3 : 1. n4 : −2 → 0. Trois neurones allumés.</li>
+<li>3 × (0,1 ; 0) + 1 × (0 ; 1) + 1 × (0 ; 0,1) = (0,3 ; 1,1).</li>
+<li>(2 ; 1) + (0,3 ; 1,1) = (2,3 ; 2,1).
+Un autre token allume d&#39;autres neurones, donc il écrit autre chose. Ici, n2 s&#39;allume et écrit fort sur la 2e case.</li>
+</ol>
+</blockquote>
+<h3>Bloc 4 — Le bloc assemblé</h3>
+<p><strong>Rappel.</strong> On a les pièces : l&#39;attention (#13), le MLP (bloc 3), RMSNorm (bloc 2), et le « + » de la connexion résiduelle (bloc 1).</p>
+<p><strong>Les 4 lignes d&#39;un bloc, chez Llama 3.</strong> x est le flux résiduel du token.</p>
+<ol>
+<li>copie = RMSNorm(x)</li>
+<li>x = x + Attention(copie)</li>
+<li>copie = RMSNorm(x)</li>
+<li>x = x + MLP(copie)</li>
+</ol>
+<p>Le bloc suivant reprend avec le nouveau x. 32 fois.
+À la fin : une dernière RMSNorm. Puis la couche de sortie donne un score par token du <span class="lex" tabindex="0" title="Vocabulaire — La liste de tous les tokens que le modèle connaît (128 256 chez Llama 3).">vocabulaire</span>. Puis le softmax.</p>
+<p><strong>Exemple : où placer la normalisation ?</strong> Deux recettes existent.</p>
+<pre><code class="language-mermaid">flowchart LR
+  subgraph POST[&quot;Post-norm, transformer de 2017&quot;]
+    A1[&quot;x&quot;] --&gt; B1[&quot;couche&quot;]
+    A1 --&gt; C1((&quot;+&quot;))
+    B1 --&gt; C1
+    C1 --&gt; D1[&quot;Norm&lt;br/&gt;sur le flux lui-même&quot;]
+  end
+  subgraph PRE[&quot;Pre-norm, Llama et presque tous depuis&quot;]
+    A2[&quot;x&quot;] --&gt; D2[&quot;Norm&lt;br/&gt;sur une copie&quot;]
+    D2 --&gt; B2[&quot;couche&quot;]
+    B2 --&gt; C2((&quot;+&quot;))
+    A2 --&gt; C2
+  end
+</code></pre>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Post-norm (2017)</th>
+<th>Pre-norm (Llama, GPT…)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Formule</td>
+<td>x = Norm(x + couche(x))</td>
+<td>x = x + couche(Norm(x))</td>
+</tr>
+<tr>
+<td>Ce qu&#39;on normalise</td>
+<td>le flux lui-même</td>
+<td>une copie</td>
+</tr>
+<tr>
+<td>La route directe traverse une normalisation</td>
+<td>✔ à chaque couche</td>
+<td>✖ jamais</td>
+</tr>
+<tr>
+<td>S&#39;entraîne sans précautions spéciales</td>
+<td>✖ il faut démarrer très doucement</td>
+<td>✔</td>
+</tr>
+</tbody></table>
+<p><strong>Ce qu&#39;on observe.</strong></p>
+<ul>
+<li>En pre-norm, la route directe du bloc 1 reste intacte de bout en bout. C&#39;est le zoom de l&#39;analogie : on règle l&#39;écran, pas le document.</li>
+<li>En post-norm, la normalisation coupe la route directe à chaque couche.</li>
+</ul>
+<blockquote>
+<p><strong>Règle</strong>
+Un bloc = deux fois « normaliser une copie, calculer, ajouter au flux ». Une fois avec l&#39;attention, une fois avec le MLP.</p>
+</blockquote>
+<blockquote>
+<p><strong>✋ Question d&#39;arrêt</strong>
+Dans les 4 lignes du bloc : à quelle ligne un token reçoit-il de l&#39;information des autres tokens ? À quelle ligne n&#39;en reçoit-il jamais ?</p>
+</blockquote>
+<blockquote>
+<p><strong>Réponse</strong>
+Ligne 2 : l&#39;attention, la seule pièce qui regarde les autres tokens.
+Ligne 4 : le MLP, qui travaille chaque token seul.</p>
+</blockquote>
+<blockquote>
+<p><strong>À faire à la main (compter)</strong>
+Llama 3 8B a 32 blocs.</p>
+<ol>
+<li>Combien d&#39;additions dans le flux résiduel, en tout ?</li>
+<li>Combien de RMSNorm, en tout ?</li>
+<li>Un modèle post-norm de 6 blocs, 2 sous-couches par bloc. Combien de normalisations la route directe traverse-t-elle ? Et en pre-norm ?</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><strong>Solution</strong></p>
+<ol>
+<li>2 par bloc × 32 = 64.</li>
+<li>2 par bloc × 32 + 1 finale = 65.</li>
+<li>Post-norm : 6 × 2 = 12. Pre-norm : 0.</li>
+</ol>
+</blockquote>
+<h2>Ce que ça révèle</h2>
+<ol>
+<li><strong>La profondeur est un problème de tuyauterie.</strong> En 2015, ajouter des couches rendait un réseau pire, même sur ses exemples d&#39;entraînement. Ce n&#39;était pas du <span class="lex" tabindex="0" title="Surapprentissage (overfitting) — Le modèle apprend le bruit de ses exemples au lieu de la règle : très bon à l'entraînement, moins bon sur du neuf.">surapprentissage</span> (#9) : le réseau n&#39;arrivait plus à apprendre du tout. La réparation n&#39;a pas été un meilleur neurone. Ça a été un « + ».</li>
+<li><strong>L&#39;essentiel des paramètres est dans les MLP.</strong> ≈ 70 % chez Llama 3 8B. Geva et al. (2021) montrent que chaque neurone de MLP marche comme une paire key → value. Il détecte un motif du texte, et pousse vers les tokens qui suivent souvent ce motif.</li>
+<li><strong>Un transformer est un tableau partagé.</strong> Toutes les couches lisent et écrivent dans le même flux. Elles ne se parlent jamais directement. Anthropic a fait de cette idée sa façon d&#39;ouvrir les modèles (Elhage et al., 2021).</li>
+<li><strong>La recette de 2015 ne bouge que maintenant.</strong> Pendant 10 ans, tout le monde a additionné avec un poids fixe de 1. Depuis fin 2025, deux labos chinois remplacent ce « + ».</li>
+</ol>
+<h3>Signaux à surveiller</h3>
+<table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Où on en est (vérifié le 20/11/2026)</th>
+<th>Ce qui le ferait bouger</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Remplacer le « + »</td>
+<td>DeepSeek, mHC (31/12/2025) : 4 flux résiduels en parallèle, mélangés de façon contrôlée. Repris dans DeepSeek V4. Kimi, Attention Residuals (16/03/2026) : chaque couche choisit, avec un softmax, quelles couches précédentes relire. Repris dans Kimi K3 (2 800 milliards de paramètres).</td>
+<td>Un labo américain qui publie un modèle phare sans « + » simple</td>
+</tr>
+<tr>
+<td>Supprimer la normalisation</td>
+<td>DyT (Zhu, Chen, He, LeCun, Liu, mars 2025) : une fonction fixe en S remplace la normalisation. Qualité égale ou meilleure dans leurs tests.</td>
+<td>Un grand LLM publié sans normalisation</td>
+</tr>
+<tr>
+<td>Les activations massives</td>
+<td>Décrites en 2024 (voir les anomalies).</td>
+<td>Un papier qui montre qu&#39;elles disparaissent avec les corrections du puits d&#39;attention (#13 bis)</td>
+</tr>
+</tbody></table>
+<p>Confiance : élevée sur les papiers. Moyenne sur les adoptions dans DeepSeek V4 et Kimi K3 (sources secondaires, voir Sources).</p>
+<h2>Termes vus</h2>
+<ul>
+<li>Nouveaux : <span class="lex" tabindex="0" title="Connexion résiduelle — On ajoute la sortie d'une couche à son entrée, au lieu de la remplacer : sortie = entrée + correction.">Connexion résiduelle</span> · <span class="lex" tabindex="0" title="Flux résiduel — Le vecteur d'un token qui traverse tous les blocs. Chaque couche lit une copie normalisée, puis ajoute sa contribution avec un « + ».">Flux résiduel</span> · <span class="lex" tabindex="0" title="RMSNorm — Ramener un vecteur à une taille typique de 1, sans changer sa forme. Puis chaque case est multipliée par un gain appris.">RMSNorm</span> · <span class="lex" tabindex="0" title="LayerNorm — Normalisation d'origine (Ba, Kiros, Hinton, 2016) : retirer la moyenne du vecteur, puis diviser par son écart-type, puis appliquer des gains appris.">LayerNorm</span> · <span class="lex" tabindex="0" title="Pre-norm - post-norm — Où placer la normalisation dans un bloc.">Pre-norm - post-norm</span> · <span class="lex" tabindex="0" title="Facteur d'expansion — De combien le MLP d'un bloc élargit le vecteur avant de le resserrer.">Facteur d&#39;expansion</span> · <span class="lex" tabindex="0" title="Problème de dégradation — Ajouter des couches rend un réseau pire, même sur ses exemples d'entraînement. Ce n'est pas du surapprentissage : le réseau n'arrive plus à apprendre.">Problème de dégradation</span> · <span class="lex" tabindex="0" title="Activations massives — Une poignée de cases du flux résiduel jusqu'à 100 000 fois plus grandes que les autres (Sun et al., 2024).">Activations massives</span></li>
+<li>Déjà vus, approfondis : <span class="lex" tabindex="0" title="MLP (perceptron multicouche) — Couches de neurones empilées avec activation. Dans un LLM, porte ~70 % des paramètres (Llama 3 8B).">MLP</span> · <span class="lex" tabindex="0" title="Couche — Un tour attention + transformation. On en empile des dizaines (96 chez GPT-3).">Couche</span> · <span class="lex" tabindex="0" title="GELU - SwiGLU — Successeurs de ReLU dans les LLM. SwiGLU (Llama, PaLM) utilise une projection comme « porte » de l'autre. Trouvée par essais, sans explication.">GELU - SwiGLU</span> · <span class="lex" tabindex="0" title="Gradient qui disparaît - explose — Le produit de nombreux facteurs tend vers 0 ou vers l'infini : les premières couches n'apprennent plus, ou l'entraînement casse.">Gradient qui disparaît - explose</span></li>
+<li>Déjà vus, reliés : <span class="lex" tabindex="0" title="Règle de la chaîne — L'effet d'un élément lointain sur la sortie = produit des effets locaux le long du chemin.">Règle de la chaîne</span> · <span class="lex" tabindex="0" title="ReLU — max(0, z). Coude net, pente 1 quand allumé. Standard depuis AlexNet (2012).">ReLU</span> · <span class="lex" tabindex="0" title="Écart-type — La racine de la variance : la taille typique d'un écart à la moyenne.">Écart-type</span> · <span class="lex" tabindex="0" title="Key — Ce qu'un token « affiche » pour être trouvé par les queries des autres.">Key</span> · <span class="lex" tabindex="0" title="Value — Ce qu'un token transmet une fois trouvé, ajouté au vecteur de celui qui le regarde.">Value</span> · <span class="lex" tabindex="0" title="Softmax — Transforme des scores en pourcentages qui font 100 %. Sert à l'attention et au tirage du token suivant.">Softmax</span> · <span class="lex" tabindex="0" title="Surapprentissage (overfitting) — Le modèle apprend le bruit de ses exemples au lieu de la règle : très bon à l'entraînement, moins bon sur du neuf.">Surapprentissage (overfitting)</span></li>
+</ul>
+<h2>Anomalies relevées</h2>
+<ul>
+<li><strong>Plus de couches, pire résultat, même à l&#39;entraînement.</strong> C&#39;est le <span class="lex" tabindex="0" title="Problème de dégradation — Ajouter des couches rend un réseau pire, même sur ses exemples d'entraînement. Ce n'est pas du surapprentissage : le réseau n'arrive plus à apprendre.">problème de dégradation</span> (He et al., 2015) : 56 couches font pire que 20. Ça contredit une règle de #9 : plus de couches = plus de <span class="lex" tabindex="0" title="Capacité — Ce qu'un modèle peut représenter. Assez de capacité = assez pour tout retenir, même des étiquettes au hasard.">capacité</span>. En théorie, le réseau profond pourrait copier le petit, et faire passer les couches en trop sans rien changer. En pratique, il n&#39;y arrive pas. Piste : apprendre à « tout recopier » est dur. Avec le « + », il suffit de sortir 0.</li>
+<li><strong>Quelques nombres géants dans le flux.</strong> Sun et al. (2024) : une poignée de cases du flux résiduel sont jusqu&#39;à 100 000 fois plus grandes que les autres. Elles restent presque constantes, quel que soit le texte. Elles servent de biais, et elles concentrent l&#39;attention sur leur token. Ça contredit l&#39;idée que la normalisation garde toutes les tailles sous contrôle. Piste : RMSNorm ne normalise que la copie, pas le flux. Lien probable avec le puits d&#39;attention (#13 bis).</li>
+</ul>
+<h2>Croisements avec d&#39;autres branches</h2>
+<ul>
+<li><strong>Grands enjeux, spatial (projet 9).</strong> Le plafond du FP16 est 65 504. Une activation massive est candidate au débordement dans les calculs intermédiaires, comme dans la V4 du projet 9. <em>Déduit, pas mesuré.</em> Testable sur Kaggle (voir l&#39;approfondissement).</li>
+<li><strong>Économie (<a href="#/enquete/4">#4</a>) et inférence (#21).</strong> 70 % des paramètres sont dans les MLP. Ce sont donc surtout eux qu&#39;on relit en mémoire à chaque token, au decode. C&#39;est aussi la pièce que le <span class="lex" tabindex="0" title="Mixture of experts — Modèle dont seule une partie s'active pour chaque token.">mixture of experts</span> découpe en plusieurs « experts », dont seuls quelques-uns s&#39;activent.</li>
+<li><strong>D&#39;où elle vient (<a href="#/enquete/2">#2</a>).</strong> L&#39;idée du « + » vient de la reconnaissance d&#39;images (2015), pas du langage. Le transformer l&#39;a empruntée.</li>
+</ul>
+<h2>Questions ouvertes</h2>
+<ol>
+<li>Si un neurone de MLP stocke un fait, peut-on corriger ce fait en ne touchant que ce neurone ?</li>
+<li>Pourquoi × 4 en 2017, × 3,5 chez Llama 3 8B, × 3,25 chez Llama 3 405B ? Le facteur d&#39;expansion est-il optimisé, ou hérité ?</li>
+<li>Les activations massives disparaissent-elles quand on répare le puits d&#39;attention (gpt-oss, Qwen) ?</li>
+<li>mHC et Attention Residuals : petit gain, ou fin du « + » ?</li>
+</ol>
+<h2>Prochaine enquête</h2>
+<ul>
+<li>Le bloc C est fini : on a toutes les pièces d&#39;un transformer.</li>
+<li><strong>#15 — D&#39;où viennent les données, et comment on les nettoie.</strong> Bloc D, l&#39;entraînement. On a la machine. On regarde maintenant ce qu&#39;on lui donne à lire.</li>
+</ul>
+<h2>Approfondissement</h2>
+<ul>
+<li><strong>Source primaire.</strong> He et al. 2015, figure 1 (courbes 20 contre 56 couches) et section 3.1 (y = F(x) + x). PDF à déposer dans <code>Bibliothèque/PDF/</code> sous le nom <code>2015 He - Deep residual learning.pdf</code>.</li>
+<li><strong>Exercice Kaggle, 20 min.</strong> Un MLP de 20 couches, puis de 56, sur un petit jeu d&#39;images (MNIST). Avec et sans connexion résiduelle. Noter la perte d&#39;entraînement après 5 <span class="lex" tabindex="0" title="Époque (epoch) — Un passage complet sur les données. Au-delà de ~4 pour un LLM, chaque relecture vaut de moins en moins.">époques</span>. Le pari d&#39;abord : lequel fait pire ?</li>
+<li><strong>Question bonus (projet 9).</strong> Charger GPT-2 sur Kaggle et noter la plus grande valeur du flux résiduel à chaque bloc. Dépasse-t-elle 65 504 ?</li>
+</ul>
+<h2>Sources</h2>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Ce qu&#39;elle apporte</th>
+<th>Confiance</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>He et al., <a href="https://arxiv.org/abs/1512.03385" target="_blank" rel="noreferrer">Deep Residual Learning for Image Recognition</a>, déc. 2015</td>
+<td>La connexion résiduelle (y = F(x) + x, sans paramètre en plus), la dégradation 20 contre 56 couches, 152 couches, 1re place ILSVRC 2015 (3,57 % d&#39;erreur)</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Vaswani et al., <a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noreferrer">Attention Is All You Need</a>, 2017</td>
+<td>Post-norm, MLP 512 → 2 048 → 512 avec ReLU</td>
+<td>Élevée, non relu aujourd&#39;hui</td>
+</tr>
+<tr>
+<td>Zhang et Sennrich, <a href="https://arxiv.org/abs/1910.07467" target="_blank" rel="noreferrer">Root Mean Square Layer Normalization</a>, oct. 2019</td>
+<td>RMSNorm saute le retrait de la moyenne ; 7 à 64 % de temps en moins</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Xiong et al., <a href="https://arxiv.org/abs/2002.04745" target="_blank" rel="noreferrer">On Layer Normalization in the Transformer Architecture</a>, ICML 2020</td>
+<td>Post-norm : gros gradients près de la sortie, warm-up nécessaire ; pre-norm s&#39;en passe</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Meta, <a href="https://arxiv.org/abs/2407.21783" target="_blank" rel="noreferrer">The Llama 3 Herd of Models</a>, juil. 2024</td>
+<td>Tailles : 32 / 80 / 126 couches, 4 096 / 8 192 / 16 384, FFN 14 336 / 28 672 / 53 248, SwiGLU</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Geva et al., <a href="https://arxiv.org/abs/2012.14913" target="_blank" rel="noreferrer">Transformer Feed-Forward Layers Are Key-Value Memories</a>, 2021</td>
+<td>Les neurones du MLP comme paires key → value</td>
+<td>Élevée sur ce que le papier mesure</td>
+</tr>
+<tr>
+<td>Elhage et al. (Anthropic), A Mathematical Framework for Transformer Circuits, déc. 2021</td>
+<td>Le flux résiduel comme espace partagé</td>
+<td>Élevée, non relu aujourd&#39;hui</td>
+</tr>
+<tr>
+<td>Sun et al., <a href="https://arxiv.org/abs/2402.17762" target="_blank" rel="noreferrer">Massive Activations in Large Language Models</a>, fév. 2024</td>
+<td>Activations jusqu&#39;à 100 000 × plus grandes, constantes, rôle de biais, lien avec l&#39;attention</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Zhu et al., <a href="https://arxiv.org/abs/2503.10622" target="_blank" rel="noreferrer">Transformers without Normalization</a>, mars 2025</td>
+<td>DyT remplace la normalisation</td>
+<td>Élevée sur leurs tests</td>
+</tr>
+<tr>
+<td>DeepSeek, <a href="https://arxiv.org/abs/2512.24880" target="_blank" rel="noreferrer">mHC: Manifold-Constrained Hyper-Connections</a>, 31 déc. 2025</td>
+<td>4 flux résiduels, surcoût de 6,7 % du temps d&#39;entraînement</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>Kimi Team, <a href="https://arxiv.org/abs/2603.15031" target="_blank" rel="noreferrer">Attention Residuals</a>, 16 mars 2026</td>
+<td>Chaque couche choisit quelles couches précédentes relire</td>
+<td>Élevée</td>
+</tr>
+<tr>
+<td>S. Raschka, <a href="https://www.sebastianraschka.com/llm-architecture-gallery/mhc/" target="_blank" rel="noreferrer">LLM Architecture Gallery : mHC</a> et <a href="https://sebastianraschka.com/llm-architecture-gallery/attention-residuals/" target="_blank" rel="noreferrer">Attention Residuals</a></td>
+<td>Adoption de mHC dans DeepSeek V4 ; AttnRes ≈ +4 % de coût d&#39;entraînement, gains modestes</td>
+<td>Moyenne (source secondaire)</td>
+</tr>
+<tr>
+<td>DeepLearning.AI, <a href="https://www.deeplearning.ai/the-batch/kimi-k3-reveals-how-a-giant-frontier-ai-model-works" target="_blank" rel="noreferrer">The Batch : Kimi K3</a>, et <a href="https://github.com/moonshotai" target="_blank" rel="noreferrer">GitHub Moonshot AI</a></td>
+<td>Kimi K3, 2 800 Md de paramètres, utilise Attention Residuals</td>
+<td>Moyenne-élevée</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>Ce qui manque</strong></p>
+<ul>
+<li>Les vecteurs et les poids des exemples sont inventés pour la démonstration.</li>
+<li>Les parts 70 % / 17 % / 13 % sont un calcul à partir des tailles publiées, pas une mesure.</li>
+<li>L&#39;effet local « 0,1 par couche » du bloc 1 est un chiffre d&#39;école. Dans un vrai réseau, il varie d&#39;une couche à l&#39;autre.</li>
+<li>Le lien activations massives × FP16 est déduit, pas mesuré.</li>
+<li>Rien de vérifié sur ce que font OpenAI, Anthropic ou Google : leurs architectures ne sont pas publiées.</li>
+</ul>
+</blockquote>
+<blockquote>
+<p><strong>Pour plus tard (hors du fil)</strong>
+<strong>LayerNorm contre RMSNorm.</strong> <span class="lex" tabindex="0" title="LayerNorm — Normalisation d'origine (Ba, Kiros, Hinton, 2016) : retirer la moyenne du vecteur, puis diviser par son écart-type, puis appliquer des gains appris.">LayerNorm</span> (Ba, Kiros, Hinton, 2016) retire d&#39;abord la moyenne du vecteur, puis divise par l&#39;écart-type. RMSNorm (2019) saute le retrait de la moyenne. Même qualité, 7 à 64 % de temps en moins selon les modèles. Sennrich, co-auteur de RMSNorm, est aussi l&#39;auteur du BPE de <a href="#/enquete/12">#12</a>.</p>
+<p><strong>Pourquoi le post-norm est délicat.</strong> Xiong et al. (2020) : en post-norm, au départ, les gradients près de la sortie sont grands. Il faut un <em>warm-up</em> : démarrer avec un <span class="lex" tabindex="0" title="Taux d'apprentissage — La taille du pas (un HYPERparamètre). Trop grand, ça oscille ; trop petit, ça traîne.">taux d&#39;apprentissage</span> minuscule, puis l&#39;augmenter peu à peu. En pre-norm, on peut s&#39;en passer.</p>
+<p><strong>Les tailles de Llama 3.</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>8B</th>
+<th>70B</th>
+<th>405B</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Blocs</td>
+<td>32</td>
+<td>80</td>
+<td>126</td>
+</tr>
+<tr>
+<td>Taille du vecteur</td>
+<td>4 096</td>
+<td>8 192</td>
+<td>16 384</td>
+</tr>
+<tr>
+<td>Neurones du MLP</td>
+<td>14 336</td>
+<td>28 672</td>
+<td>53 248</td>
+</tr>
+<tr>
+<td>Facteur d&#39;expansion</td>
+<td>3,5</td>
+<td>3,5</td>
+<td>3,25</td>
+</tr>
+</tbody></table>
+<p><strong>Le transformer de 2017.</strong> 512 → 2 048 → 512 (× 4), ReLU, post-norm, LayerNorm.</p>
+<p><strong>Les alternatives au « + ».</strong> Hyper-connections (ByteDance, Zhu et al., 2024) : élargir le flux en plusieurs voies. Instable à grande échelle selon DeepSeek, d&#39;où mHC qui contraint le mélange (+ 6,7 % de temps d&#39;entraînement pour 4 voies). Attention Residuals (Kimi) : un softmax sur les sorties des couches précédentes, au lieu d&#39;une somme à poids fixe 1.</p>
+<p><strong>DyT.</strong> DyT(x) = tanh(α × x). tanh est une fonction en S entre −1 et 1, cousine de la <span class="lex" tabindex="0" title="Sigmoïde — Activation en S, entre 0 et 1. Pente max 0,25 : étouffe le gradient dans un réseau profond.">sigmoïde</span>. α est appris.</p>
+</blockquote>
