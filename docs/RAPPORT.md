@@ -1,6 +1,6 @@
 # Rapport — schéma 3D de Llama 3.2 3B (phases D et F)
 
-**Site : https://axelphilipp14-star.github.io/schema-llama/** · code : https://github.com/axelphilipp14-star/schema-llama · état au 24/11/2026.
+**Site : https://axelphilipp14-star.github.io/schema-llama/** · code : https://github.com/axelphilipp14-star/schema-llama · état au 24/11/2026, campagne rejouée en entier à 22:33.
 
 ## Exigences : valeur mesurée, preuve
 | # | Exigence | Seuil | Mesuré (sur le vrai 3B sauf mention) | Statut | Preuve |
@@ -8,8 +8,8 @@
 | E1 | Trace fidèle au modèle | dims = config ; Σ attention = 1 à la précision du format ; softmax(QKᵀ) = attention ; top-1 = génération | **15/15 traces** (3B Instruct, 3B base, 1B × 5 phrases) ; + recalculs RMSNorm, Σ p·V, SwiGLU | ✅ (seuil corrigé par calcul, AN-001) | `docs/preuves/traces_github_actions_rapport.json`, `tests/trace.test.ts`, `tests/m2-math.test.ts` |
 | E2 | Nombres affichés = trace | 100 % des valeurs testées | logit lens 28 blocs, top-3 par étape, top-10 ; cartes RMSNorm, softmax, sortie de tête, MLP ; base/Instruct | ✅ | `tests/e2e/numbers.spec.ts`, `block.spec.ts`, `make.spec.ts` |
 | E3 | Fluidité 3D | ≥ 50 i/s, 1440×900, écran Retina | trajet min **59**, bloc min **57** (écran 60 Hz ; 131–144 i/s sur écran 144 Hz) | ✅ | `docs/preuves/M1_mesure_3b.json`, `M2_mesure_fps_3b.json` |
-| E4 | Chargement | utilisable < 3 s ; trace ≤ 2 Mo gzip | site publié : **2,4 s** (1re visite), 0,6–1,2 s ensuite ; trace **196 Ko** gzip | ✅ | `docs/preuves/M6_site_publie.json` |
-| E5 | Direct sur le Mac (8 Go) | 1er résultat < 60 s (cache), ≥ 5 tokens/s, pas de crash | **1B : 25 s**, 0,5–0,7 s par phrase ✅ · 3B : 119 s ✗ (proposé en option « lent ») | ✅ 1B / ✗ 3B (AN-002) | `docs/preuves/M3_direct_1b.json`, `M3_direct_3b.json` |
+| E4 | Chargement | utilisable < 3 s ; trace ≤ 2 Mo gzip | site publié : **1,2 à 2,4 s** (1re visite selon le réseau), 0,4–1,2 s ensuite ; trace **196 Ko** gzip | ✅ | `docs/preuves/M6_site_publie.json` |
+| E5 | Direct sur le Mac (8 Go) | 1er résultat < 60 s (cache), ≥ 5 tokens/s, pas de crash | **1B : 25 s en local, 30,4 s sur le site publié** (1re visite avec téléchargement de 1,1 Go : 310 s), 0,6–0,8 s par phrase ✅ · 3B : 119 s ✗ (option « lent ») | ✅ 1B / ✗ 3B (AN-002) | `docs/preuves/M3_direct_1b.json`, `M3_direct_1b_site_publie.json`, `M3_direct_1b_site_publie_telechargement.json`, `M3_direct_3b.json` |
 | E6 | Direct cohérent avec la trace | top-1 identique, ≥ 8/10 en commun | 1B : ✓, 8/10 · **3B : ✓, 8/10** (« was » 49,7 % direct / 46,6 % trace) | ✅ (à la limite : quantification 4 bits) | idem |
 | E7 | FR/EN complet | 100 % des clés | 0 clé manquante, 0 phrase à traduire ; 30 termes identiques listés | ✅ | `tests/i18n.test.ts` |
 | E8 | Suivre un token | ≤ 60 s | **43,3 s** (28 blocs) | ✅ | `docs/preuves/M1_mesure_3b.json` |
@@ -18,7 +18,8 @@
 Tests : **131 unitaires + 4 e2e**, verts ; la publication sur GitHub Pages ne se fait que si les tests unitaires passent (`.github/workflows/pages.yml`).
 
 ## Ce qui n'est pas fait (ou pas vérifié)
-- **Le modèle en direct sur le site publié** n'a pas été testé de bout en bout (test interrompu à la demande d'Axel pendant le téléchargement de 1,1 Go). En local : vérifié. À faire : `SITE=https://axelphilipp14-star.github.io/schema-llama/ node scripts/measure-m3.mjs 1b`.
+- Le 3B en direct n'a été mesuré qu'en local (même code que le 1B, vérifié sur le site publié).
+- **Première visite** : le modèle en direct (1,1 Go) met ≈ 5 minutes à se télécharger avant le premier résultat ; ensuite il est en cache (30 s). La page le dit pendant le chargement, mais n'annonce pas la durée.
 - Schéma Mermaid de l'enquête 12 : erreur de syntaxe dans la note (ligne 6) — à corriger par Axel dans le coffre.
 - Fiche fine-tuning : attend l'enquête #18.
 - Ligne de trace dans `Journal.md` du coffre : refusée par le contrôle des permissions, laissée à Axel.

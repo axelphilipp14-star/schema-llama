@@ -1,0 +1,104 @@
+{
+ "date": "2026-11-24T21:41:55.607Z",
+ "machine": "MacBook A18 Pro, 8 Go",
+ "model": "1b",
+ "first_result_wall_s": 30.553,
+ "status": "ready",
+ "error": null,
+ "loadS": 20.6,
+ "warmS": 8.7,
+ "firstResultS": 30.4,
+ "forwardMs": 588,
+ "top10": [
+  [
+   " was",
+   0.5186
+  ],
+  [
+   " had",
+   0.0747
+  ],
+  [
+   " is",
+   0.049
+  ],
+  [
+   " got",
+   0.0364
+  ],
+  [
+   " has",
+   0.0189
+  ],
+  [
+   "'s",
+   0.0159
+  ],
+  [
+   " failed",
+   0.0136
+  ],
+  [
+   " fell",
+   0.0113
+  ],
+  [
+   " went",
+   0.0086
+  ],
+  [
+   " hit",
+   0.0074
+  ]
+ ],
+ "compare": [
+  "Llama 3.2 1B prêt · chargement 20,6 s · préparation 8,7 s · 1er résultat 30,4 s après le clic."
+ ],
+ "t05_top3": [
+  [
+   " was",
+   0.961
+  ],
+  [
+   " had",
+   0.0199
+  ],
+  [
+   " is",
+   0.0086
+  ]
+ ],
+ "sampled": {
+  "id": 574,
+  "t": " was",
+  "p": 0.9610369205474854,
+  "rank": 0
+ },
+ "french": {
+  "forwardMs": 844,
+  "tokens": 12,
+  "top5": [
+   [
+    " a",
+    0.2852
+   ],
+   [
+    " était",
+    0.2597
+   ],
+   [
+    " s",
+    0.1527
+   ],
+   [
+    " n",
+    0.0817
+   ],
+   [
+    " est",
+    0.0651
+   ]
+  ]
+ },
+ "errors": []
+}

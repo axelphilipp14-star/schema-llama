@@ -1,10 +1,10 @@
 {
  "url": "https://axelphilipp14-star.github.io/schema-llama/",
- "date": "2026-11-24T20:55:04.969Z",
+ "date": "2026-11-24T21:35:11.017Z",
  "runs": [
   {
    "run": 1,
-   "usable_s": 2.363,
+   "usable_s": 1.193,
    "errors": [],
    "sizes": {
     "modulepreload-polyfill-Cr-ogGcy.js": {
@@ -23,29 +23,53 @@
      "encoding": "gzip",
      "transfer": 195982
     },
-    "chunk-J5ZVWO5B-oDCd-gWO.js": {
+    "chunk-M57EVK23-CeHzFFZ9.js": {
      "encoding": "gzip",
-     "transfer": 434
+     "transfer": 4559
     },
-    "chunk-R3KSYZAL-vUtwU7ze.js": {
+    "mermaid.core-B_iy7zom.js": {
      "encoding": "gzip",
-     "transfer": 2703
-    },
-    "chunk-X4PVCEUW-BsUvHfJJ.js": {
-     "encoding": "gzip",
-     "transfer": 959
+     "transfer": 28915
     },
     "chunk-LEVMRMFU-DaMzbGqm.js": {
      "encoding": "gzip",
      "transfer": 794
     },
+    "chunk-R3KSYZAL-vUtwU7ze.js": {
+     "encoding": "gzip",
+     "transfer": 2703
+    },
+    "chunk-BG4553SI-C_Js-ZqR.js": {
+     "encoding": "gzip",
+     "transfer": 39543
+    },
+    "d3-selection-NzLttgZr.js": {
+     "encoding": "gzip",
+     "transfer": 7336
+    },
+    "chunk-AXFCVDMN-DmIUNeDg.js": {
+     "encoding": "gzip",
+     "transfer": 31709
+    },
+    "chunk-DUW6YSOI-Dgx8z5s3.js": {
+     "encoding": "gzip",
+     "transfer": 462
+    },
+    "chunk-X4PVCEUW-BsUvHfJJ.js": {
+     "encoding": "gzip",
+     "transfer": 959
+    },
     "chunk-6MUBBAK2-XwnmPQUc.js": {
      "encoding": "gzip",
      "transfer": 6078
     },
-    "rough.esm-Dy-Kn_BL.js": {
+    "chunk-J5ZVWO5B-oDCd-gWO.js": {
      "encoding": "gzip",
-     "transfer": 8809
+     "transfer": 434
+    },
+    "chunk-STOXU5M4-BZHqQAga.js": {
+     "encoding": "gzip",
+     "transfer": 16507
     },
     "chunk-Y2CYZVJY-DsF7k-Jl.js": {
      "encoding": "none",
@@ -55,61 +79,41 @@
      "encoding": "gzip",
      "transfer": 6443
     },
-    "chunk-M57EVK23-CeHzFFZ9.js": {
+    "rough.esm-Dy-Kn_BL.js": {
      "encoding": "gzip",
-     "transfer": 4559
-    },
-    "chunk-DUW6YSOI-Dgx8z5s3.js": {
-     "encoding": "gzip",
-     "transfer": 462
-    },
-    "d3-selection-NzLttgZr.js": {
-     "encoding": "gzip",
-     "transfer": 7336
+     "transfer": 8809
     },
     "chunk-DQASFODM-BOn4yJX1.js": {
      "encoding": "gzip",
      "transfer": 11958
     },
-    "mermaid.core-B_iy7zom.js": {
-     "encoding": "gzip",
-     "transfer": 28915
-    },
-    "chunk-AXFCVDMN-DmIUNeDg.js": {
-     "encoding": "gzip",
-     "transfer": 31709
-    },
-    "chunk-STOXU5M4-BZHqQAga.js": {
-     "encoding": "gzip",
-     "transfer": 16507
-    },
-    "chunk-BG4553SI-C_Js-ZqR.js": {
-     "encoding": "gzip",
-     "transfer": 39543
-    },
     "chunk-5VM5RSS4-ZNzvKenW.js": {
      "encoding": "gzip",
      "transfer": 271
-    },
-    "chunk-XXDRQBXY-COo8-xq1.js": {
-     "encoding": "gzip",
-     "transfer": 227
-    },
-    "chunk-HFQBQIA3-wDKJ2Zbs.js": {
-     "encoding": "gzip",
-     "transfer": 900
-    },
-    "chunk-QB3YPZ4I-C7qnb3zD.js": {
-     "encoding": "gzip",
-     "transfer": 20376
     },
     "chunk-TU62E6Q5-B2n5jPkl.js": {
      "encoding": "gzip",
      "transfer": 402
     },
+    "chunk-XXDRQBXY-COo8-xq1.js": {
+     "encoding": "gzip",
+     "transfer": 227
+    },
+    "chunk-QB3YPZ4I-C7qnb3zD.js": {
+     "encoding": "gzip",
+     "transfer": 20376
+    },
     "flowDiagram-MALGAFMO-BGtubl-p.js": {
      "encoding": "gzip",
      "transfer": 303
+    },
+    "chunk-HFQBQIA3-wDKJ2Zbs.js": {
+     "encoding": "gzip",
+     "transfer": 900
+    },
+    "chunk-KQLB2F66-C-RRtD5y.js": {
+     "encoding": "gzip",
+     "transfer": 4314
     },
     "graphlib-DS17s2tU.js": {
      "encoding": "gzip",
@@ -119,10 +123,6 @@
      "encoding": "gzip",
      "transfer": 2476
     },
-    "chunk-KQLB2F66-C-RRtD5y.js": {
-     "encoding": "gzip",
-     "transfer": 4314
-    },
     "elk-XV6XMXQE-BAyOc2iH.js": {
      "encoding": "gzip",
      "transfer": 464658
@@ -131,7 +131,7 @@
   },
   {
    "run": 2,
-   "usable_s": 0.638,
+   "usable_s": 0.362,
    "errors": [],
    "sizes": {
     "modulepreload-polyfill-Cr-ogGcy.js": {
@@ -142,19 +142,19 @@
      "encoding": "gzip",
      "transfer": 374432
     },
-    "3b-instruct-en-satellite.json": {
-     "encoding": "gzip",
-     "transfer": 195982
-    },
     "index.json": {
      "encoding": "gzip",
      "transfer": 1654
+    },
+    "3b-instruct-en-satellite.json": {
+     "encoding": "gzip",
+     "transfer": 195982
     }
    }
   },
   {
    "run": 3,
-   "usable_s": 1.244,
+   "usable_s": 0.362,
    "errors": [],
    "sizes": {
     "modulepreload-polyfill-Cr-ogGcy.js": {

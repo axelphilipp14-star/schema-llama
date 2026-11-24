@@ -120,3 +120,9 @@
 - **Non vérifié** : le direct (WebGPU) sur le site publié — test interrompu à la demande d'Axel pendant le téléchargement ; à refaire.
 - **Phase D** : `docs/RAPPORT.md` (E1–E9 : valeur mesurée, preuve, statut ; ce qui n'est pas fait). **Phase F** : `docs/LECONS.md`, anomalies classées par cause racine (spécification et mesure, pas code).
 - Incident : un push avec un test rouge (chaîne de commandes sans arrêt sur échec) ; la publication l'a refusé ; corrigé.
+
+## 2026-11-24 22:33 (date) — Campagne rejouée en entier (« relance tout »)
+- Typage, **131 tests unitaires**, **4 e2e**, contenu à jour par rapport au coffre, build : verts.
+- Mesures refaites, identiques : E8 = 43,3 s ; E3 min 59 (trajet) / 57 (bloc) i/s ; E4 site publié 1,2 s, 0 erreur.
+- **Direct sur le site publié** (fait cette fois) : 1re visite 310 s (téléchargement de 1,1 Go pour l'origine github.io), puis **30,4 s** modèle en cache → E5 ✅ en ligne ; phrase FR identique au local (« a » 28,5 %, « était » 26,0 %), 0 erreur.
+- `docs/RAPPORT.md` mis à jour. Reste noté : la page n'annonce pas la durée du premier téléchargement.
