@@ -126,3 +126,6 @@
 - Mesures refaites, identiques : E8 = 43,3 s ; E3 min 59 (trajet) / 57 (bloc) i/s ; E4 site publié 1,2 s, 0 erreur.
 - **Direct sur le site publié** (fait cette fois) : 1re visite 310 s (téléchargement de 1,1 Go pour l'origine github.io), puis **30,4 s** modèle en cache → E5 ✅ en ligne ; phrase FR identique au local (« a » 28,5 %, « était » 26,0 %), 0 erreur.
 - `docs/RAPPORT.md` mis à jour. Reste noté : la page n'annonce pas la durée du premier téléchargement.
+
+## 2026-11-24 22:43 (commit) — Annonce du premier téléchargement (demande d'Axel)
+- Sous les boutons du direct : la première fois ≈ 5 min (1B), ≈ 7 min (3B) ; ensuite en cache ≈ 30 s / ≈ 2 min ; durées mesurées sur un MacBook 8 Go, selon la connexion. Pendant le téléchargement : Mo reçus / Mo total. Sources : `docs/preuves/M3_direct_1b_site_publie_telechargement.json` (310 s), `M3_direct_1b_site_publie.json` (30,4 s), `M0c_Llama-3.2-3B-Instruct-ONNX.json` (418 s puis 152 s), `M3_direct_3b.json` (119 s).
