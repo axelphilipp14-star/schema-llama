@@ -114,7 +114,7 @@
 - Tests : 131 unitaires + 4 e2e (`tests/e2e/make.spec.ts` : pourcentages base/Instruct affichés = traces) verts.
 - Preuve : `docs/preuves/M4_*.png`.
 
-## (heure du commit) — M6 · en ligne ; phases D et F
+## 2026-11-24 21:59 (commit) — M6 · en ligne ; phases D et F
 - **Site publié** : https://axelphilipp14-star.github.io/schema-llama/ (`.github/workflows/pages.yml` : tests unitaires puis build puis déploiement, à chaque push). Page **À propos** (sources des nombres, ce qui est vérifié, limites, licence, inspirations), meta description, compteur i/s masqué en production (`?fps` pour l'afficher), lien Obsidian masqué hors du Mac d'Axel.
 - **E4** sur le site publié : utilisable en 2,4 s (1re visite), trace 196 Ko gzip, 0 erreur ; vues vérifiées : trajet, À propos, enquête 13, fabriquer, anglais.
 - **Non vérifié** : le direct (WebGPU) sur le site publié — test interrompu à la demande d'Axel pendant le téléchargement ; à refaire.
