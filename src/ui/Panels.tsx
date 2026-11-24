@@ -2,7 +2,9 @@ import type { Trace } from '../data/trace'
 import { showTok } from '../data/trace'
 import { useStore } from '../store'
 import { useT } from '../i18n'
+import { useEffect } from 'react'
 import { stepAt, type JourneyLayout } from '../scene/journeyLayout'
+import { BLOCK_STEPS } from '../scene/blockGeom'
 import { meanAttnLast } from '../scene/Journey'
 import { stepName } from './Timeline'
 
@@ -154,24 +156,49 @@ export function JourneyPanel({ trace, lay }: { trace: Trace; lay: JourneyLayout 
   )
 }
 
-/** Panneau de la vue « dans un bloc » (M0, détaillée en M2). */
+/** Panneau de la vue « dans un bloc » (M2) : explication de l'étape, choix du bloc et de la tête. */
 export function BlockPanel({ trace }: { trace: Trace }) {
-  const { t } = useT()
-  const { layer, setLayer, backToJourney } = useStore()
+  const { t, num } = useT()
+  const { layer, setLayer, head, setHead, blockStep, setBlockStep } = useStore()
   const c = trace.config
+  const step = BLOCK_STEPS[blockStep]
+  const perG = c.n_heads / c.n_kv_heads
+  const g = Math.floor(head / perG)
+  const groupHeads = Array.from({ length: perG }, (_, j) => g * perG + j + 1).join(', ')
+  const ex = t.blk.explain
+  const text = step === 'qkv' ? ex.qkv(head + 1, g + 1, groupHeads, perG)
+    : step === 'heads' ? ex.heads(c.n_heads, c.n_kv_heads)
+    : step === 'mlp' ? ex.mlp(num(c.d_model, 0), num(c.d_mlp, 0))
+    : ex[step]
+
+  // Clavier : ← → pour les étapes.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement)?.tagName === 'INPUT') return
+      if (e.code === 'ArrowRight') setBlockStep(Math.min(BLOCK_STEPS.length - 1, blockStep + 1))
+      if (e.code === 'ArrowLeft') setBlockStep(Math.max(0, blockStep - 1))
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  })
+
   return (
     <aside className="panel">
       <Header trace={trace} />
-      <button className="btn back" onClick={backToJourney}>{t.back}</button>
       <label className="row">
         <span>{t.layerLabel}</span>
         <input type="range" min={0} max={c.n_layers - 1} value={layer} onChange={(e) => setLayer(+e.target.value)} />
         <span className="mono">{layer + 1} / {c.n_layers}</span>
       </label>
+      <label className="row">
+        <span>{t.blk.head}</span>
+        <input type="range" min={0} max={c.n_heads - 1} value={head} onChange={(e) => setHead(+e.target.value)} />
+        <span className="mono">{head + 1} / {c.n_heads}</span>
+      </label>
+      <h2 className="step-title">{t.blk.stepName[step]}</h2>
+      <div className="step-body"><p>{text}</p></div>
       <h2>{t.blockLensTitle}</h2>
-      <Probs items={trace.layers[layer].lens} />
-      <h2>{t.top10}</h2>
-      <Probs items={trace.output.top10} />
+      <Probs items={trace.layers[layer].lens.slice(0, 5)} />
       <Footer trace={trace} />
     </aside>
   )

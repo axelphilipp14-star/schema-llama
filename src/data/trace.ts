@@ -2,19 +2,24 @@
 
 export interface TokP { id: number; t: string; p: number }
 
+export interface NormDetail { x8: number[]; rms: number; w8: number[]; y8: number[] }
+
 export interface TraceLayer {
   resid_in_norm: number[]
+  mid_norm: number[]
+  norm1: NormDetail
+  norm2: NormDetail
   rms_in_last: number
   attn: number[][][] // [heads][n][n]
   attn_out_norm: number[]
-  last: { q8: number[][]; k8: number[][][]; scores: number[][] }
+  last: { q8: number[][]; k8: number[][][]; scores: number[][]; v8: number[][][]; ctx8: number[][] }
   mlp: { out_norm: number[]; top: { i: number; gate: number; up: number; act: number }[]; act_l2: number }
   resid_out_norm: number[]
   lens: TokP[]
 }
 
 export interface Trace {
-  schema: 1
+  schema: 2
   meta: { model_id: string; dtype: string; device: string; date: string; torch: string; transformers: string; note: string }
   config: {
     n_layers: number; d_model: number; n_heads: number; n_kv_heads: number; head_dim: number

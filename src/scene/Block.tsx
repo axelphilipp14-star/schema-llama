@@ -1,165 +1,171 @@
+// M2 — Dans un bloc : RMSNorm → attention (toutes les têtes, GQA) → + → RMSNorm → MLP → +.
+// La partie de l'étape en cours est mise en avant, le reste est atténué. Clic sur une grille = choisir la tête.
 import { useMemo } from 'react'
-import { Cells } from './Cells'
 import { Line } from '@react-three/drei'
-import { Label } from './labels'
 import { Color } from 'three'
+import { Cells } from './Cells'
+import { Label } from './labels'
 import type { Trace } from '../data/trace'
 import { showTok } from '../data/trace'
 import { C, div, seq } from './colors'
 import { useStore } from '../store'
+import { useT } from '../i18n'
+import { ATTN_Y0, BLOCK_STEPS, LANE, MLP_H8, X, blockGeom, type BlockStep } from './blockGeom'
 
-// Disposition (unités de scène). Le flux va de gauche à droite (axe x), un couloir par token (axe z).
-export const X = { in: 0, norm1: 1.6, attnL: 2.8, attnR: 9.6, add1: 10.6, norm2: 11.8, mlpL: 13.2, mlpR: 17.4, add2: 18.6, out: 20 }
-const LANE = 0.62
+export { X }
 
-const fmt = (v: number, d = 3) => v.toLocaleString('fr-FR', { maximumFractionDigits: d })
+const FOCUS: Record<BlockStep, Set<string>> = {
+  norm1: new Set(['in', 'norm1']),
+  qkv: new Set(['attn']), scores: new Set(['attn']), softmax: new Set(['attn']), mix: new Set(['attn']), heads: new Set(['attn']),
+  add1: new Set(['attn', 'add1', 'mid']),
+  mlp: new Set(['norm2', 'mlp', 'mid']),
+  add2: new Set(['mlp', 'add2', 'out']),
+}
 
 export function Block({ trace }: { trace: Trace }) {
+  const { t, num, pct } = useT()
   const layer = useStore((s) => s.layer)
+  const head = useStore((s) => s.head)
+  const setHead = useStore((s) => s.setHead)
+  const step = BLOCK_STEPS[useStore((s) => s.blockStep)]
   const L = trace.layers[layer]
   const cfg = trace.config
-  const n = trace.tokens.length
-  const laneZ = (i: number) => (i - (n - 1) / 2) * LANE
-  const toks = trace.tokens.map((t) => showTok(t.t))
+  const geo = useMemo(() => blockGeom(trace), [trace])
+  const { n, laneZ } = geo
+  const toks = trace.tokens.map((x) => showTok(x.t))
+  const on = (k: string) => FOCUS[step].has(k)
+  const op = (k: string) => (on(k) ? 1 : 0.22)
+  const headFocus = ['qkv', 'scores', 'softmax', 'mix'].includes(step)
 
-  // Échelle log des normes du flux résiduel (le token de début a des normes très grandes : « attention sink »).
-  const maxNorm = Math.max(...trace.layers.flatMap((l) => l.resid_out_norm), ...trace.layers.flatMap((l) => l.resid_in_norm))
+  // Normes du flux résiduel (échelle log : le token ⟨début⟩ a des normes très grandes).
+  const maxNorm = Math.max(...trace.layers.flatMap((l) => [...l.resid_out_norm, ...l.resid_in_norm]))
   const h = (v: number) => 0.12 + 0.9 * (Math.log1p(v) / Math.log1p(maxNorm))
 
-  // Barres du flux résiduel : norme à l'entrée et à la sortie du bloc (vraies valeurs de la trace).
   const bars = useMemo(() => {
-    const pos: [number, number, number][] = []
-    const scales: [number, number, number][] = []
-    const colors: Color[] = []
-    const meta: { label: string; value: string }[] = []
-    for (const [x, norms, name] of [[X.in, L.resid_in_norm, 'entrée du bloc'], [X.out, L.resid_out_norm, 'sortie du bloc']] as const) {
-      norms.forEach((v, i) => {
-        const hh = h(v)
-        pos.push([x, hh / 2, laneZ(i)])
-        scales.push([1, hh, 1])
-        colors.push(new Color(x === X.in ? C.emb : C.resid))
-        meta.push({ label: `${name} · token « ${toks[i]} »`, value: `‖x‖ = ${fmt(v, 2)}` })
-      })
-    }
-    return { pos, scales, colors, meta }
-  }, [L, n])
+    const mk = (x: number, norms: number[], name: string, color: string) => ({
+      pos: norms.map((v, i) => [x, h(v) / 2, laneZ(i)] as [number, number, number]),
+      scales: norms.map((v) => [1, h(v), 1] as [number, number, number]),
+      colors: norms.map(() => new Color(color)),
+      meta: norms.map((v, i) => ({ label: t.blk.hoverBar(name, toks[i]), value: `‖x‖ = ${num(v, 2)}` })),
+    })
+    return { in: mk(X.in, L.resid_in_norm, t.blk.barIn, C.emb), mid: mk(X.add1 + 0.45, L.mid_norm, t.blk.normMid, C.attn), out: mk(X.out, L.resid_out_norm, t.blk.barOut, C.resid) }
+  }, [L, t])
 
-  // Attention : 24 têtes rangées en 8 colonnes (une par paire K/V partagée, GQA) × 3 lignes.
+  // Attention : toutes les têtes. En mode « une tête », les autres sont atténuées et la ligne du dernier token est soulignée.
   const attn = useMemo(() => {
-    const H = cfg.n_heads
-    const G = cfg.n_kv_heads
-    const perG = H / G
-    const width = X.attnR - X.attnL
-    const gap = 0.14
-    const g = (width - gap * (G - 1)) / G
-    const cell = g / n
     const pos: [number, number, number][] = []
     const colors: Color[] = []
     const meta: { h: number; q: number; k: number; p: number }[] = []
-    for (let hd = 0; hd < H; hd++) {
-      const col = Math.floor(hd / perG)
-      const row = hd % perG
-      const x0 = X.attnL + col * (g + gap)
-      const y0 = 1.3 + (perG - 1 - row) * (g + gap)
-      for (let q = 0; q < n; q++) {
-        for (let k = 0; k < n; k++) {
-          const p = L.attn[hd][q][k]
-          pos.push([x0 + (k + 0.5) * cell, y0 + (n - 1 - q + 0.5) * cell, 0])
-          colors.push(k > q ? new Color(C.surface) : seq(p, C.attn))
-          meta.push({ h: hd, q, k, p })
-        }
+    for (let hd = 0; hd < geo.H; hd++) {
+      const b = geo.head(hd)
+      const dimHead = headFocus && hd !== head
+      for (let q = 0; q < n; q++) for (let k = 0; k < n; k++) {
+        const p = L.attn[hd][q][k]
+        pos.push([b.x0 + (k + 0.5) * geo.cell, b.y0 + (n - 1 - q + 0.5) * geo.cell, 0])
+        const c = k > q ? new Color(C.surface) : seq(p, C.attn)
+        colors.push(dimHead ? c.lerp(new Color(C.bg), 0.75) : c)
+        meta.push({ h: hd, q, k, p })
       }
     }
-    return { pos, colors, meta, cell, g, gap, perG, G, top: 1.3 + perG * (g + gap) }
-  }, [L, cfg, n])
+    return { pos, colors, meta }
+  }, [L, geo, head, headFocus])
 
-  // MLP : 3 072 → 8 192 → 3 072. Colonne du milieu = les 8 192 neurones, 16 plus actifs (dernier token) en vrai.
   const mlp = useMemo(() => {
-    const H8 = 3.4
-    const H3 = H8 * (cfg.d_model / cfg.d_mlp)
-    const y0 = 1.3
-    const maxAct = Math.max(...L.mlp.top.map((t) => Math.abs(t.act)))
-    const pos: [number, number, number][] = []
-    const colors: Color[] = []
-    L.mlp.top.forEach((t) => {
-      pos.push([(X.mlpL + X.mlpR) / 2, y0 + (t.i / cfg.d_mlp) * H8, 0.06])
-      colors.push(div(t.act, maxAct))
-    })
-    return { H8, H3, y0, pos, colors, maxAct }
+    const maxAct = Math.max(...L.mlp.top.map((x) => Math.abs(x.act)))
+    return {
+      pos: L.mlp.top.map((x) => [(X.mlpL + X.mlpR) / 2, ATTN_Y0 + (x.i / cfg.d_mlp) * MLP_H8, 0.06] as [number, number, number]),
+      colors: L.mlp.top.map((x) => div(x.act, maxAct)),
+    }
   }, [L, cfg])
 
   const xm = (X.mlpL + X.mlpR) / 2
   const xEnd = X.out + 1
+  const H3 = geo.mlpH3
+  const sel = geo.head(head)
+  const grp = Math.floor(head / geo.perG)
+  const gFirst = geo.head(grp * geo.perG), gLast = geo.head(grp * geo.perG + geo.perG - 1)
+  const rect = (x0: number, y0: number, x1: number, y1: number, z = 0.04): [number, number, number][] => [[x0, y0, z], [x1, y0, z], [x1, y1, z], [x0, y1, z], [x0, y0, z]]
+  const lastRowY = sel.y0 + 0.5 * geo.cell
 
   return (
     <group>
-      {/* Flux résiduel : un tube par token */}
       {trace.tokens.map((_, i) => (
-        <Line key={i} points={[[X.in - 1, 0, laneZ(i)], [xEnd, 0, laneZ(i)]]} color={C.resid} lineWidth={1} transparent opacity={0.35} />
+        <Line key={i} points={[[X.in - 1, 0, laneZ(i)], [xEnd, 0, laneZ(i)]]} color={C.resid} lineWidth={1} transparent opacity={0.3} />
       ))}
-      {toks.map((t, i) => (
-        <Label key={i} p={[X.in - 1.6, 0, laneZ(i)]} color={C.emb} small>{t}</Label>
+      {toks.map((tk, i) => (
+        <Label key={i} p={[X.in - 0.5, 0, laneZ(i)]} color={i === n - 1 ? C.text : C.emb} small align="right" priority={i === n - 1 ? 5 : 1}>{tk}</Label>
       ))}
 
-      <Cells pos={bars.pos} scales={bars.scales} colors={bars.colors} size={[0.22, 1, 0.22]} info={(i) => bars.meta[i]} />
+      <Cells pos={bars.in.pos} scales={bars.in.scales} colors={bars.in.colors} size={[0.22, 1, 0.22]} info={(i) => bars.in.meta[i]} opacity={op('in')} />
+      <Cells pos={bars.mid.pos} scales={bars.mid.scales} colors={bars.mid.colors} size={[0.22, 1, 0.22]} info={(i) => bars.mid.meta[i]} opacity={op('mid')} />
+      <Cells pos={bars.out.pos} scales={bars.out.scales} colors={bars.out.colors} size={[0.22, 1, 0.22]} info={(i) => bars.out.meta[i]} opacity={op('out')} />
 
-      {/* RMSNorm */}
-      {[X.norm1, X.norm2].map((x, k) => (
+      {([['norm1', X.norm1, '①'], ['norm2', X.norm2, '⑧']] as const).map(([k, x, mark]) => (
         <group key={k}>
           <mesh position={[x, 0.55, 0]}>
             <boxGeometry args={[0.18, 1.1, LANE * n + 0.2]} />
-            <meshStandardMaterial color={C.norm} transparent opacity={0.55} />
+            <meshStandardMaterial color={C.norm} transparent opacity={on(k) ? 0.75 : 0.2} emissive={C.norm} emissiveIntensity={on(k) ? 0.4 : 0} />
           </mesh>
-          <Label p={[x, 1.55, 0]} color={C.norm} small>{k === 0 ? '① ' : '④ '}RMSNorm</Label>
+          <Label p={[x, 1.55, 0]} color={on(k) ? C.text : C.muted} small priority={on(k) ? 6 : 1}>{mark} {t.blk.normLbl}</Label>
         </group>
       ))}
 
       {/* Attention */}
-      <Cells pos={attn.pos} colors={attn.colors} size={[attn.cell * 0.9, attn.cell * 0.9, 0.04]}
+      <Cells pos={attn.pos} colors={attn.colors} size={[geo.cell * 0.9, geo.cell * 0.9, 0.04]} opacity={on('attn') ? 1 : 0.3}
+        onClick={(i) => setHead(attn.meta[i].h)}
         info={(i) => {
           const m = attn.meta[i]
-          return { label: `tête ${m.h + 1} (K/V partagé n° ${Math.floor(m.h / attn.perG) + 1}) · « ${toks[m.q]} » regarde « ${toks[m.k]} »`, value: m.k > m.q ? 'masqué (futur)' : `${fmt(m.p * 100, 2)} %` }
+          return { label: t.blk.hoverAttn(m.h + 1, Math.floor(m.h / geo.perG) + 1, toks[m.q], toks[m.k]), value: m.k > m.q ? t.blk.masked : pct(m.p, 2) }
         }} />
-      {Array.from({ length: attn.G }, (_, gI) => (
-        <Label key={gI} p={[X.attnL + gI * (attn.g + attn.gap) + attn.g / 2, 1.1, 0]} color={C.muted} small>{gI + 1}</Label>
+      {on('attn') && (
+        <>
+          {/* Groupe K/V de la tête choisie (GQA, pointillés), la tête (cadre blanc), la ligne du dernier token (vert) */}
+          <Line points={rect(gLast.x0 - 0.05, gLast.y0 - 0.05, gFirst.x1 + 0.05, gFirst.y1 + 0.05)} color={C.muted} lineWidth={1} dashed dashSize={0.06} gapSize={0.05} />
+          <Line points={rect(sel.x0 - 0.02, sel.y0 - 0.02, sel.x1 + 0.02, sel.y1 + 0.02)} color={C.text} lineWidth={2} />
+          {headFocus && <Line points={rect(sel.x0, lastRowY - geo.cell / 2, sel.x1, lastRowY + geo.cell / 2, 0.06)} color={C.out} lineWidth={2} />}
+        </>
+      )}
+      {Array.from({ length: geo.G }, (_, g) => (
+        <Label key={g} p={[X.attnL + g * (geo.g + geo.gap) + geo.g / 2, ATTN_Y0 - 0.2, 0]} color={g === grp && on('attn') ? C.text : C.muted} small>{g + 1}</Label>
       ))}
-      <Label p={[(X.attnL + X.attnR) / 2, attn.top + 0.35, 0]} color={C.attn}>
-        ② Attention · {cfg.n_heads} têtes en {cfg.n_kv_heads} groupes (K/V partagés)
-      </Label>
-      <Line points={[[X.norm1, 0.2, 0], [X.attnL - 0.1, 1.3, 0]]} color={C.attn} lineWidth={1} transparent opacity={0.6} />
-      <Line points={[[X.attnR + 0.1, 1.3, 0], [X.add1, 0.2, 0]]} color={C.attn} lineWidth={1} transparent opacity={0.6} />
-      <Label p={[X.add1, 0.45, 0]} color={C.attn}>③ ＋</Label>
+      {headFocus && toks.map((tk, q) => (
+        <Label key={`qy-${q}`} p={[sel.x0 - 0.04, sel.y0 + (n - 1 - q + 0.5) * geo.cell, 0.05]} color={q === n - 1 ? C.out : C.muted} small align="right" priority={4}>{tk}</Label>
+      ))}
+      <Label p={[(X.attnL + X.attnR) / 2, geo.attnTop + 0.3, 0]} color={on('attn') ? C.attn : C.muted} priority={3}>{t.blk.attnTitle(geo.H, geo.G)}</Label>
+      <Line points={[[X.norm1, 0.2, 0], [X.attnL - 0.1, ATTN_Y0, 0]]} color={C.attn} lineWidth={1} transparent opacity={0.6 * op('attn')} />
+      <Line points={[[X.attnR + 0.1, ATTN_Y0, 0], [X.add1, 0.2, 0]]} color={C.attn} lineWidth={1} transparent opacity={0.6 * op('add1')} />
+      <Label p={[X.add1, 0.45, 0]} color={on('add1') ? C.attn : C.muted} priority={6}>⑦ ＋</Label>
 
       {/* MLP */}
-      <Line points={[[X.mlpL, mlp.y0 + (mlp.H8 - mlp.H3) / 2, 0], [xm - 0.15, mlp.y0, 0]]} color={C.mlp} lineWidth={1} />
-      <Line points={[[X.mlpL, mlp.y0 + (mlp.H8 + mlp.H3) / 2, 0], [xm - 0.15, mlp.y0 + mlp.H8, 0]]} color={C.mlp} lineWidth={1} />
-      <Line points={[[X.mlpR, mlp.y0 + (mlp.H8 - mlp.H3) / 2, 0], [xm + 0.15, mlp.y0, 0]]} color={C.mlp} lineWidth={1} />
-      <Line points={[[X.mlpR, mlp.y0 + (mlp.H8 + mlp.H3) / 2, 0], [xm + 0.15, mlp.y0 + mlp.H8, 0]]} color={C.mlp} lineWidth={1} />
-      {[X.mlpL, X.mlpR].map((x, k) => (
-        <mesh key={k} position={[x, mlp.y0 + mlp.H8 / 2, 0]}>
-          <boxGeometry args={[0.12, mlp.H3, 0.12]} />
-          <meshStandardMaterial color={C.mlp} transparent opacity={0.5} />
-        </mesh>
+      {([[X.mlpL, xm - 0.15], [X.mlpR, xm + 0.15]] as const).map(([xa, xb], k) => (
+        <group key={k}>
+          <Line points={[[xa, ATTN_Y0 + (MLP_H8 - H3) / 2, 0], [xb, ATTN_Y0, 0]]} color={C.mlp} lineWidth={1} transparent opacity={op('mlp')} />
+          <Line points={[[xa, ATTN_Y0 + (MLP_H8 + H3) / 2, 0], [xb, ATTN_Y0 + MLP_H8, 0]]} color={C.mlp} lineWidth={1} transparent opacity={op('mlp')} />
+          <mesh position={[xa, ATTN_Y0 + MLP_H8 / 2, 0]}>
+            <boxGeometry args={[0.12, H3, 0.12]} />
+            <meshStandardMaterial color={C.mlp} transparent opacity={0.5 * op('mlp')} />
+          </mesh>
+        </group>
       ))}
-      <mesh position={[xm, mlp.y0 + mlp.H8 / 2, 0]}>
-        <boxGeometry args={[0.3, mlp.H8, 0.08]} />
-        <meshStandardMaterial color={C.surface} />
+      <mesh position={[xm, ATTN_Y0 + MLP_H8 / 2, 0]}>
+        <boxGeometry args={[0.3, MLP_H8, 0.08]} />
+        <meshStandardMaterial color={C.surface} transparent opacity={op('mlp')} />
       </mesh>
-      <Cells pos={mlp.pos} colors={mlp.colors} size={[0.9, 0.035, 0.05]}
+      <Cells pos={mlp.pos} colors={mlp.colors} size={[0.9, 0.035, 0.05]} opacity={op('mlp')}
         info={(i) => {
-          const t = L.mlp.top[i]
-          return { label: `neurone ${t.i} sur ${cfg.d_mlp} · dernier token « ${toks[n - 1]} »`, value: `silu(gate ${fmt(t.gate)}) × up ${fmt(t.up)} = ${fmt(t.act)}` }
+          const x = L.mlp.top[i]
+          return { label: t.blk.hoverNeuron(x.i, cfg.d_mlp, toks[n - 1]), value: `silu(${num(x.gate, 3)}) × ${num(x.up, 3)} = ${num(x.act, 3)}` }
         }} />
-      <Label p={[X.mlpL + 0.2, mlp.y0 + (mlp.H8 - mlp.H3) / 2 - 0.3, 0]} color={C.muted} small>{cfg.d_model.toLocaleString('fr-FR')}</Label>
-      <Label p={[xm, mlp.y0 - 0.25, 0]} color={C.muted} small>{cfg.d_mlp.toLocaleString('fr-FR')}</Label>
-      <Label p={[X.mlpR - 0.2, mlp.y0 + (mlp.H8 - mlp.H3) / 2 - 0.3, 0]} color={C.muted} small>{cfg.d_model.toLocaleString('fr-FR')}</Label>
-      <Label p={[xm, mlp.y0 + mlp.H8 + 0.35, 0]} color={C.mlp}>⑤ MLP (SwiGLU) · 16 neurones les plus actifs</Label>
-      <Line points={[[X.norm2, 0.2, 0], [X.mlpL, mlp.y0, 0]]} color={C.mlp} lineWidth={1} transparent opacity={0.6} />
-      <Line points={[[X.mlpR, mlp.y0, 0], [X.add2, 0.2, 0]]} color={C.mlp} lineWidth={1} transparent opacity={0.6} />
-      <Label p={[X.add2, 0.45, 0]} color={C.mlp}>⑥ ＋</Label>
+      <Label p={[X.mlpL + 0.2, ATTN_Y0 + (MLP_H8 - H3) / 2 - 0.3, 0]} color={C.muted} small>{num(cfg.d_model, 0)}</Label>
+      <Label p={[xm, ATTN_Y0 - 0.25, 0]} color={C.muted} small>{num(cfg.d_mlp, 0)}</Label>
+      <Label p={[X.mlpR - 0.2, ATTN_Y0 + (MLP_H8 - H3) / 2 - 0.3, 0]} color={C.muted} small>{num(cfg.d_model, 0)}</Label>
+      <Label p={[xm, ATTN_Y0 + MLP_H8 + 0.35, 0]} color={on('mlp') ? C.mlp : C.muted} priority={3}>{t.blk.mlpTitle}</Label>
+      <Line points={[[X.norm2, 0.2, 0], [X.mlpL, ATTN_Y0, 0]]} color={C.mlp} lineWidth={1} transparent opacity={0.6 * op('mlp')} />
+      <Line points={[[X.mlpR, ATTN_Y0, 0], [X.add2, 0.2, 0]]} color={C.mlp} lineWidth={1} transparent opacity={0.6 * op('add2')} />
+      <Label p={[X.add2, 0.45, 0]} color={on('add2') ? C.mlp : C.muted} priority={6}>⑨ ＋</Label>
 
-      <Label p={[X.in, -0.55, laneZ(n - 1) + 0.4]} color={C.muted} small>entrée ‖x‖</Label>
-      <Label p={[X.out, -0.55, laneZ(n - 1) + 0.4]} color={C.muted} small>sortie ‖x‖</Label>
+      <Label p={[X.in, -0.55, laneZ(n - 1) + 0.4]} color={C.muted} small>{t.blk.inNorm}</Label>
+      <Label p={[X.out, -0.55, laneZ(n - 1) + 0.4]} color={C.muted} small>{t.blk.outNorm}</Label>
     </group>
   )
 }

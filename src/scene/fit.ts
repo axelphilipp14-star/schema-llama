@@ -1,7 +1,9 @@
 // Cadrage : place la caméra (direction donnée) pour que les 8 coins d'une boîte tiennent dans l'écran, centrés.
 import { PerspectiveCamera, Vector3 } from 'three'
 
-export function fitBox(cam: PerspectiveCamera, aspect: number, min: Vector3, max: Vector3, dir: Vector3, margin = 0.92) {
+/** region : zone de l'écran (coordonnées −1…1) où la boîte doit tenir, pour laisser de la place aux cartes. */
+export function fitBox(cam: PerspectiveCamera, aspect: number, min: Vector3, max: Vector3, dir: Vector3, margin = 0.92,
+  region: { x0: number; x1: number; y0: number; y1: number } = { x0: -1, x1: 1, y0: -1, y1: 1 }) {
   const c = cam.clone() as PerspectiveCamera
   c.aspect = aspect
   c.updateProjectionMatrix()
@@ -25,7 +27,7 @@ export function fitBox(cam: PerspectiveCamera, aspect: number, min: Vector3, max
     for (let k = 0; k < 40; k++) {
       d = (lo + hi) / 2
       const b = place(target, d)
-      const ext = Math.max((b.x1 - b.x0) / 2, (b.y1 - b.y0) / 2)
+      const ext = Math.max((b.x1 - b.x0) / (region.x1 - region.x0), (b.y1 - b.y0) / (region.y1 - region.y0))
       if (ext > margin) lo = d; else hi = d
     }
     // Recentrage : décale la cible selon les axes droite/haut de la caméra.
@@ -33,7 +35,9 @@ export function fitBox(cam: PerspectiveCamera, aspect: number, min: Vector3, max
     const right = new Vector3().setFromMatrixColumn(c.matrixWorld, 0)
     const up = new Vector3().setFromMatrixColumn(c.matrixWorld, 1)
     const halfH = Math.tan((c.fov * Math.PI) / 360) * d
-    target.addScaledVector(right, ((b.x0 + b.x1) / 2) * halfH * aspect).addScaledVector(up, ((b.y0 + b.y1) / 2) * halfH)
+    const cx = (b.x0 + b.x1) / 2 - (region.x0 + region.x1) / 2, cy = (b.y0 + b.y1) / 2 - (region.y0 + region.y1) / 2
+    target.addScaledVector(right, cx * halfH * aspect).addScaledVector(up, cy * halfH)
   }
+  // `target` est le point visé ; la boîte apparaît dans `region`.
   return { position: target.clone().addScaledVector(d0, d), target }
 }

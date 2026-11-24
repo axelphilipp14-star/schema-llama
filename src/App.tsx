@@ -1,15 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
-import { Block, X } from './scene/Block'
+import { Block } from './scene/Block'
 import { Journey } from './scene/Journey'
 import { journeyLayout } from './scene/journeyLayout'
-import { Rig, Ticker } from './scene/Rig'
+import { BlockRig, Rig, Ticker } from './scene/Rig'
+import { blockGeom } from './scene/blockGeom'
+import { BlockCalc, BlockSteps } from './ui/BlockCalc'
 import { C } from './scene/colors'
 import { loadTrace, type Trace } from './data/trace'
 import { useStore } from './store'
 import { Fps } from './ui/Fps'
-import { FitCamera } from './scene/FitCamera'
 import { LabelOverlay, LabelProjector } from './scene/labels'
 import { Timeline } from './ui/Timeline'
 import { BlockPanel, JourneyPanel } from './ui/Panels'
@@ -24,9 +25,10 @@ export default function App() {
   useEffect(() => { loadTrace(TRACE_ID).then(setTrace).catch((e) => setErr(String(e))) }, [])
   useEffect(() => { document.documentElement.lang = lang }, [lang])
   const lay = useMemo(() => (trace ? journeyLayout(trace) : null), [trace])
+  const geo = useMemo(() => (trace ? blockGeom(trace) : null), [trace])
 
   if (err) return <div className="center">{err}</div>
-  if (!trace || !lay) return <div className="center">…</div>
+  if (!trace || !lay || !geo) return <div className="center">…</div>
   return (
     <div className="app">
       <div className="stage">
@@ -44,7 +46,7 @@ export default function App() {
           ) : (
             <group key="block">
               <Block trace={trace} />
-              <FitCamera target={[(X.in + X.out) / 2 - 0.5, 2.1, 0.6]} w={X.out - X.in + 3.5} h={7} dir={[-0.3, 0.75, 1]} />
+              <BlockRig geo={geo} />
             </group>
           )}
           <LabelProjector />
@@ -52,7 +54,7 @@ export default function App() {
         <LabelOverlay />
         <HoverBox />
         <Fps />
-        {view === 'journey' && <Timeline lay={lay} />}
+        {view === 'journey' ? <Timeline lay={lay} /> : <><BlockCalc trace={trace} /><BlockSteps /></>}
       </div>
       {view === 'journey' ? <JourneyPanel trace={trace} lay={lay} /> : <BlockPanel trace={trace} />}
     </div>

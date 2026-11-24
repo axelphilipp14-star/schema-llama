@@ -41,3 +41,14 @@
 - Reste pour E7 : les libellés 3D de la vue « dans un bloc » sont encore en français → refaits en M2.
 - Preuve : `docs/preuves/M1_*.png`, `docs/preuves/M1_mesure_1b.json`, `docs/preuves/M1_mesure_charge28.json`.
 - Suivant : M2 (zoom attention et MLP).
+
+## 2026-11-24 21:30 — M2 · zoom dans le bloc : attention et MLP, avec les vrais nombres
+- **Trace enrichie (schéma 2)** : V et sortie de chaque tête (8 dims), détail des deux RMSNorm (x, RMS, poids, y), norme du flux après l'attention. Nouveaux contrôles dans le script de trace : RMSNorm recalculée (1,0 %), Σ p·V recalculé (0,3 %), silu(gate)·up recalculé (0,6 %) — tolérance 5 % **dérivée** de l'arrondi bf16 (leçon AN-001). Trace 1B régénérée (0,13 Mo gzip), notebook Kaggle régénéré (même code).
+- **Vue « dans un bloc »** : 9 étapes (① RMSNorm, ② Q K V, ③ scores Q·K, ④ softmax + masque, ⑤ mélange des V, ⑥ toutes les têtes / GQA, ⑦ addition, ⑧ MLP SwiGLU, ⑨ addition). Caméra qui vole vers la partie de l'étape (cadrage dans la moitié haute de l'écran, la carte occupe le bas). Partie active en avant, reste atténué. Tête sélectionnable (clic sur une grille ou curseur) ; groupe K/V partagé en pointillés ; ligne du dernier token en vert.
+- **Carte de calcul** (nombres en HTML, révélés ligne par ligne) avec les vrais nombres et l'étiquette « trace » ou « calculé ici ». Exemple réel (bloc 10, tête 1) : « it » regarde « satellite » à **32,03 %** (⟨début⟩ 24,41 %) — le pronom va chercher son antécédent.
+- FR/EN complet, y compris les libellés 3D du bloc (dette E7 de M1 soldée).
+- Boucle visuelle : ~12 captures. Corrigé : carte qui masquait la tête zoomée (→ cadrage dans une région de l'écran), carte transparente, **collision de classe CSS `calc`** (une ligne recalculée se superposait à la ligne « satellite »), étape « addition » vide en 3D (→ barres de norme réelles après l'attention), libellés tronqués.
+- **Tests** : `tests/m2-math.test.ts` (4 calculs refaits sur le JSON publié = trace), `tests/i18n.test.ts` (E7 : mêmes clés, rien de vide, anglais ≠ français hors 24 termes techniques listés), `tests/e2e/block.spec.ts` (E2 : RMSNorm, softmax, sortie de tête, MLP affichés = trace). 11 tests unitaires + 2 e2e verts.
+- **E3 vue bloc** (dpr 2) : 3 séries, minimum 56 / 60 / 60 i/s, médiane 141–143 → OK. Chutes ponctuelles à 60 i/s non liées à une étape (sonde : chaque étape seule tient 144 i/s) : fréquence d'affichage de la fenêtre de test, pas la scène.
+- Preuve : `docs/preuves/M2_*.png`, `docs/preuves/M2_mesure_fps.json`.
+- Suivant : M3 (exemple modifiable : ta phrase, la température, modèle en direct).

@@ -55,12 +55,16 @@ def trace_sentence(model, tok, prompt: str, model_id: str, *, max_tokens=16, add
     n = ids.shape[1]
 
     layers = model.model.layers
-    cap: dict[str, list] = {k: [None] * L for k in ("q", "k", "attn_out", "mlp_out", "act", "gate", "up", "ln1_in")}
+    cap: dict[str, list] = {k: [None] * L for k in ("q", "k", "v", "ctx", "ln1_out", "ln2_out", "attn_out", "mlp_out", "act", "gate", "up")}
     hooks = []
     for li, layer in enumerate(layers):
         a = layer.self_attn
         hooks.append(a.q_proj.register_forward_hook(lambda m, i, o, li=li: cap["q"].__setitem__(li, o)))
         hooks.append(a.k_proj.register_forward_hook(lambda m, i, o, li=li: cap["k"].__setitem__(li, o)))
+        hooks.append(a.v_proj.register_forward_hook(lambda m, i, o, li=li: cap["v"].__setitem__(li, o)))
+        hooks.append(a.o_proj.register_forward_hook(lambda m, i, o, li=li: cap["ctx"].__setitem__(li, i[0])))
+        hooks.append(layer.input_layernorm.register_forward_hook(lambda m, i, o, li=li: cap["ln1_out"].__setitem__(li, o)))
+        hooks.append(layer.post_attention_layernorm.register_forward_hook(lambda m, i, o, li=li: cap["ln2_out"].__setitem__(li, o)))
         hooks.append(a.register_forward_hook(lambda m, i, o, li=li: cap["attn_out"].__setitem__(li, o[0])))
         hooks.append(layer.mlp.register_forward_hook(lambda m, i, o, li=li: cap["mlp_out"].__setitem__(li, o)))
         hooks.append(layer.mlp.gate_proj.register_forward_hook(lambda m, i, o, li=li: cap["gate"].__setitem__(li, o)))
@@ -79,7 +83,17 @@ def trace_sentence(model, tok, prompt: str, model_id: str, *, max_tokens=16, add
     pos = torch.arange(n, device=dev)[None]
     cos, sin = model.model.rotary_emb(hs[0], pos)
 
-    checks = {"attn_row_sum_max_err": 0.0, "qk_recompute_max_err": 0.0}
+    checks = {"attn_row_sum_max_err": 0.0, "qk_recompute_max_err": 0.0, "norm_recompute_max_err": 0.0,
+              "ctx_recompute_max_err": 0.0, "silu_recompute_max_err": 0.0}
+    eps = cfg.rms_norm_eps
+
+    def norm_detail(x_last, w, y_last):
+        """RMSNorm du dernier token : y = x / sqrt(moyenne(x²) + eps) × w. 8 premières dimensions."""
+        rms = (x_last.pow(2).mean() + eps).sqrt()
+        y_re = x_last / rms * w.float()
+        err = float(((y_re - y_last).abs() / (y_last.abs() + 1e-2)).max())
+        checks["norm_recompute_max_err"] = max(checks["norm_recompute_max_err"], err)
+        return {"x8": rnd(x_last[:8]), "rms": rnd(rms, 6), "w8": rnd(w[:8]), "y8": rnd(y_last[:8])}
 
     # Embeddings
     emb = model.model.embed_tokens(ids)[0].float()
@@ -119,20 +133,36 @@ def trace_sentence(model, tok, prompt: str, model_id: str, *, max_tokens=16, add
         h_mid = h_in + attn_out
         h_out = h_mid + mlp_out
 
+        # V et contexte de chaque tête (dernier token) : ctx_h = Σ_k p[h, k] · v[groupe(h), k]
+        v = cap["v"][li][0].float().view(n, KV, hd).transpose(0, 1)  # [KV, n, hd]
+        ctx = cap["ctx"][li][0, -1].float().view(H, hd)  # [H, hd]
+        ctx_re = torch.einsum("hk,hkd->hd", A[:, -1, :], v.repeat_interleave(H // KV, dim=0))
+        checks["ctx_recompute_max_err"] = max(checks["ctx_recompute_max_err"], float(((ctx_re - ctx).abs() / (ctx.abs().max() + 1e-6)).max()))
+        layer = layers[li]
+        n1 = norm_detail(h_in[-1], layer.input_layernorm.weight.detach().cpu().to(h_in.device), cap["ln1_out"][li][0, -1].float())
+        n2 = norm_detail(h_mid[-1], layer.post_attention_layernorm.weight.detach().cpu().to(h_in.device), cap["ln2_out"][li][0, -1].float())
+
         gate = cap["gate"][li][0, -1].float()
         up = cap["up"][li][0, -1].float()
         act = cap["act"][li][0, -1].float()
         top_v, top_i = act.abs().topk(16)
+        silu_re = torch.nn.functional.silu(gate[top_i]) * up[top_i]
+        checks["silu_recompute_max_err"] = max(checks["silu_recompute_max_err"], float(((silu_re - act[top_i]).abs() / (act[top_i].abs() + 1e-2)).max()))
 
         out_layers.append({
             "resid_in_norm": rnd(h_in.norm(dim=-1)),
             "rms_in_last": rnd(h_in[-1].pow(2).mean().sqrt()),
             "attn": rnd(A),
             "attn_out_norm": rnd(attn_out.norm(dim=-1)),
+            "mid_norm": rnd(h_mid.norm(dim=-1)),
+            "norm1": n1,
+            "norm2": n2,
             "last": {
                 "q8": rnd(q[:, -1, :8]),  # [H, 8]
                 "k8": rnd(k[:, :, :8]),  # [KV, n, 8]
                 "scores": rnd(scores[:, -1, :]),  # [H, n] scores bruts (÷√d), avant masque
+                "v8": rnd(v[:, :, :8]),  # [KV, n, 8]
+                "ctx8": rnd(ctx[:, :8]),  # [H, 8] sortie de chaque tête avant o_proj
             },
             "mlp": {
                 "out_norm": rnd(mlp_out.norm(dim=-1)),
@@ -158,7 +188,7 @@ def trace_sentence(model, tok, prompt: str, model_id: str, *, max_tokens=16, add
     import transformers
 
     return {
-        "schema": 1,
+        "schema": 2,
         "meta": {
             "model_id": model_id,
             "dtype": str(next(model.parameters()).dtype).replace("torch.", ""),
@@ -215,6 +245,11 @@ def check_trace(tr) -> list[str]:
     # fp16/bf16 : tolérance large sur le recalcul
     if c["qk_recompute_max_err"] > 2e-2:
         fails.append(f"softmax(QKᵀ) recalculé ≠ attention du modèle : {c['qk_recompute_max_err']:.2e}")
+    # Recalculs du détail M2. Tolérance relative 5e-2, dérivée (AN-001) : chaque recalcul enchaîne ≤ 6 opérations
+    # arrondies au format du modèle ; en bf16 (eps/2 = 3,9e-3) → ≤ 2,3 %, doublé pour l'arrondi JSON des petites valeurs.
+    for key, lim in (("norm_recompute_max_err", 5e-2), ("ctx_recompute_max_err", 5e-2), ("silu_recompute_max_err", 5e-2)):
+        if c.get(key, 0) > lim:
+            fails.append(f"{key} = {c[key]:.2e} > {lim}")
     if not c["greedy_matches_top1"]:
         fails.append("top-1 de la trace ≠ generate() glouton")
     return fails

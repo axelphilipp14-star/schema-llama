@@ -5,6 +5,7 @@ import { PerspectiveCamera, Vector3 } from 'three'
 import { anim, useStore } from '../store'
 import { pulseX, TABLE_H, type JourneyLayout } from './journeyLayout'
 import { fitBox } from './fit'
+import { BLOCK_STEPS, stepFrame, type BlockGeom } from './blockGeom'
 
 export function Ticker({ lay }: { lay: JourneyLayout }) {
   const last = useRef(0)
@@ -65,6 +66,39 @@ export function Rig({ lay }: { lay: JourneyLayout }) {
     c.target.lerp(desT.current, k)
     c.update()
     if (mode === 'overview' && camera.position.distanceTo(desP.current) < 0.02) useStore.getState().setCam('free')
+  })
+  return null
+}
+
+/** Caméra de la vue « dans un bloc » : vole vers le cadrage de l'étape en cours (et de la tête choisie). */
+export function BlockRig({ geo }: { geo: BlockGeom }) {
+  const { camera, size, controls } = useThree()
+  const c = controls as unknown as { target: Vector3; update: () => void; addEventListener: (e: string, f: () => void) => void; removeEventListener: (e: string, f: () => void) => void } | null
+  const step = useStore((s) => s.blockStep)
+  const head = useStore((s) => s.head)
+  const des = useRef<{ position: Vector3; target: Vector3 } | null>(null)
+  const active = useRef(true)
+
+  useEffect(() => {
+    const f = stepFrame(geo, BLOCK_STEPS[step], head)
+    des.current = fitBox(camera as PerspectiveCamera, size.width / size.height, new Vector3(...f.min), new Vector3(...f.max), new Vector3(...f.dir), 0.9, { x0: -0.96, x1: 0.96, y0: -0.12, y1: 0.94 })
+    active.current = true
+  }, [step, head, size.width, size.height])
+
+  useEffect(() => {
+    if (!c) return
+    const onStart = () => { active.current = false }
+    c.addEventListener('start', onStart)
+    return () => c.removeEventListener('start', onStart)
+  }, [c])
+
+  useFrame((_, dt) => {
+    if (!c || !des.current || !active.current) return
+    const k = 1 - Math.exp(-Math.min(dt, 0.1) * 3.2)
+    camera.position.lerp(des.current.position, k)
+    c.target.lerp(des.current.target, k)
+    c.update()
+    if (camera.position.distanceTo(des.current.position) < 0.005) active.current = false
   })
   return null
 }
