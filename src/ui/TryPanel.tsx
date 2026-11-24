@@ -98,12 +98,15 @@ export function TryPanel({ trace }: { trace: Trace }) {
         <>
           <p className="small muted">{t.tryit.liveIntro}</p>
           <div className="row-btns">{loadBtn('1b')}{loadBtn('3b')}</div>
+          <p className="small first-time">{t.tryit.firstTime}</p>
           {L.error && <p className="small warn">{L.error === 'no-webgpu' ? t.tryit.noWebgpu : `${t.tryit.loadError} ${L.error}`}</p>}
         </>
       ) : L.status !== 'ready' ? (
         <>
           <p className="small">{L.status === 'warming' ? t.tryit.warming : t.tryit.loading(MODELS[L.model!].label)}</p>
           <div className="pbar wide"><span style={{ width: `${Math.round(L.progress * 100)}%` }} /></div>
+          {L.status === 'loading' && L.totalMB > 0 && <p className="small muted mono">{t.tryit.downloaded(num(L.loadedMB, 0), num(L.totalMB, 0), num(L.progress * 100, 0))}</p>}
+          <p className="small muted">{t.tryit.firstTime}</p>
         </>
       ) : (
         <>

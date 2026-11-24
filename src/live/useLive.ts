@@ -17,6 +17,8 @@ interface LiveState {
   status: 'idle' | 'loading' | 'warming' | 'ready' | 'error'
   model: ModelKey | null
   progress: number
+  loadedMB: number
+  totalMB: number
   loadS: number | null
   warmS: number | null
   firstResultS: number | null
@@ -31,7 +33,7 @@ interface LiveState {
 
 export const useLive = create<LiveState>(() => ({
   tokStatus: 'idle', tokens: [], tokensFor: '',
-  status: 'idle', model: null, progress: 0, loadS: null, warmS: null, firstResultS: null, error: null,
+  status: 'idle', model: null, progress: 0, loadedMB: 0, totalMB: 0, loadS: null, warmS: null, firstResultS: null, error: null,
   running: false, resultFor: '', top10: [], entropy: null, forwardMs: null, sampled: null,
 }))
 ;(globalThis as unknown as { __live: typeof useLive }).__live = useLive
@@ -46,7 +48,7 @@ function w() {
     const set = useLive.setState
     if (m.type === 'tok-ready') set({ tokStatus: 'ready' })
     else if (m.type === 'tokens') set({ tokens: m.tokens, tokensFor: m.text })
-    else if (m.type === 'progress') set({ progress: m.total ? m.loaded / m.total : 0, status: m.loaded >= m.total ? 'warming' : 'loading' })
+    else if (m.type === 'progress') set({ progress: m.total ? m.loaded / m.total : 0, loadedMB: m.loaded / 1e6, totalMB: m.total / 1e6, status: m.loaded >= m.total ? 'warming' : 'loading' })
     else if (m.type === 'ready') set({ status: 'ready', loadS: m.load_s, warmS: m.warm_s, progress: 1 })
     else if (m.type === 'result') {
       const s = useLive.getState()
@@ -68,7 +70,7 @@ export const live = {
   tokenize(text: string) { w().postMessage({ type: 'tokenize', text }) },
   load(key: ModelKey) {
     loadClick = performance.now()
-    useLive.setState({ status: 'loading', model: key, progress: 0, error: null, loadS: null, warmS: null, firstResultS: null, top10: [], resultFor: '' })
+    useLive.setState({ status: 'loading', model: key, progress: 0, loadedMB: 0, totalMB: 0, error: null, loadS: null, warmS: null, firstResultS: null, top10: [], resultFor: '' })
     w().postMessage({ type: 'load', modelId: MODELS[key].id })
   },
   run(text: string, T: number) { useLive.setState({ running: true }); w().postMessage({ type: 'run', text, T }) },

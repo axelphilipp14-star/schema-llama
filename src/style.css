@@ -223,3 +223,4 @@ html, body, #root { margin: 0; height: 100%; background: var(--bg); color: var(-
 .about li { margin: 6px 0; }
 .about a { color: var(--emb); }
 .built-big { margin-top: 30px; font-weight: 600; }
+.first-time { color: var(--make); }
