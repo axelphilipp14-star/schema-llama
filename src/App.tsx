@@ -15,13 +15,18 @@ import { LabelOverlay, LabelProjector } from './scene/labels'
 import { Timeline } from './ui/Timeline'
 import { BlockPanel, JourneyPanel } from './ui/Panels'
 import { EnquetePage, useRoute } from './ui/EnquetePage'
+import { About } from './ui/About'
 import { MakeRig, MakeScene, type TraceSummary } from './scene/MakeScene'
 import { MakePanel, MakeSteps } from './ui/MakePanel'
 
 
+/** Compteur d'images/s : en développement, ou avec ?fps sur le site publié. */
+const SHOW_FPS = import.meta.env.DEV || new URLSearchParams(location.search).has('fps')
+
 export default function App() {
   const route = useRoute()
   if (route.page === 'enquete') return <EnquetePage id={route.id} />
+  if (route.page === 'about') return <About />
   return <Schema />
 }
 
@@ -71,7 +76,7 @@ function Schema() {
         </Canvas>
         <LabelOverlay />
         <HoverBox />
-        <Fps />
+        {SHOW_FPS && <Fps />}
         {phase === 'make' ? <MakeSteps /> : view === 'journey' ? <Timeline lay={lay} /> : <><BlockCalc trace={trace} /><BlockSteps /></>}
       </div>
       {phase === 'make' ? <MakePanel traces={summaries} /> : view === 'journey' ? <JourneyPanel trace={trace} lay={lay} /> : <BlockPanel trace={trace} />}

@@ -101,5 +101,6 @@ export function useRoute() {
   const m = hash.match(/^#\/enquete\/([\w-]+)/)
   if (m) return { page: 'enquete' as const, id: m[1] }
   if (hash.startsWith('#/enquetes')) return { page: 'enquete' as const, id: null }
+  if (hash.startsWith('#/a-propos')) return { page: 'about' as const, id: null }
   return { page: 'schema' as const, id: null }
 }

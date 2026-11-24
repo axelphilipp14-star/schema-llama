@@ -52,6 +52,28 @@ const fr = {
   source: (dtype: string, date: string) => `Source : trace ${dtype}, ${date}. Couleurs de l'attention en échelle racine ; hauteurs du flux en échelle log.`,
   dims: (d: string, h: number, kv: number, m: string, V: string) => `Dimensions lues dans la trace : ${d} · ${h} têtes · ${kv} K/V · MLP ${m} · vocabulaire ${V}.`,
   builtWith: 'Built with Llama',
+  aboutPage: {
+    title: 'À propos',
+    sections: [
+      { h: 'Ce que c’est', p: ['Un schéma 3D interactif de Llama 3.2 3B, le modèle de langage ouvert de Meta : comment il est fabriqué (données, tokenizer, pré-entraînement, fine-tuning) et comment il répond (tokens, embeddings, 28 blocs, token de sortie). Construit par Axel Philippe, qui apprend l’IA, pour apprendre et pour montrer, avec Claude Code.'] },
+      { h: 'D’où viennent les nombres', p: ['Aucun nombre n’est inventé. Chaque nombre affiché vient de l’une de ces trois sources, et l’interface dit laquelle :'], ul: [
+        'Des traces : Llama 3.2 (3B Instruct, 3B de base, 1B Instruct) a été exécuté sur 5 phrases et tout ce qui se passe à l’intérieur a été enregistré : tokens, embeddings, attention de chaque tête, Q, K, V, RMSNorm, MLP, probabilités. Calcul en bfloat16 sur processeur (GitHub Actions), poids officiels de Meta (copie publique « unsloth »).',
+        'Le modèle en direct : Llama 3.2 1B (ou 3B) tourne dans ton navigateur sur ta carte graphique (WebGPU, Transformers.js), quantifié en 4 bits. Il donne les probabilités du token suivant pour n’importe quelle phrase, mais pas l’intérieur (attention, MLP).',
+        'Les chiffres publiés par Meta (fiche du modèle) pour la fabrication : volume de données, heures de calcul, émissions. Source et date indiquées à côté.',
+      ] },
+      { h: 'Ce qui est vérifié', p: ['Des tests automatiques refont les calculs à partir des nombres publiés : chaque ligne d’attention fait 100 % (à la précision du format près), softmax(Q·K) redonne l’attention du modèle, la somme des V redonne la sortie de chaque tête, RMSNorm et SwiGLU se recalculent, le premier choix de la trace est bien celui que le modèle génère, et les nombres affichés à l’écran sont ceux des traces. Le modèle en direct retrouve le même premier choix que la trace, avec 8 tokens sur 10 en commun (la quantification 4 bits explique l’écart).'] },
+      { h: 'Les limites, dites franchement', p: [], ul: [
+        'Les traces ne gardent qu’une partie des nombres (8 premières dimensions sur 128 pour Q, K, V ; les 16 neurones les plus actifs sur 8 192 ; le top-50 des scores de sortie).',
+        'La température appliquée à une phrase tracée est exacte à T = 1 et T = 0, approchée ailleurs (sur les 50 tokens gardés) ; le modèle en direct, lui, est exact.',
+        'Le modèle 3B en direct est lent sur un ordinateur à 8 Go (≈ 2 minutes avant le premier résultat) : le 1B est proposé par défaut.',
+        'L’entonnoir des données est un schéma : Meta ne publie pas le volume de chaque étape de nettoyage.',
+        'Les enquêtes d’Axel sont en français ; les fiches courtes existent en anglais.',
+      ] },
+      { h: 'Inspirations', p: ['La méthode des traces calculées d’avance vient d’AnimatedLLM (Kasner et Dušek, 2026). La visualisation de Brendan Bycroft (bbycroft.net/llm) a servi de référence visuelle ; aucun code n’en est repris.'] },
+      { h: 'Licence', p: ['Llama 3.2 est sous la licence communautaire Llama 3.2 de Meta. Built with Llama.'] },
+    ] as { h: string; p: string[]; ul?: string[] }[],
+    linksTitle: 'Liens', code: 'Le code source (GitHub)', card: 'La fiche officielle du modèle (Meta, Hugging Face)', license: 'La licence Llama 3.2', animated: 'AnimatedLLM (Kasner et Dušek, 2026)', bbycroft: 'LLM Visualization (Brendan Bycroft)',
+  },
   phase: { label: 'Les deux phases', make: 'Fabriquer', respond: 'Répondre' },
   about: { link: 'À propos' },
   make: {
@@ -203,6 +225,28 @@ const en: Dict = {
   source: (dtype, date) => `Source: ${dtype} trace, ${date}. Attention colours on a square-root scale; stream heights on a log scale.`,
   dims: (d, h, kv, m, V) => `Dimensions read from the trace: ${d} · ${h} heads · ${kv} K/V · MLP ${m} · vocabulary ${V}.`,
   builtWith: 'Built with Llama',
+  aboutPage: {
+    title: 'About',
+    sections: [
+      { h: 'What this is', p: ['An interactive 3D diagram of Llama 3.2 3B, Meta’s open language model: how it is built (data, tokenizer, pre-training, fine-tuning) and how it answers (tokens, embeddings, 28 blocks, output token). Built by Axel Philippe, who is learning AI, to learn and to show, with Claude Code.'] },
+      { h: 'Where the numbers come from', p: ['No number is made up. Every number shown comes from one of these three sources, and the interface says which:'], ul: [
+        'Traces: Llama 3.2 (3B Instruct, 3B base, 1B Instruct) was run on 5 sentences and everything happening inside was recorded: tokens, embeddings, each head’s attention, Q, K, V, RMSNorm, MLP, probabilities. Computed in bfloat16 on CPU (GitHub Actions), Meta’s official weights (public “unsloth” copy).',
+        'The live model: Llama 3.2 1B (or 3B) runs in your browser on your graphics card (WebGPU, Transformers.js), quantized to 4 bits. It gives next-token probabilities for any sentence, but not the insides (attention, MLP).',
+        'Figures published by Meta (model card) for the building phase: data volume, compute hours, emissions. Source and date shown alongside.',
+      ] },
+      { h: 'What is checked', p: ['Automated tests redo the computations from the published numbers: each attention row sums to 100% (up to the format’s precision), softmax(Q·K) gives back the model’s attention, the sum of the Vs gives back each head’s output, RMSNorm and SwiGLU are recomputed, the trace’s first choice is the token the model generates, and the numbers on screen are the trace’s. The live model finds the same first choice as the trace, with 8 of 10 tokens in common (4-bit quantization explains the gap).'] },
+      { h: 'Limits, stated plainly', p: [], ul: [
+        'Traces keep only part of the numbers (first 8 of 128 dimensions for Q, K, V; the 16 most active of 8,192 neurons; the top-50 output scores).',
+        'Temperature applied to a traced sentence is exact at T = 1 and T = 0, approximate elsewhere (over the 50 kept tokens); the live model is exact.',
+        'The live 3B model is slow on an 8 GB computer (≈ 2 minutes before the first result): the 1B is offered by default.',
+        'The data funnel is schematic: Meta does not publish the volume of each cleaning stage.',
+        'Axel’s investigations are in French; the short cards exist in English.',
+      ] },
+      { h: 'Inspirations', p: ['The precomputed-trace method comes from AnimatedLLM (Kasner and Dušek, 2026). Brendan Bycroft’s visualization (bbycroft.net/llm) served as a visual reference; no code was taken from it.'] },
+      { h: 'License', p: ['Llama 3.2 is licensed under Meta’s Llama 3.2 Community License. Built with Llama.'] },
+    ],
+    linksTitle: 'Links', code: 'Source code (GitHub)', card: 'Official model card (Meta, Hugging Face)', license: 'Llama 3.2 license', animated: 'AnimatedLLM (Kasner and Dušek, 2026)', bbycroft: 'LLM Visualization (Brendan Bycroft)',
+  },
   phase: { label: 'The two phases', make: 'Build', respond: 'Answer' },
   about: { link: 'About' },
   make: {
