@@ -10,7 +10,7 @@ const ctx = await chromium.launchPersistentContext('results/chrome-profile', {
 const page = await ctx.newPage()
 const errors = []
 page.on('pageerror', (e) => errors.push(e.message))
-await page.goto('http://localhost:5173/schema-llama/?lang=fr')
+await page.goto((process.env.SITE ?? 'http://localhost:5173/schema-llama/') + '?lang=fr')
 await page.waitForTimeout(2000)
 await page.click('.tabs button:nth-child(2)')
 await page.waitForFunction(() => window.__live.getState().tokStatus === 'ready', null, { timeout: 120000 })
@@ -35,6 +35,6 @@ await page.waitForFunction(() => window.__live.getState().resultFor.startsWith('
 const fr = await page.evaluate(() => { const s = window.__live.getState(); return { forwardMs: s.forwardMs, tokens: s.tokens.length, top5: s.top10.slice(0, 5).map((x) => [x.t, +x.p.toFixed(4)]) } })
 await page.screenshot({ path: `results/m3_live_${key}_fr.png` })
 const res = { date: new Date().toISOString(), machine: 'MacBook A18 Pro, 8 Go', model: key, first_result_wall_s, ...s1, compare, t05_top3: t05, sampled, french: fr, errors }
-writeFileSync(`docs/preuves/M3_direct_${key}.json`, JSON.stringify(res, null, 1))
+writeFileSync(`docs/preuves/M3_direct_${key}${process.env.SITE ? '_site_publie' : ''}.json`, JSON.stringify(res, null, 1))
 console.log(JSON.stringify(res, null, 1))
 await ctx.close()
