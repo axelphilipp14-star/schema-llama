@@ -24,7 +24,7 @@ Un schéma 3D interactif de Llama 3.2 3B, en ligne sur GitHub Pages, qui montre 
 | H1 — 3B q4f16 tient dans 8 Go en WebGPU | **mesuré** : tient (pas de crash, 9,7 tok/s) mais 147 s avant le 1er résultat → E5 échoue (AN-002) | `docs/preuves/M0c_Llama-3.2-3B-Instruct-ONNX.json` |
 | H2 — 1B q4f16 (~1,1 Go) tient | **mesuré** : oui, 38 s avant le 1er résultat, 18,6 tok/s → E5 OK | `docs/preuves/M0c_Llama-3.2-1B-Instruct-ONNX.json` |
 | H3 — l'export ONNX ne donne pas les scores d'attention | **mesuré** : confirmé, sorties = `logits` + cache K/V seulement (1B et 3B) | idem |
-| H4 — R3F tient 28 blocs instanciés à 50 i/s | **hypothèse** | compteur i/s, M1 |
+| H4 — R3F tient 28 blocs instanciés à 50 i/s | **mesuré** : 28 blocs (trace de charge), min 131 i/s, médiane 135, écran Retina ×2 → E3 OK | `docs/preuves/M1_mesure_charge28.json` |
 | H5 — trace d'une phrase ≤ 16 tokens ≤ 2 Mo gzip | **mesuré (1B, 8 tokens)** : 0,09 Mo ; estimation 3B 16 tokens ≈ 0,5 Mo | `tests/trace.test.ts` |
 | H6 — q4f16 change peu le top-10 (E6) | **mesuré (1B)** : même top-1, 8/10 en commun avec la trace bf16 (limite du seuil) ; 3B à mesurer avec la trace Kaggle | `docs/preuves/M0c_*.json` |
 

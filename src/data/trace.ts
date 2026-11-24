@@ -41,7 +41,8 @@ export async function loadTrace(id: string): Promise<Trace> {
 }
 
 /** Affichage d'un token : rend visibles les espaces et le BOS. */
+export const BOS_LABEL = { current: '⟨début⟩' }
 export function showTok(t: string): string {
-  if (t === '<|begin_of_text|>') return '⟨début⟩'
+  if (t === '<|begin_of_text|>') return BOS_LABEL.current
   return t.replace(/ /g, '·').replace(/\n/g, '⏎')
 }

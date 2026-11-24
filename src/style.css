@@ -30,14 +30,66 @@ html, body, #root { margin: 0; height: 100%; background: var(--bg); color: var(-
 .probs .bar span { display: block; height: 100%; background: var(--out); }
 .probs .num { text-align: right; color: var(--muted); }
 
-.labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 5; }
 .labels .lbl { position: absolute; left: 0; top: 0; will-change: transform; }
 .lbl { font: 600 13px Inter, sans-serif; white-space: nowrap; text-shadow: 0 1px 3px #000; user-select: none; }
 .lbl-s { font: 400 12px 'JetBrains Mono', monospace; }
 
 .hover {
+  z-index: 40;
   position: absolute; left: 16px; bottom: 16px; max-width: 520px; padding: 10px 14px;
   background: var(--surface); border: 1px solid var(--grid); border-radius: 8px; pointer-events: none;
 }
 .hover .big { font-size: 16px; color: var(--attn); margin-top: 2px; }
 .fps { position: absolute; left: 16px; top: 12px; opacity: 0.8; }
+
+/* Panneau */
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.lang { display: inline-flex; border: 1px solid var(--grid); border-radius: 6px; overflow: hidden; }
+.lang button { background: none; border: 0; color: var(--muted); font: 600 12px Inter, sans-serif; padding: 4px 9px; cursor: pointer; }
+.lang button.on { background: var(--grid); color: var(--text); }
+.step-title { font-size: 15px !important; color: var(--text); margin-top: 18px !important; padding-top: 14px; border-top: 1px solid var(--grid); }
+.step-body { min-height: 150px; }
+.step-body p { margin: 6px 0 10px; }
+.vals { color: var(--emb); word-break: break-word; line-height: 1.7; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; flex-direction: column; align-items: center; padding: 4px 8px; border: 1px solid var(--grid); border-radius: 6px; background: var(--bg); }
+.chip b { font-weight: 600; color: var(--text); }
+.chip i { font-style: normal; color: var(--emb); font-size: 11px; }
+.chosen { color: var(--out); font-size: 15px; }
+.probs li.hl .tok { color: var(--out); font-weight: 600; }
+.lens { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 14px; }
+.lens li { display: grid; grid-template-columns: 22px 1fr 50px; gap: 6px; padding: 1px 4px; border-radius: 4px; cursor: pointer; break-inside: avoid; font-size: 12px; }
+.lens li .k { color: var(--muted); font-size: 11px; }
+.lens li .tok { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.lens li .tok.ok { color: var(--out); }
+.lens li .num { text-align: right; color: var(--muted); font-size: 11px; }
+.lens li.future { opacity: 0.35; }
+.lens li.cur { background: var(--grid); }
+.lens li:hover { background: color-mix(in srgb, var(--grid) 60%, transparent); }
+.foot { margin-top: 18px !important; border-top: 1px solid var(--grid); padding-top: 10px; }
+.built { color: var(--text); }
+.btn { background: var(--surface); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 6px 11px; font: 600 12px Inter, sans-serif; cursor: pointer; }
+.btn:hover { border-color: var(--muted); }
+.btn.on { border-color: var(--emb); color: var(--emb); }
+.btn.back { margin-top: 10px; }
+
+/* Frise */
+.timeline { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 16px 14px; display: flex; flex-direction: column; gap: 8px; z-index: 30;
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--bg) 88%, transparent) 30%); }
+.tl-controls { display: flex; align-items: center; gap: 8px; }
+.tl-controls .icon { width: 32px; padding: 6px 0; font-size: 16px; line-height: 1; }
+.tl-controls .play { min-width: 104px; }
+.tl-name { font-weight: 600; margin-left: 6px; }
+.tl-spacer { flex: 1; }
+.tl-speed { color: var(--muted); font-size: 12px; display: inline-flex; gap: 6px; align-items: center; }
+.tl-speed select { background: var(--surface); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 4px; }
+.tl-track { display: flex; gap: 2px; height: 10px; }
+.tl-seg { flex-basis: 0; position: relative; padding: 0; border: 0; border-radius: 2px; background: var(--grid); cursor: pointer; overflow: hidden; }
+.tl-seg span { position: absolute; inset: 0 auto 0 0; display: block; }
+.tl-seg.k-tokens span, .tl-seg.k-embed span { background: var(--emb); }
+.tl-seg.k-block span { background: linear-gradient(90deg, var(--attn) 50%, var(--mlp) 50%); }
+.tl-seg.k-norm span { background: var(--norm); }
+.tl-seg.k-head span, .tl-seg.k-probs span { background: var(--out); }
+.tl-seg.cur { outline: 1px solid var(--text); }
+.hover { bottom: 84px !important; }

@@ -6,3 +6,4 @@ playwright-report/
 .DS_Store
 __pycache__/
 .venv/
+public/traces/_*

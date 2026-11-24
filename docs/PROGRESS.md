@@ -30,3 +30,14 @@
 - b) 1 bloc en 3D depuis la trace : **marche** (144 i/s, 0 erreur).
 - c) direct : **1B marche** (E5 OK) ; **3B tient mais trop lent** (AN-002) ; attention en direct impossible avec les exports standard.
 - Suivant : M1 (le trajet d'un token, 28 blocs) sur la trace 1B, bascule sur la trace 3B dès réception.
+
+## 2026-11-24 19:30 — M1 · le trajet d'un token
+- Fait : scène « trajet » (`src/scene/Journey.tsx`) : tokens et leurs numéros → **vraie ligne de chaque token** dans la table d'embedding (position = id / 128 256) → 16 premières valeurs réelles du vecteur → L blocs (attention orange | MLP violet) → RMSNorm finale → tête de sortie, reliée à la table d'entrée par un arc « même table » (`tie_embeddings`) → top-10. Impulsion animée par token ; seule celle du dernier token va jusqu'à la sortie.
+- À chaque bloc, avec les vrais nombres : arcs d'attention du dernier token (moyenne des têtes ; ⟨début⟩, le « puits », dessiné à part), **logit lens** (barre verte = top-1 lu à la sortie du bloc, vert si c'est le token final). Panneau synchronisé, liste « la prédiction se forme » (cliquable). Clic sur un bloc → vue détaillée de M0 ; retour au même bloc.
+- Frise : lecture/pause, pas à pas (← → espace), vitesse, « suivre le token » / « vue d'ensemble » (cadrage calculé sur les coins projetés de la scène). FR/EN pour toute la vue trajet (`src/i18n.ts`). Libellés : masquage automatique des chevauchements par priorité.
+- Boucle visuelle : ~14 captures. Corrigé : vue de face trop plate (→ diagonale), caméra de suivi trop basse (arcs vus par la tranche), arcs écrasés par le puits d'attention, chevauchement des noms, frise recouverte, ⟨début⟩ non traduit, plantage des libellés JSX.
+- **Mesures (écran Retina ×2, 1440×900)** : E8 = **30,1 s** (16 blocs) et **43,3 s** (28 blocs, trace de charge) ≤ 60 s ✅ ; E3 = min **131 i/s** ✅ ; 0 erreur. → **AN-003** : l'outil de mesure a d'abord donné 45,6 / 120,8 / 48,3 s (rechargement Vite, vrai bug de fin de lecture, détection en retard) ; corrigé et recalé sur la valeur calculée.
+- E2 : `tests/e2e/numbers.spec.ts` — logit lens des 16 blocs, top-3 de chaque étape et top-10 final affichés = trace ✅.
+- Reste pour E7 : les libellés 3D de la vue « dans un bloc » sont encore en français → refaits en M2.
+- Preuve : `docs/preuves/M1_*.png`, `docs/preuves/M1_mesure_1b.json`, `docs/preuves/M1_mesure_charge28.json`.
+- Suivant : M2 (zoom attention et MLP).

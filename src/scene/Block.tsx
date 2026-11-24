@@ -1,8 +1,8 @@
-import { useLayoutEffect, useMemo, useRef } from 'react'
+import { useMemo } from 'react'
+import { Cells } from './Cells'
 import { Line } from '@react-three/drei'
 import { Label } from './labels'
-import { Color, InstancedMesh, Object3D } from 'three'
-import type { ThreeEvent } from '@react-three/fiber'
+import { Color } from 'three'
 import type { Trace } from '../data/trace'
 import { showTok } from '../data/trace'
 import { C, div, seq } from './colors'
@@ -13,45 +13,6 @@ export const X = { in: 0, norm1: 1.6, attnL: 2.8, attnR: 9.6, add1: 10.6, norm2:
 const LANE = 0.62
 
 const fmt = (v: number, d = 3) => v.toLocaleString('fr-FR', { maximumFractionDigits: d })
-
-/** Grille instanciée générique : une boîte par cellule, couleur par cellule, survol → libellé. */
-function Cells({ pos, colors, size, info, scales }: {
-  pos: [number, number, number][]
-  colors: Color[]
-  scales?: [number, number, number][]
-  size: [number, number, number]
-  info: (i: number) => { label: string; value: string }
-}) {
-  const ref = useRef<InstancedMesh>(null)
-  const setHover = useStore((s) => s.setHover)
-  useLayoutEffect(() => {
-    const m = ref.current
-    if (!m) return
-    const o = new Object3D()
-    pos.forEach((p, i) => {
-      o.position.set(...p)
-      if (scales) o.scale.set(...scales[i])
-      o.updateMatrix()
-      m.setMatrixAt(i, o.matrix)
-      m.setColorAt(i, colors[i])
-    })
-    m.instanceMatrix.needsUpdate = true
-    if (m.instanceColor) m.instanceColor.needsUpdate = true
-    m.computeBoundingSphere()
-  }, [pos, colors, scales])
-  return (
-    <instancedMesh
-      key={pos.length}
-      ref={ref}
-      args={[undefined, undefined, pos.length]}
-      onPointerMove={(e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); if (e.instanceId != null) setHover(info(e.instanceId)) }}
-      onPointerOut={() => setHover(null)}
-    >
-      <boxGeometry args={size} />
-      <meshStandardMaterial roughness={0.6} metalness={0.05} />
-    </instancedMesh>
-  )
-}
 
 export function Block({ trace }: { trace: Trace }) {
   const layer = useStore((s) => s.layer)
