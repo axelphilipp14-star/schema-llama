@@ -93,7 +93,7 @@
 - **AN-004** : heures de ce journal inventées (jusqu'à « 25/11 00:40 » alors qu'il était 18:16 le 24/11) → remplacées par les heures des commits ; date M3 corrigée dans le coffre ; règle « heures lues avec `date`/`git log` » ajoutée à `CLAUDE.md`.
 - Non fait : la ligne de trace dans `Journal.md` du coffre (règle 8 du coffre) — refusée par le contrôle des permissions ; laissée à la décision d'Axel.
 
-## 2026-11-24 (commit ci-dessous) — Tâches d'Axel faites par Claude, à sa demande ; vraies traces du 3B
+## 2026-11-24 21:42 (commit) — Tâches d'Axel faites par Claude, à sa demande ; vraies traces du 3B
 - **Tâche 1 (traces)** : pas d'accès au compte HF/Kaggle d'Axel → traces calculées sur **GitHub Actions** (CPU, 16 Go, gratuit en dépôt public) avec `scripts/trace_batch.py` et `.github/workflows/trace.yml`, à partir des copies publiques `unsloth/…` des poids officiels (même licence Llama 3.2). **15 traces** (3B Instruct, 3B base, 1B Instruct × 5 phrases), **E1 vert 15/15**, 1,4–2,0 s par phrase pour le 3B. Run : https://github.com/axelphilipp14-star/schema-llama/actions/runs/45482108528 · rapport `docs/preuves/traces_github_actions_rapport.json`.
 - `rope_theta` absent des traces (transformers récent : `rope_parameters`) → correctif dans `trace_core.py` ; traces existantes complétées depuis le `config.json` officiel (`scripts/fill-rope.py`, provenance notée dans `meta.rope_source`). Aucun nombre tapé en dur.
 - **Tâche 2 (phrases)** : `scripts/sentences.json` — pronom EN/FR, fait (« The capital of France is »), ambiguïté (« La souris… »), IA × spatial (« To cool a data center in orbit… »). 6 à 12 tokens. Sans les prédictions d'Axel (c'était l'exercice).
