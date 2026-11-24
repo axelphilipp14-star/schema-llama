@@ -1,0 +1,43 @@
+Downloading networkx (2.0MiB)
+Downloading sympy (6.0MiB)
+Downloading tokenizers (3.0MiB)
+Downloading pydantic-core (2.0MiB)
+Downloading torch (132.1MiB)
+Downloading transformers (12.9MiB)
+Downloading numpy (5.3MiB)
+ Downloaded pydantic-core
+ Downloaded networkx
+ Downloaded tokenizers
+ Downloaded numpy
+ Downloaded sympy
+ Downloaded transformers
+ Downloaded torch
+Installed 40 packages in 371ms
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+W1124 16:36:10.047000 81869 torch/distributed/elastic/multiprocessing/redirects.py:35] NOTE: Redirects are currently not supported in MacOs.
+Loading weights:   0%|          | 0/146 [00:00<?, ?it/s]Loading weights: 100%|██████████| 146/146 [00:00<00:00, 7296.35it/s]
+chargé en 223.1 s
+Traceback (most recent call last):
+  File "/Users/axelphilippe/schema-llama/scripts/trace_local.py", line 42, in <module>
+    tr = trace_sentence(model, tok, a.prompt, a.model)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/axelphilippe/.cache/uv/environments-v2/trace-local-dcb91efe322e632e/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 158, in no_grad
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/axelphilippe/schema-llama/scripts/trace_core.py", line 141, in trace_sentence
+    "lens": lens(h_out[-1]),
+            ^^^^^^^^^^^^^^^
+  File "/Users/axelphilippe/schema-llama/scripts/trace_core.py", line 92, in lens
+    logits = lm_head(norm(h_last[None, None]))[0, 0].float()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/axelphilippe/.cache/uv/environments-v2/trace-local-dcb91efe322e632e/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1787, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/axelphilippe/.cache/uv/environments-v2/trace-local-dcb91efe322e632e/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1798, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/axelphilippe/.cache/uv/environments-v2/trace-local-dcb91efe322e632e/lib/python3.12/site-packages/torch/nn/modules/linear.py", line 134, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: expected m1 and m2 to have the same dtype, but got: float != c10::BFloat16

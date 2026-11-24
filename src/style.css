@@ -1,0 +1,43 @@
+:root {
+  --bg: #0b0d12; --surface: #141821; --grid: #2a3040; --text: #e6e8ee; --muted: #8a93a6;
+  --emb: #4fb3ff; --attn: #ff8a3d; --mlp: #b07cff; --norm: #7d8597; --out: #3ddc97; --make: #f2c14e;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body, #root { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 14px/1.45 Inter, system-ui, sans-serif; }
+.mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; font-size: 13px; }
+.muted { color: var(--muted); }
+.small { font-size: 12px; }
+.center { display: grid; place-items: center; height: 100%; color: var(--muted); }
+.app { display: grid; grid-template-columns: 1fr 360px; height: 100%; }
+.stage { position: relative; overflow: hidden; min-width: 0; }
+.app canvas { display: block; }
+
+.panel {
+  position: relative; z-index: 50; overflow: auto; background: var(--surface); border-left: 1px solid var(--grid);
+  padding: 18px 20px;
+}
+.panel h1 { font-size: 18px; font-weight: 600; margin: 0 0 6px; }
+.panel h2 { font-size: 13px; font-weight: 600; margin: 18px 0 6px; }
+.panel p { margin: 6px 0; }
+.warn { color: var(--make); font-size: 12px; }
+.row { display: grid; grid-template-columns: 40px 1fr 56px; align-items: center; gap: 10px; margin-top: 14px; }
+.row input { accent-color: var(--attn); width: 100%; }
+.probs { list-style: none; margin: 0; padding: 0; }
+.probs li { display: grid; grid-template-columns: 110px 1fr 58px; gap: 8px; align-items: center; padding: 2px 0; }
+.probs .tok { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.probs .bar { height: 6px; background: var(--grid); border-radius: 3px; overflow: hidden; }
+.probs .bar span { display: block; height: 100%; background: var(--out); }
+.probs .num { text-align: right; color: var(--muted); }
+
+.labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.labels .lbl { position: absolute; left: 0; top: 0; will-change: transform; }
+.lbl { font: 600 13px Inter, sans-serif; white-space: nowrap; text-shadow: 0 1px 3px #000; user-select: none; }
+.lbl-s { font: 400 12px 'JetBrains Mono', monospace; }
+
+.hover {
+  position: absolute; left: 16px; bottom: 16px; max-width: 520px; padding: 10px 14px;
+  background: var(--surface); border: 1px solid var(--grid); border-radius: 8px; pointer-events: none;
+}
+.hover .big { font-size: 16px; color: var(--attn); margin-top: 2px; }
+.fps { position: absolute; left: 16px; top: 12px; opacity: 0.8; }

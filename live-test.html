@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test direct WebGPU</title>
+    <style>
+      body { background:#0b0d12; color:#e6e8ee; font:14px/1.5 Inter,system-ui,sans-serif; max-width:860px; margin:32px auto; padding:0 16px; }
+      button { background:#141821; color:#e6e8ee; border:1px solid #2a3040; border-radius:6px; padding:8px 14px; margin-right:8px; cursor:pointer; }
+      button:hover { border-color:#3ddc97; }
+      pre { background:#141821; border:1px solid #2a3040; border-radius:8px; padding:12px; white-space:pre-wrap; font:12px/1.5 'JetBrains Mono',monospace; }
+      input { width:100%; background:#141821; color:#e6e8ee; border:1px solid #2a3040; border-radius:6px; padding:8px; }
+    </style>
+  </head>
+  <body>
+    <h1>M0-c — Llama 3.2 en direct dans le navigateur (WebGPU)</h1>
+    <p>Charge le modèle quantifié (q4f16), mesure le temps, la vitesse, le top-10 du token suivant, et liste les sorties du graphe ONNX (scores d'attention disponibles ?).</p>
+    <p><input id="prompt" value="The satellite lost its antenna because it" /></p>
+    <button data-m="onnx-community/Llama-3.2-3B-Instruct-ONNX">Tester le 3B (~2,4 Go)</button>
+    <button data-m="onnx-community/Llama-3.2-1B-Instruct-ONNX">Tester le 1B (~1,1 Go)</button>
+    <pre id="log">WebGPU : vérification…</pre>
+    <script type="module" src="/src/live/liveTest.ts"></script>
+  </body>
+</html>

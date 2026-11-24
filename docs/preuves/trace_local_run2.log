@@ -1,0 +1,4 @@
+contrôles E1 : {'attn_row_sum_max_err': 0.0029296875, 'qk_recompute_max_err': 0.009666979312896729, 'greedy_matches_top1': True, 'dims_match_config': True, 'row_sum_tol': 0.00430625}
+écrit /Users/axelphilippe/schema-llama/scripts/../public/traces/dev-1b-satellite.json — 0.34 Mo brut, 0.09 Mo gzip
+top-10 : [(' was', 0.5303), (' had', 0.0718), (' is', 0.0493), (' got', 0.0299), ("'s", 0.0181), (' has', 0.0181), (' became', 0.011), (' fell', 0.0086), (' experienced', 0.0086), (' failed', 0.0076)]
+E1 OK
