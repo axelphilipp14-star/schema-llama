@@ -242,6 +242,10 @@ function stripSections(lines) {
 
 /** Obsidian → Markdown standard : liens internes, termes du Lexique, encadrés, intégrations retirées. */
 function obsidianToMd(md, enqByTitle) {
+  // Les blocs de code (```mermaid…```) et le code en ligne restent intacts : `[[…]]` y est de la syntaxe, pas un lien.
+  return md.split(/(^```[^\n]*\n[\s\S]*?^```[ \t]*$|`[^`\n]+`)/m).map((part, i) => (i % 2 ? part : prose(part, enqByTitle))).join('')
+}
+function prose(md, enqByTitle) {
   return md
     .replace(/%%[\s\S]*?%%/g, '')
     .replace(/!\[\[[^\]]*\]\]/g, '')

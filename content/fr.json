@@ -416,8 +416,7 @@
      "def": "Apprentissage par renforcement à partir de retours humains, qui transforme un prédicteur en assistant."
     }
    ],
-   "enAttente": "L'enquête #18 (fine-tuning et RLHF) n'est pas encore écrite. Cette fiche se remplira toute seule quand elle existera.",
-   "empreinte": "39dfdeaf6c87"
+   "empreinte": "227c52bb4164"
   }
  }
 }

@@ -63,5 +63,13 @@ describe('coffre → contenu (E9)', () => {
     expect(html).not.toContain('<script>')
     expect(html).toContain('<strong>Le point clé</strong>')
   })
+
+  it('pages : les blocs de code (Mermaid) et le code en ligne gardent leurs [[ ]]', () => {
+    run(env)
+    const html = readFileSync(join(dir, 'pages', '98.html'), 'utf8')
+    expect(html).toContain('V[[&quot;VOCABULAIRE&quot;]]')
+    expect(html).toContain('<code>[[Miroir]]</code>')
+    expect(html).toMatch(/<span class="lex"[^>]*>Miroir<\/span>/)
+  })
 })
 

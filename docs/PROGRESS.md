@@ -136,3 +136,8 @@
 - **Mini-carte 2D** (`src/ui/MiniMap.tsx`) en haut de la scène, synchronisée et cliquable : trajet (avec une jauge des 28 blocs), bloc (RMSNorm → attention → + → RMSNorm → MLP → +), fabrication.
 - Fausse piste tracée : la caméra « suivre » repassait en « libre » → pile d'appels : événement **molette réel** sur la fenêtre de test visible à l'écran (comportement voulu : l'utilisateur reprend la main). Fenêtres de test désormais hors écran (`--window-position=-3000,0`).
 - Mesures inchangées : E8 43,3 s, E3 min 59 / 57 i/s. Tests : 132 unitaires + 6 e2e (`tests/e2e/extras.spec.ts`).
+
+## 25/11/2026 00:40 — Schéma Mermaid #12 réparé, fiche fine-tuning sans enquête #18
+- Cause du diagramme #12 cassé : la note du coffre était juste ; `build-content.mjs` convertissait `[[…]]` en lien Obsidian **jusque dans les blocs de code** (forme Mermaid `V[["…"]]` → `V"…"`). Correction : conversion limitée au texte hors code (blocs et code en ligne). Test de non-régression ajouté (échoue sans la correction, passe avec). Seule la page 12 change.
+- Enquête #18 : décision d'Axel « soit tu l'écris soit tu t'en passes » → on s'en passe. Mention « pas encore écrite » retirée ; la station garde l'explication, les étapes Meta sourcées, la comparaison base/Instruct tracée et les définitions du Lexique. Si #18 est écrite un jour, il suffit de l'ajouter à `pieces.json`.
+- Preuve : 133 tests verts.

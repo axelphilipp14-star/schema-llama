@@ -409,10 +409,6 @@
         "en": "Fine-tuning"
       },
       "enquetes": [],
-      "pending": {
-        "fr": "L'enquête #18 (fine-tuning et RLHF) n'est pas encore écrite. Cette fiche se remplira toute seule quand elle existera.",
-        "en": "Investigation #18 (fine-tuning and RLHF) has not been written yet. This card will fill itself in once it exists."
-      },
       "mots": {
         "extra": [
           "Fine-tuning",
