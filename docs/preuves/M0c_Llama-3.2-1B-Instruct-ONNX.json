@@ -1,0 +1,218 @@
+{
+ "date": "2026-11-24T15:48:43.470Z",
+ "machine": "MacBook A18 Pro, 8 Go",
+ "results": [
+  {
+   "run": 1,
+   "wall_s": 156,
+   "webgpu": true,
+   "adapter": {},
+   "maxBufferSize": 4294967292,
+   "modelId": "onnx-community/Llama-3.2-1B-Instruct-ONNX",
+   "status": "ok",
+   "progress": "onnx/model_q4f16.onnx_data 100 %",
+   "load_s": 134.1,
+   "output_names": {
+    "model": [
+     "logits",
+     "present.0.key",
+     "present.0.value",
+     "present.1.key",
+     "present.1.value",
+     "present.2.key",
+     "present.2.value",
+     "present.3.key",
+     "present.3.value",
+     "present.4.key",
+     "present.4.value",
+     "present.5.key",
+     "present.5.value",
+     "present.6.key",
+     "present.6.value",
+     "present.7.key",
+     "present.7.value",
+     "present.8.key",
+     "present.8.value",
+     "present.9.key",
+     "present.9.value",
+     "present.10.key",
+     "present.10.value",
+     "present.11.key",
+     "present.11.value",
+     "present.12.key",
+     "present.12.value",
+     "present.13.key",
+     "present.13.value",
+     "present.14.key",
+     "present.14.value",
+     "present.15.key",
+     "present.15.value"
+    ]
+   },
+   "attention_outputs": [],
+   "forward_ms": 15912,
+   "top10": [
+    {
+     "id": 574,
+     "t": " was",
+     "p": 0.5186
+    },
+    {
+     "id": 1047,
+     "t": " had",
+     "p": 0.0747
+    },
+    {
+     "id": 374,
+     "t": " is",
+     "p": 0.049
+    },
+    {
+     "id": 2751,
+     "t": " got",
+     "p": 0.0364
+    },
+    {
+     "id": 706,
+     "t": " has",
+     "p": 0.0189
+    },
+    {
+     "id": 596,
+     "t": "'s",
+     "p": 0.0159
+    },
+    {
+     "id": 4745,
+     "t": " failed",
+     "p": 0.0136
+    },
+    {
+     "id": 11299,
+     "t": " fell",
+     "p": 0.0113
+    },
+    {
+     "id": 4024,
+     "t": " went",
+     "p": 0.0086
+    },
+    {
+     "id": 4295,
+     "t": " hit",
+     "p": 0.0074
+    }
+   ],
+   "n_tokens": 8,
+   "gen_tok_s": 17.2,
+   "gen_text": " was damaged during the launch.\nThe satellite was launched from a launch pad in the desert.\nThe satellite was launched from a launch pad in the desert.\nThe satellite",
+   "js_heap_gb": 0.1
+  },
+  {
+   "run": 2,
+   "wall_s": 42,
+   "webgpu": true,
+   "adapter": {},
+   "maxBufferSize": 4294967292,
+   "modelId": "onnx-community/Llama-3.2-1B-Instruct-ONNX",
+   "status": "ok",
+   "progress": "onnx/model_q4f16.onnx_data 100 %",
+   "load_s": 23.3,
+   "output_names": {
+    "model": [
+     "logits",
+     "present.0.key",
+     "present.0.value",
+     "present.1.key",
+     "present.1.value",
+     "present.2.key",
+     "present.2.value",
+     "present.3.key",
+     "present.3.value",
+     "present.4.key",
+     "present.4.value",
+     "present.5.key",
+     "present.5.value",
+     "present.6.key",
+     "present.6.value",
+     "present.7.key",
+     "present.7.value",
+     "present.8.key",
+     "present.8.value",
+     "present.9.key",
+     "present.9.value",
+     "present.10.key",
+     "present.10.value",
+     "present.11.key",
+     "present.11.value",
+     "present.12.key",
+     "present.12.value",
+     "present.13.key",
+     "present.13.value",
+     "present.14.key",
+     "present.14.value",
+     "present.15.key",
+     "present.15.value"
+    ]
+   },
+   "attention_outputs": [],
+   "forward_ms": 14807,
+   "top10": [
+    {
+     "id": 574,
+     "t": " was",
+     "p": 0.5186
+    },
+    {
+     "id": 1047,
+     "t": " had",
+     "p": 0.0747
+    },
+    {
+     "id": 374,
+     "t": " is",
+     "p": 0.049
+    },
+    {
+     "id": 2751,
+     "t": " got",
+     "p": 0.0364
+    },
+    {
+     "id": 706,
+     "t": " has",
+     "p": 0.0189
+    },
+    {
+     "id": 596,
+     "t": "'s",
+     "p": 0.0159
+    },
+    {
+     "id": 4745,
+     "t": " failed",
+     "p": 0.0136
+    },
+    {
+     "id": 11299,
+     "t": " fell",
+     "p": 0.0113
+    },
+    {
+     "id": 4024,
+     "t": " went",
+     "p": 0.0086
+    },
+    {
+     "id": 4295,
+     "t": " hit",
+     "p": 0.0074
+    }
+   ],
+   "n_tokens": 8,
+   "gen_tok_s": 18.6,
+   "gen_text": " was damaged during the launch.\nThe satellite was launched from a launch pad in the desert.\nThe satellite was launched from a launch pad in the desert.\nThe satellite",
+   "js_heap_gb": 0.1
+  }
+ ]
+}
