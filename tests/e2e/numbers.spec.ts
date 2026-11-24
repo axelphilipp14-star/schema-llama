@@ -2,7 +2,7 @@
 import { expect, test } from '@playwright/test'
 import { readFileSync } from 'node:fs'
 
-const trace = JSON.parse(readFileSync('public/traces/dev-1b-satellite.json', 'utf8'))
+const trace = JSON.parse(readFileSync('public/traces/3b-instruct-en-satellite.json', 'utf8'))
 const pctFr = (p: number) => `${(p * 100).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`
 
 test('top-10 final et logit lens de chaque bloc = trace', async ({ page }) => {

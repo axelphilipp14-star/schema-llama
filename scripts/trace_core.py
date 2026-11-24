@@ -202,7 +202,9 @@ def trace_sentence(model, tok, prompt: str, model_id: str, *, max_tokens=16, add
         "config": {
             "n_layers": L, "d_model": D, "n_heads": H, "n_kv_heads": KV, "head_dim": hd,
             "d_mlp": cfg.intermediate_size, "vocab": cfg.vocab_size,
-            "max_ctx": cfg.max_position_embeddings, "rope_theta": getattr(cfg, "rope_theta", None),
+            "max_ctx": cfg.max_position_embeddings,
+            # transformers récents rangent la base de RoPE dans rope_parameters
+            "rope_theta": getattr(cfg, "rope_theta", None) or (getattr(cfg, "rope_parameters", None) or {}).get("rope_theta"),
             "rms_eps": cfg.rms_norm_eps, "tie_embeddings": bool(cfg.tie_word_embeddings),
         },
         "prompt": prompt,

@@ -21,7 +21,7 @@ export function journeyLayout(trace: Trace) {
   const xNorm = xBlock(L - 1) + BLOCK_W / 2 + 1.0
   const xHead = xNorm + 1.6
   const xProbs = xHead + 1.2
-  const xEnd = xProbs + 5.2
+  const xEnd = xProbs + 6.6
   const laneZ = (i: number) => (i - (n - 1) / 2) * LANE
 
   // Durées (s, vitesse 1×) : E8 exige de suivre un token de bout en bout en ≤ 60 s.

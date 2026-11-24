@@ -66,7 +66,7 @@ export const useStore = create<State>((set) => ({
   cam: 'overview',
   setCam: (cam) => set({ cam }),
   seek: (progress) => { anim.progress = progress; set({ progress }) },
-  traceId: (typeof location !== 'undefined' && new URLSearchParams(location.search).get('trace')) || 'dev-1b-satellite',
+  traceId: (typeof location !== 'undefined' && new URLSearchParams(location.search).get('trace')) || '3b-instruct-en-satellite',
   setTraceId: (traceId) => { anim.progress = 0; set({ traceId, progress: 0, playing: false, view: 'journey' }) },
   tab: 'journey',
   setTab: (tab) => set({ tab }),

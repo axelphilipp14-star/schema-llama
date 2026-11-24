@@ -92,3 +92,14 @@
 - `npm run obsidian` (`scripts/sync-obsidian.mjs`) écrit **« Schéma du modèle — Suivi »** dans le coffre : tâches d'Axel, questions à trancher, étapes faites, dernière étape en détail ; chemins du dépôt → liens GitHub, chemins de rendus → dossier local. Note entièrement générée, à relancer à chaque étape. Lien ajouté en tête du « Journal du projet » de `Schéma du modèle.md`.
 - **AN-004** : heures de ce journal inventées (jusqu'à « 25/11 00:40 » alors qu'il était 18:16 le 24/11) → remplacées par les heures des commits ; date M3 corrigée dans le coffre ; règle « heures lues avec `date`/`git log` » ajoutée à `CLAUDE.md`.
 - Non fait : la ligne de trace dans `Journal.md` du coffre (règle 8 du coffre) — refusée par le contrôle des permissions ; laissée à la décision d'Axel.
+
+## 2026-11-24 (commit ci-dessous) — Tâches d'Axel faites par Claude, à sa demande ; vraies traces du 3B
+- **Tâche 1 (traces)** : pas d'accès au compte HF/Kaggle d'Axel → traces calculées sur **GitHub Actions** (CPU, 16 Go, gratuit en dépôt public) avec `scripts/trace_batch.py` et `.github/workflows/trace.yml`, à partir des copies publiques `unsloth/…` des poids officiels (même licence Llama 3.2). **15 traces** (3B Instruct, 3B base, 1B Instruct × 5 phrases), **E1 vert 15/15**, 1,4–2,0 s par phrase pour le 3B. Run : https://github.com/axelphilipp14-star/schema-llama/actions/runs/45482108528 · rapport `docs/preuves/traces_github_actions_rapport.json`.
+- `rope_theta` absent des traces (transformers récent : `rope_parameters`) → correctif dans `trace_core.py` ; traces existantes complétées depuis le `config.json` officiel (`scripts/fill-rope.py`, provenance notée dans `meta.rope_source`). Aucun nombre tapé en dur.
+- **Tâche 2 (phrases)** : `scripts/sentences.json` — pronom EN/FR, fait (« The capital of France is »), ambiguïté (« La souris… »), IA × spatial (« To cool a data center in orbit… »). 6 à 12 tokens. Sans les prédictions d'Axel (c'était l'exercice).
+- **Tâche 3** : `docs/analyses/bbycroft.md` → idée retenue tout de suite : **RoPE** expliqué dans l'étape ② du bloc (Q, K après rotation) — manque qu'un pro aurait vu.
+- **Tâche 4** : fiche [lu] `docs/analyses/lu-animatedllm.md` (arXiv 2601.04213, lu en entier).
+- **Le schéma passe au vrai 3B** (trace par défaut `3b-instruct-en-satellite`, 28 blocs) ; trace de dev 1B retirée (remplacée par la trace 1B du serveur).
+- **Mesures sur le 3B** : E8 = **43,3 s** ✅ ; E3 trajet min 59 i/s, bloc min 57 i/s ✅ (écran à 60 Hz) ; **E6 3B** ✅ top-1 identique, 8/10 ; E5 3B 118,9 s ✗ (attendu, AN-002, option « lent »). Tests : **129 unitaires** (invariants et recalculs sur les 15 traces) + 3 e2e verts.
+- Observation pour M4 : « The capital of France is » → « Paris » **69,9 %** (Instruct) contre **24,6 %** (base) : l'effet du fine-tuning, chiffré.
+- Preuve : `docs/preuves/3B_*.png`, `docs/preuves/M1_mesure_3b.json`, `docs/preuves/M2_mesure_fps_3b.json`, `docs/preuves/M3_direct_3b.json`.

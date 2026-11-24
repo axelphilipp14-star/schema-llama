@@ -1,7 +1,7 @@
 // E8 (suivre un token de bout en bout ≤ 60 s) et E3 (≥ 50 i/s) — lecture complète à 1×, écran Retina simulé (dpr 2).
 // Usage : node scripts/measure-m1.mjs [traceId]
 import { chromium } from '@playwright/test'
-const trace = process.argv[2] ?? 'dev-1b-satellite'
+const trace = process.argv[2] ?? '3b-instruct-en-satellite'
 const browser = await chromium.launch({ headless: false, args: ['--use-angle=metal', '--enable-gpu', '--ignore-gpu-blocklist'] })
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 })
 const errors = []

@@ -2,7 +2,7 @@
 import { expect, test } from '@playwright/test'
 import { readFileSync } from 'node:fs'
 
-const tr = JSON.parse(readFileSync('public/traces/dev-1b-satellite.json', 'utf8'))
+const tr = JSON.parse(readFileSync('public/traces/3b-instruct-en-satellite.json', 'utf8'))
 const n = tr.tokens.length
 const LAYER = 9, HEAD = 0 // bloc 10, tête 1 (celle des captures)
 const close = (a: number, b: number) => Math.abs(a - b) < 1e-9

@@ -78,6 +78,7 @@ export function BlockCalc({ trace }: { trace: Trace }) {
         <Heat label={t.blk.vTitle(g + 1)} rows={L.last.v8[g]} tokens={toks} i={2} />
       </div>
       <p className="small muted" style={rv(3)}>{t.blk.dims8(c.head_dim)} · {t.blk.hoverCell}</p>
+      <p className="small rope" style={rv(4)}>{t.blk.rope(c.rope_theta ? num(c.rope_theta, 0) : null)}</p>
     </>
   )
   else if (step === 'scores' || step === 'softmax') {

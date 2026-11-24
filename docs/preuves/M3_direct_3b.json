@@ -1,14 +1,14 @@
 {
- "date": "2026-11-24T17:02:53.517Z",
+ "date": "2026-11-24T20:41:28.178Z",
  "machine": "MacBook A18 Pro, 8 Go",
  "model": "3b",
- "first_result_wall_s": 107.966,
+ "first_result_wall_s": 118.964,
  "status": "ready",
  "error": null,
- "loadS": 63.4,
- "warmS": 32.8,
- "firstResultS": 107.4,
- "forwardMs": 10746,
+ "loadS": 80.5,
+ "warmS": 34.3,
+ "firstResultS": 118.9,
+ "forwardMs": 3540,
  "top10": [
   [
    " was",
@@ -52,7 +52,8 @@
   ]
  ],
  "compare": [
-  "Llama 3.2 3B prêt · chargement 63,4 s · préparation 32,8 s · 1er résultat 107,4 s après le clic."
+  "Même phrase et même modèle que la trace : top-1 identique ✓ · 8/10 tokens en commun (quantification q4 contre bf16).",
+  "Llama 3.2 3B prêt · chargement 80,5 s · préparation 34,3 s · 1er résultat 118,9 s après le clic."
  ],
  "t05_top3": [
   [
@@ -75,7 +76,7 @@
   "rank": 0
  },
  "french": {
-  "forwardMs": 4149,
+  "forwardMs": 547,
   "tokens": 12,
   "top5": [
    [

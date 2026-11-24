@@ -1,0 +1,467 @@
+[
+ {
+  "model": "3b-instruct",
+  "repo": "unsloth/Llama-3.2-3B-Instruct",
+  "sentence": "en-satellite",
+  "fails": [],
+  "checks": {
+   "attn_row_sum_max_err": 0.002899169921875,
+   "qk_recompute_max_err": 0.009062349796295166,
+   "norm_recompute_max_err": 0.009695966728031635,
+   "ctx_recompute_max_err": 0.0033213633578270674,
+   "silu_recompute_max_err": 0.006095686461776495,
+   "greedy_matches_top1": true,
+   "dims_match_config": true,
+   "row_sum_tol": 0.00430625
+  },
+  "gzip_bytes": 185989,
+  "top3": [
+   [
+    " was",
+    0.4659
+   ],
+   [
+    "'s",
+    0.0407
+   ],
+   [
+    " malfunction",
+    0.0407
+   ]
+  ]
+ },
+ {
+  "model": "3b-instruct",
+  "repo": "unsloth/Llama-3.2-3B-Instruct",
+  "sentence": "fr-satellite",
+  "fails": [],
+  "checks": {
+   "attn_row_sum_max_err": 0.00286865234375,
+   "qk_recompute_max_err": 0.006884843111038208,
+   "norm_recompute_max_err": 0.009731444530189037,
+   "ctx_recompute_max_err": 0.0029134773649275303,
+   "silu_recompute_max_err": 0.006435799412429333,
+   "greedy_matches_top1": true,
+   "dims_match_config": true,
+   "row_sum_tol": 0.00450625
+  },
+  "gzip_bytes": 297643,
+  "top3": [
+   [
+    " a",
+    0.3094
+   ],
+   [
+    " était",
+    0.2263
+   ],
+   [
+    " est",
+    0.1211
+   ]
+  ]
+ },
+ {
+  "model": "3b-instruct",
+  "repo": "unsloth/Llama-3.2-3B-Instruct",
+  "sentence": "en-capital",
+  "fails": [],
+  "checks": {
+   "attn_row_sum_max_err": 0.002685546875,
+   "qk_recompute_max_err": 0.010519266128540039,
+   "norm_recompute_max_err": 0.010121677070856094,
+   "ctx_recompute_max_err": 0.0032233363017439842,
+   "silu_recompute_max_err": 0.005829323548823595,
+   "greedy_matches_top1": true,
+   "dims_match_config": true,
+   "row_sum_tol": 0.00420625
+  },
+  "gzip_bytes": 141134,
+  "top3": [
+   [
+    " Paris",
+    0.699
+   ],
+   [
+    " located",
+    0.0611
+   ],
+   [
+    "...",
+    0.0327
+   ]
+  ]
+ },
+ {
+  "model": "3b-instruct",
+  "repo": "unsloth/Llama-3.2-3B-Instruct",
+  "sentence": "fr-souris",
+  "fails": [],
+  "checks": {
+   "attn_row_sum_max_err": 0.0029296875,
+   "qk_recompute_max_err": 0.006583750247955322,
+   "norm_recompute_max_err": 0.009606266394257545,
+   "ctx_recompute_max_err": 0.003369305282831192,
+   "silu_recompute_max_err": 0.006471121218055487,
+   "greedy_matches_top1": true,
+   "dims_match_config": true,
+   "row_sum_tol": 0.0044062500000000004
+  },
+  "gzip_bytes": 233301,
+  "top3": [
+   [
+    " s",
+    0.3501
+   ],
+   [
+    " a",
+    0.2726
+   ],
+   [
+    " se",
+    0.0474
+   ]
+  ]
+ },
+ {
+  "model": "3b-instruct",
+  "repo": "unsloth/Llama-3.2-3B-Instruct",
+  "sentence": "en-orbit",
+  "fails": [],
+  "checks": {
+   "attn_row_sum_max_err": 0.0028839111328125,
+   "qk_recompute_max_err": 0.009748399257659912,
+   "norm_recompute_max_err": 0.010137365199625492,
+   "ctx_recompute_max_err": 0.0030599036253988743,
+   "silu_recompute_max_err": 0.005814487114548683,
+   "greedy_matches_top1": true,
+   "dims_match_config": true,
+   "row_sum_tol": 0.00445625
+  },
+  "gzip_bytes": 270020,
+  "top3": [
+   [
+    " a",
+    0.464
+   ],
+   [
+    " the",
+    0.0489
+   ],
+   [
+    " an",
+    0.0358
+   ]
+  ]
+ },
+ {
+  "model": "3b-base",
+  "repo": "unsloth/Llama-3.2-3B",
+  "sentence": "en-satellite",
+  "fails": [],
+  "checks": {
+   "attn_row_sum_max_err": 0.00286865234375,
+   "qk_recompute_max_err": 0.009424567222595215,
+   "norm_recompute_max_err": 0.010093876160681248,
+   "ctx_recompute_max_err": 0.0030128767248243093,
+   "silu_recompute_max_err": 0.005721953231841326,
+   "greedy_matches_top1": true,
+   "dims_match_config": true,
+   "row_sum_tol": 0.00430625
+  },
+  "gzip_bytes": 186121,
+  "top3": [
+   [
+    " was",
+    0.4081
+   ],
+   [
+    " had",
+    0.0626
+   ],
+   [
+    " is",
+    0.0335
+   ]
+  ]
+ },
+ {
+  "model": "3b-base",
+  "repo": "unsloth/Llama-3.2-3B",
+  "sentence": "fr-satellite",
+  "fails": [],
+  "checks": {
+   "attn_row_sum_max_err": 0.0028533935546875,
+   "qk_recompute_max_err": 0.009196281433105469,
+   "norm_recompute_max_err": 0.0102089773863554,
+   "ctx_recompute_max_err": 0.0032766894437372684,
+   "silu_recompute_max_err": 0.0063445549458265305,
+   "greedy_matches_top1": true,
+   "dims_match_config": true,
+   "row_sum_tol": 0.00450625
+  },
+  "gzip_bytes": 297913,
+  "top3": [
+   [
+    " a",
+    0.2939
+   ],
+   [
+    " s",
+    0.202
+   ],
+   [
+    " était",
+    0.1783
+   ]
+  ]
+ },
+ {
+  "model": "3b-base",
+  "repo": "unsloth/Llama-3.2-3B",
+  "sentence": "en-capital",
+  "fails": [],
+  "checks": {
+   "attn_row_sum_max_err": 0.00262451171875,
+   "qk_recompute_max_err": 0.011017978191375732,
+   "norm_recompute_max_err": 0.009649673476815224,
+   "ctx_recompute_max_err": 0.0037416121922433376,
+   "silu_recompute_max_err": 0.006613755598664284,
+   "greedy_matches_top1": true,
+   "dims_match_config": true,
+   "row_sum_tol": 0.00420625
+  },
+  "gzip_bytes": 141573,
+  "top3": [
+   [
+    " Paris",
+    0.2462
+   ],
+   [
+    " the",
+    0.1318
+   ],
+   [
+    " a",
+    0.1026
+   ]
+  ]
+ },
+ {
+  "model": "3b-base",
+  "repo": "unsloth/Llama-3.2-3B",
+  "sentence": "fr-souris",
+  "fails": [],
+  "checks": {
+   "attn_row_sum_max_err": 0.00286865234375,
+   "qk_recompute_max_err": 0.009515047073364258,
+   "norm_recompute_max_err": 0.010724511928856373,
+   "ctx_recompute_max_err": 0.0031114101875573397,
+   "silu_recompute_max_err": 0.006002198904752731,
+   "greedy_matches_top1": true,
+   "dims_match_config": true,
+   "row_sum_tol": 0.0044062500000000004
+  },
+  "gzip_bytes": 233534,
+  "top3": [
+   [
+    " s",
+    0.1766
+   ],
+   [
+    " a",
+    0.1464
+   ],
+   [
+    " est",
+    0.0539
+   ]
+  ]
+ },
+ {
+  "model": "3b-base",
+  "repo": "unsloth/Llama-3.2-3B",
+  "sentence": "en-orbit",
+  "fails": [],
+  "checks": {
+   "attn_row_sum_max_err": 0.0029296875,
+   "qk_recompute_max_err": 0.008722484111785889,
+   "norm_recompute_max_err": 0.010114304721355438,
+   "ctx_recompute_max_err": 0.003588977036997676,
+   "silu_recompute_max_err": 0.006029184442013502,
+   "greedy_matches_top1": true,
+   "dims_match_config": true,
+   "row_sum_tol": 0.00445625
+  },
+  "gzip_bytes": 269649,
+  "top3": [
+   [
+    " a",
+    0.2609
+   ],
+   [
+    " the",
+    0.066
+   ],
+   [
+    " an",
+    0.0426
+   ]
+  ]
+ },
+ {
+  "model": "1b-instruct",
+  "repo": "unsloth/Llama-3.2-1B-Instruct",
+  "sentence": "en-satellite",
+  "fails": [],
+  "checks": {
+   "attn_row_sum_max_err": 0.0029296875,
+   "qk_recompute_max_err": 0.009666979312896729,
+   "norm_recompute_max_err": 0.009540383704006672,
+   "ctx_recompute_max_err": 0.0033427244052290916,
+   "silu_recompute_max_err": 0.0058466908521950245,
+   "greedy_matches_top1": true,
+   "dims_match_config": true,
+   "row_sum_tol": 0.00430625
+  },
+  "gzip_bytes": 126628,
+  "top3": [
+   [
+    " was",
+    0.5325
+   ],
+   [
+    " had",
+    0.0721
+   ],
+   [
+    " is",
+    0.0495
+   ]
+  ]
+ },
+ {
+  "model": "1b-instruct",
+  "repo": "unsloth/Llama-3.2-1B-Instruct",
+  "sentence": "fr-satellite",
+  "fails": [],
+  "checks": {
+   "attn_row_sum_max_err": 0.0029296875,
+   "qk_recompute_max_err": 0.009677231311798096,
+   "norm_recompute_max_err": 0.009940280579030514,
+   "ctx_recompute_max_err": 0.003122006542980671,
+   "silu_recompute_max_err": 0.005767121911048889,
+   "greedy_matches_top1": true,
+   "dims_match_config": true,
+   "row_sum_tol": 0.00450625
+  },
+  "gzip_bytes": 204830,
+  "top3": [
+   [
+    " a",
+    0.3145
+   ],
+   [
+    " était",
+    0.2161
+   ],
+   [
+    " n",
+    0.1157
+   ]
+  ]
+ },
+ {
+  "model": "1b-instruct",
+  "repo": "unsloth/Llama-3.2-1B-Instruct",
+  "sentence": "en-capital",
+  "fails": [],
+  "checks": {
+   "attn_row_sum_max_err": 0.0029296875,
+   "qk_recompute_max_err": 0.010245323181152344,
+   "norm_recompute_max_err": 0.009610412642359734,
+   "ctx_recompute_max_err": 0.0033417847007513046,
+   "silu_recompute_max_err": 0.006289330311119556,
+   "greedy_matches_top1": true,
+   "dims_match_config": true,
+   "row_sum_tol": 0.00420625
+  },
+  "gzip_bytes": 96074,
+  "top3": [
+   [
+    " Paris",
+    0.6881
+   ],
+   [
+    " a",
+    0.0498
+   ],
+   [
+    " not",
+    0.0322
+   ]
+  ]
+ },
+ {
+  "model": "1b-instruct",
+  "repo": "unsloth/Llama-3.2-1B-Instruct",
+  "sentence": "fr-souris",
+  "fails": [],
+  "checks": {
+   "attn_row_sum_max_err": 0.0029108524322509766,
+   "qk_recompute_max_err": 0.008912622928619385,
+   "norm_recompute_max_err": 0.009935030713677406,
+   "ctx_recompute_max_err": 0.0030868430621922016,
+   "silu_recompute_max_err": 0.0053708516061306,
+   "greedy_matches_top1": true,
+   "dims_match_config": true,
+   "row_sum_tol": 0.0044062500000000004
+  },
+  "gzip_bytes": 165635,
+  "top3": [
+   [
+    " a",
+    0.1036
+   ],
+   [
+    " la",
+    0.0859
+   ],
+   [
+    " s",
+    0.0758
+   ]
+  ]
+ },
+ {
+  "model": "1b-instruct",
+  "repo": "unsloth/Llama-3.2-1B-Instruct",
+  "sentence": "en-orbit",
+  "fails": [],
+  "checks": {
+   "attn_row_sum_max_err": 0.002685546875,
+   "qk_recompute_max_err": 0.01314014196395874,
+   "norm_recompute_max_err": 0.00968258548527956,
+   "ctx_recompute_max_err": 0.003262520534917712,
+   "silu_recompute_max_err": 0.006007670424878597,
+   "greedy_matches_top1": true,
+   "dims_match_config": true,
+   "row_sum_tol": 0.00445625
+  },
+  "gzip_bytes": 186233,
+  "top3": [
+   [
+    " a",
+    0.4946
+   ],
+   [
+    " the",
+    0.0669
+   ],
+   [
+    " various",
+    0.0316
+   ]
+  ]
+ }
+]

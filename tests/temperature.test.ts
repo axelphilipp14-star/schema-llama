@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { traceTemperature } from '../src/data/math'
 
-const tr = JSON.parse(readFileSync('public/traces/dev-1b-satellite.json', 'utf8'))
+const tr = JSON.parse(readFileSync('public/traces/3b-instruct-en-satellite.json', 'utf8'))
 const top50 = tr.output.top50_logits, top10 = tr.output.top10
 const H = (ps: number[]) => -ps.filter((p) => p > 0).reduce((a, p) => a + p * Math.log2(p), 0)
 

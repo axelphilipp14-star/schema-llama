@@ -25,7 +25,7 @@ from trace_core import check_trace, save_trace, trace_sentence  # noqa: E402
 ap = argparse.ArgumentParser()
 ap.add_argument("--model", default="unsloth/Llama-3.2-1B-Instruct")
 ap.add_argument("--prompt", default="The satellite lost its antenna because it")
-ap.add_argument("--id", default="dev-1b-satellite")
+ap.add_argument("--id", default="dev-1b-local")
 ap.add_argument("--dtype", default="bfloat16", choices=["float32", "bfloat16"])
 ap.add_argument("--out", default=os.path.join(os.path.dirname(__file__), "..", "public", "traces"))
 a = ap.parse_args()
