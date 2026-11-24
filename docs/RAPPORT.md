@@ -20,8 +20,8 @@ Tests : **131 unitaires + 4 e2e**, verts ; la publication sur GitHub Pages ne se
 ## Ce qui n'est pas fait (ou pas vérifié)
 - Le 3B en direct n'a été mesuré qu'en local (même code que le 1B, vérifié sur le site publié).
 - **Première visite** : le modèle en direct (1,1 Go) met ≈ 5 minutes à se télécharger avant le premier résultat ; ensuite il est en cache (30 s). La page le dit pendant le chargement, mais n'annonce pas la durée.
-- Schéma Mermaid de l'enquête 12 : erreur de syntaxe dans la note (ligne 6) — à corriger par Axel dans le coffre.
-- Fiche fine-tuning : attend l'enquête #18.
+- ~~Schéma Mermaid de l'enquête 12~~ : réparé le 25/11. Ce n'était pas la note : `build-content.mjs` convertissait `[[…]]` jusque dans les blocs de code (diagnostic d'abord faux, corrigé en lisant le message d'erreur réel).
+- Fiche fine-tuning : pas d'enquête #18 (décision d'Axel, 25/11) ; la station s'appuie sur la fiche technique Meta, les traces base/Instruct et le Lexique.
 - Ligne de trace dans `Journal.md` du coffre : refusée par le contrôle des permissions, laissée à Axel.
 - Idées tirées de bbycroft non faites : poids et activations distingués visuellement, comparaison 1B/3B côte à côte, mini-carte 2D (`docs/analyses/bbycroft.md`).
 - E8 est mesuré en lecture automatique ; pas encore chronométré avec de vrais lecteurs.
