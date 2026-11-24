@@ -1,0 +1,423 @@
+{
+ "_genere": "scripts/build-content.mjs — ne pas modifier à la main",
+ "source": "AI x spatial",
+ "pieces": {
+  "tokens": {
+   "titre": "Tokens",
+   "phase": "respond",
+   "enquetes": [
+    {
+     "numero": "12",
+     "titre": "Tokenization, and why French costs more",
+     "artifact": "https://claude.ai/artifact/4VTBUpFQd3pCY8gkkkVrRB",
+     "obsidian": "obsidian://open?vault=AI%20x%20spatial&file=Enqu%C3%AAtes%2FEnqu%C3%AAte%2012%20%E2%80%94%20La%20tokenisation%2C%20et%20pourquoi%20le%20fran%C3%A7ais%20co%C3%BBte%20plus%20cher"
+    }
+   ],
+   "mots": [
+    {
+     "terme": "Tokenizer",
+     "def": "The tool that splits text into tokens. Changing it changes the number of tokens for the same text (+30% since Claude 4.7)."
+    },
+    {
+     "terme": "Vocabulary",
+     "def": "The list of all the tokens the model knows (128,256 in Llama 3)."
+    },
+    {
+     "terme": "BPE (Byte Pair Encoding)",
+     "def": "Building a vocabulary by merging, again and again, the most frequent pair of pieces in a corpus. Born as a compression algorithm (Gage, 1994), adapted to text by Sennrich in 2016."
+    },
+    {
+     "terme": "Fertility (tokenizer)",
+     "def": "Average number of tokens per word in a language. The higher it is, the more the language costs and the lower the accuracy."
+    },
+    {
+     "terme": "Token",
+     "def": "A piece of text of about 4 characters in English. It is the unit of reading, writing and billing."
+    }
+   ],
+   "question": "The model never sees your text. It sees a sequence of numbers taken from a fixed list of 100,000 to 200,000 pieces. Who built that list, how — and why does the same text cost up to twice as much in French as in English?",
+   "clair": "The text is cut into pieces. In English, 1 token is about 4 characters, and 100 tokens about 75 words (OpenAI). Other languages don't have the same ratio: French generally uses more for the same meaning (medium confidence).",
+   "piege": "**Counting letters.** The model never receives the letters of “strawberry”. It receives two or three numbers and has to remember what is inside instead of reading it.\n**Arithmetic.** A number is split by frequency, not into units and tens. The columns of an addition are not aligned in what the model sees.",
+   "aTraduire": 0
+  },
+  "embeddings": {
+   "titre": "Embeddings",
+   "phase": "respond",
+   "enquetes": [
+    {
+     "numero": "11",
+     "titre": "Embeddings",
+     "artifact": "https://claude.ai/artifact/N2oJ4Duj1Bw1RC4cc1Y22M",
+     "obsidian": "obsidian://open?vault=AI%20x%20spatial&file=Enqu%C3%AAtes%2FEnqu%C3%AAte%2011%20%E2%80%94%20Les%20embeddings"
+    }
+   ],
+   "mots": [
+    {
+     "terme": "Vector",
+     "def": "A list of numbers that represents the meaning of a token."
+    },
+    {
+     "terme": "Embedding",
+     "def": "The starting vector of a token, the same whatever the context (it encodes the word and its position)."
+    },
+    {
+     "terme": "Dimension",
+     "def": "Number of slots in a vector. A Llama 3 embedding has 4,096."
+    },
+    {
+     "terme": "Cosine similarity",
+     "def": "A measure of how close two vectors are, based on their direction. 1 = same direction, 0 = unrelated."
+    },
+    {
+     "terme": "Embedding table",
+     "def": "One row per token of the vocabulary. Reading a word = fetching its row. In Llama 3: 128,256 rows × 4,096 numbers ≈ 525 million parameters."
+    }
+   ],
+   "question": "**How does a word become a list of numbers that has a meaning?**",
+   "clair": "Each token starts with a list of random numbers. During training, these numbers are adjusted like any other weight, to better predict the surrounding words. Words used in the same contexts end up with close numbers. The meaning is written nowhere: it is inferred from the company the word keeps.",
+   "analogie": "Imagine a city where every word has an address. Nobody drew the map. The words moved in on their own, following one rule: you live near the words you hang out with in sentences. Result: “cat” and “dog” live on the same street, “Paris” and “Rome” in the same neighbourhood, “car” far from both.",
+   "piege": "The dimensions have no labels. There is no “gender” slot and no “size” slot. Notions are directions spread across all the slots. My tables with “royalty” and “male” are a teaching simplification.",
+   "aTraduire": 0
+  },
+  "attention": {
+   "titre": "Attention",
+   "phase": "respond",
+   "enquetes": [
+    {
+     "numero": "13",
+     "titre": "Attention in detail",
+     "artifact": null,
+     "obsidian": "obsidian://open?vault=AI%20x%20spatial&file=Enqu%C3%AAtes%2FEnqu%C3%AAte%2013%20%E2%80%94%20L'attention%20en%20d%C3%A9tail"
+    },
+    {
+     "numero": "13 bis",
+     "titre": "Attention, step by step",
+     "artifact": null,
+     "obsidian": "obsidian://open?vault=AI%20x%20spatial&file=Enqu%C3%AAtes%2FEnqu%C3%AAte%2013%20bis%20%E2%80%94%20L'attention%2C%20calcul%20par%20calcul"
+    }
+   ],
+   "mots": [
+    {
+     "terme": "Query",
+     "def": "What a token is “looking for” in the other tokens."
+    },
+    {
+     "terme": "Key",
+     "def": "What a token “displays” to be found by the queries of the others."
+    },
+    {
+     "terme": "Value",
+     "def": "What a token passes on once found, added to the vector of the token looking at it."
+    },
+    {
+     "terme": "Dot product",
+     "def": "Multiplying two vectors element by element, then adding up. A single number comes out: large if the two vectors point in the same direction. It is the operation that gives the score between one token's query and another token's key."
+    },
+    {
+     "terme": "Softmax",
+     "def": "Turns scores into percentages that add up to 100%. Used in attention and to draw the next token."
+    },
+    {
+     "terme": "Attention head",
+     "def": "One query/key/value set that looks for one kind of link. Dozens run in parallel in each layer (96 in GPT-3)."
+    }
+   ],
+   "question": "In a sentence, how does a token decide which other tokens to look at, and what exactly does it get from them?",
+   "clair": "It is the step where a frozen vector becomes a contextual embedding. It is also **the only place in the model where tokens exchange information**. Everywhere else, each token is processed on its own.",
+   "analogie": "A trade fair. Each participant wears **a badge** saying what they offer. They have in mind **what they are looking for**, which is not necessarily what they display. When someone talks to them, they share **what they know**, which is richer than their badge.\nEach participant has one hour. They read all the badges, judge how well each one matches what they are looking for, and **split their hour**: 40 minutes with one, 15 with another, 5 with a third. They leave with a mix of everything they heard, weighted by the time spent.",
+   "piege": "The text is 128 times longer, but the computation is **16,368 times** larger. Doubling the context quadruples this computation. It is a quadratic complexity: Vaswani et al. write O(n²·d) per layer.\nThis is the bill behind the price of long contexts (#4) and one of the leads for context rot: 100% of attention spread over 128,000 tokens leaves little for each.",
+   "aTraduire": 0
+  },
+  "residual": {
+   "titre": "The residual stream",
+   "phase": "respond",
+   "enquetes": [
+    {
+     "numero": "14",
+     "titre": "MLP, normalization and residual connections",
+     "artifact": null,
+     "obsidian": "obsidian://open?vault=AI%20x%20spatial&file=Enqu%C3%AAtes%2FEnqu%C3%AAte%2014%20%E2%80%94%20MLP%2C%20normalisation%20et%20connexions%20r%C3%A9siduelles"
+    }
+   ],
+   "mots": [
+    {
+     "terme": "Residual connection",
+     "def": "The output of a layer is added to its input instead of replacing it: output = input + correction."
+    },
+    {
+     "terme": "Residual stream",
+     "def": "The vector of a token that flows through every block. Each layer reads a normalized copy, then adds its contribution with a “+”."
+    }
+   ],
+   "question": "In #13, attention produces a mixture of values for each token. Question: what do we do with it?",
+   "clair": "• By replacing, the token loses what it was.\n• By adding, the layer only has to learn a small correction.\n• If the layer is useless for this token, it outputs (0; 0). The token goes through untouched.\n**And the slope?** Reminder from #8: the effect of a distant setting on the error = the product of the local effects along the path. That is the chain rule.",
+   "analogie": "A shared document goes from hand to hand, between 32 pairs of reviewers.\n• The 1st of each pair reads the other paragraphs. Then adds a note to their own.\n• The 2nd works on a single paragraph, without looking at the others. They also add a note.\n• **Rule 1: nobody deletes.** Everyone writes in suggestion mode.\n• **Rule 2: before reading, everyone adjusts the zoom on their screen.** The text may be in size 3, or size 300. The zoom makes it readable. It doesn't change the document.",
+   "aTraduire": 0
+  },
+  "rmsnorm": {
+   "titre": "RMSNorm",
+   "phase": "respond",
+   "enquetes": [
+    {
+     "numero": "14",
+     "titre": "MLP, normalization and residual connections",
+     "artifact": null,
+     "obsidian": "obsidian://open?vault=AI%20x%20spatial&file=Enqu%C3%AAtes%2FEnqu%C3%AAte%2014%20%E2%80%94%20MLP%2C%20normalisation%20et%20connexions%20r%C3%A9siduelles"
+    }
+   ],
+   "mots": [
+    {
+     "terme": "RMSNorm",
+     "def": "Bring a vector back to a typical size of 1 without changing its shape. Then each slot is multiplied by a learned gain."
+    }
+   ],
+   "question": "Each layer adds something to the vector. After 32 layers, its size may have grown a lot. And in #13 bis: numbers that are too large give huge scores. The softmax saturates.",
+   "clair": "• The size disappears. The shape remains.\n• After RMSNorm, the typical size of a slot is 1.\n**The gains.** Last step: each slot is multiplied by a gain, learned during training.\n• Gains (1; 1; 2; 0.5) → (0.2; 1.4; 0.4; 0.7).\n• The model puts relief back where it wants it.\n• In Llama 3 8B: 4,096 gains per RMSNorm.",
+   "aTraduire": 0
+  },
+  "mlp": {
+   "titre": "The MLP",
+   "phase": "respond",
+   "enquetes": [
+    {
+     "numero": "14",
+     "titre": "MLP, normalization and residual connections",
+     "artifact": null,
+     "obsidian": "obsidian://open?vault=AI%20x%20spatial&file=Enqu%C3%AAtes%2FEnqu%C3%AAte%2014%20%E2%80%94%20MLP%2C%20normalisation%20et%20connexions%20r%C3%A9siduelles"
+    },
+    {
+     "numero": "10",
+     "titre": "The neuron, layers, and the activation function",
+     "artifact": "https://claude.ai/artifact/61hGQAD9AkuMKxiCpuAxZN",
+     "obsidian": "obsidian://open?vault=AI%20x%20spatial&file=Enqu%C3%AAtes%2FEnqu%C3%AAte%2010%20%E2%80%94%20Le%20neurone%2C%20les%20couches%2C%20la%20fonction%20d'activation"
+    }
+   ],
+   "mots": [
+    {
+     "terme": "Expansion factor",
+     "def": "How much a block's MLP widens the vector before narrowing it again."
+    },
+    {
+     "terme": "Artificial neuron",
+     "def": "A mini-computation: multiply each input by a weight, add up, add a bias, pass the result through the activation."
+    },
+    {
+     "terme": "Activation function",
+     "def": "A fixed computation after each neuron. It must bend the line, otherwise 100 layers = 1."
+    },
+    {
+     "terme": "GELU - SwiGLU",
+     "def": "Successors of ReLU in LLMs. SwiGLU (Llama, PaLM) uses one projection as the “gate” of the other. Found by trial and error, without an explanation."
+    }
+   ],
+   "question": "A neuron multiplies each input by a weight, adds up, then passes the result through an activation. ReLU: a negative number becomes 0. An MLP = two layers of neurons.",
+   "clair": "• Each neuron in the middle is a detector. It fires if the token looks like its pattern. Like a key.\n• A neuron that fires writes its vector. Like a value.\n• Neurons that are off (0) write nothing.\n• No other token is involved. That is the big difference with attention.\n**The real sizes, Llama 3 8B.**\n• 4,096 slots → 14,336 neurons → 4,096 slots. Expansion factor: 3.5.\n• The activation is not ReLU but SwiGLU (#10). It is a smoother variant, with a 3rd matrix that acts as a “gate”.",
+   "piege": "This holds whatever the number of layers and neurons: multiply then add, repeated 100 times, is still “multiply then add”. Without activation, a 126-layer network like Llama 3 405B would mathematically be a single layer.",
+   "aTraduire": 0
+  },
+  "output": {
+   "titre": "Output and temperature",
+   "phase": "respond",
+   "enquetes": [
+    {
+     "numero": "1",
+     "titre": "What happens when a model answers you",
+     "artifact": "https://claude.ai/artifact/GN7pxj8amKaXzPs1cFx5Yq",
+     "obsidian": "obsidian://open?vault=AI%20x%20spatial&file=Enqu%C3%AAtes%2FEnqu%C3%AAte%2001%20%E2%80%94%20Ce%20qui%20se%20passe%20quand%20un%20mod%C3%A8le%20te%20r%C3%A9pond"
+    }
+   ],
+   "mots": [
+    {
+     "terme": "Softmax",
+     "def": "Turns scores into percentages that add up to 100%. Used in attention and to draw the next token."
+    },
+    {
+     "terme": "Temperature",
+     "def": "The setting for randomness when drawing the next token."
+    },
+    {
+     "terme": "Token",
+     "def": "A piece of text of about 4 characters in English. It is the unit of reading, writing and billing."
+    },
+    {
+     "terme": "Context window",
+     "def": "Everything the model sees for an answer, the answer included."
+    }
+   ],
+   "question": "When a model answers you, it doesn't search for anything and doesn't assemble anything. It predicts the next piece of a word, one at a time, from everything in its context window, then starts again. Its knowledge comes from its training, not from the internet at the moment it answers. It only goes on the internet if a search tool has been plugged in.",
+   "clair": "The last layer gives a score to each token of the vocabulary, 128,256 in Llama 3 (Hugging Face). One is drawn, added to the context, and the whole loop starts again.",
+   "piege": "During the conversation, the parameters don't move: the model learns nothing from you live. What personalizes it is only what goes into its context window.",
+   "aTraduire": 0
+  },
+  "data": {
+   "titre": "The data",
+   "phase": "make",
+   "enquetes": [
+    {
+     "numero": "15",
+     "titre": "Where the data comes from, and how it is cleaned",
+     "artifact": null,
+     "obsidian": "obsidian://open?vault=AI%20x%20spatial&file=Enqu%C3%AAtes%2FEnqu%C3%AAte%2015%20%E2%80%94%20D'o%C3%B9%20viennent%20les%20donn%C3%A9es%2C%20et%20comment%20on%20les%20nettoie"
+    }
+   ],
+   "mots": [
+    {
+     "terme": "Common Crawl",
+     "def": "A non-profit that scrapes the web every month and gives everything away for free. It is the base of almost every pre-training dataset."
+    },
+    {
+     "terme": "Heuristic filter",
+     "def": "A simple, hand-written rule that throws away a web page. Heuristic = a practical rule, not a perfect one."
+    },
+    {
+     "terme": "Deduplication",
+     "def": "Removing copies and near-copies of the same text, to keep only one."
+    },
+    {
+     "terme": "Quality classifier",
+     "def": "A small model that gives each page a grade, to sort a dataset too big for a human to read. A classifier = a model that puts things into boxes."
+    }
+   ],
+   "question": "Where do the trillions of tokens a model reads come from, and how do you go from the raw web to text worth learning from?",
+   "clair": "• The base is the scraped web: Common Crawl, ≈ 2 billion pages a month.\n• The raw web is mostly junk. It goes through a 4-stage funnel: extract the text, discard with rules, remove copies, sort with a model.\n• At FineWeb (Hugging Face, 2024): 96 Common Crawl snapshots → 15 trillion tokens. Then 1.3 trillion for the “educational” version.\n• Code, maths, books are added, and more and more text written by other models.\n• Each stage throws away good with bad. And sorting doesn't protect against everything: 250 poisoned documents are enough to plant a backdoor.",
+   "analogie": "You have to fill a student's library. They will read everything you give them, word for word, and nothing else. Your only source: the dumpster where the whole city throws its papers.",
+   "piege": "• Anthropic, the UK AISI and the Alan Turing Institute (Oct. 2025) trained 72 models, from 600M to 13B parameters.\n• They slipped poisoned documents into the data: normal text, then a trigger word, then gibberish. The model learns “trigger word → gibberish”. It is a **backdoor**: a hidden behaviour that only switches on with the right word.\n• 100 documents: failure. 250: success, **whatever the size of the model**.",
+   "aTraduire": 0
+  },
+  "tokenizer": {
+   "titre": "Building the tokenizer",
+   "phase": "make",
+   "enquetes": [
+    {
+     "numero": "12",
+     "titre": "Tokenization, and why French costs more",
+     "artifact": "https://claude.ai/artifact/4VTBUpFQd3pCY8gkkkVrRB",
+     "obsidian": "obsidian://open?vault=AI%20x%20spatial&file=Enqu%C3%AAtes%2FEnqu%C3%AAte%2012%20%E2%80%94%20La%20tokenisation%2C%20et%20pourquoi%20le%20fran%C3%A7ais%20co%C3%BBte%20plus%20cher"
+    }
+   ],
+   "mots": [
+    {
+     "terme": "Tokenizer",
+     "def": "The tool that splits text into tokens. Changing it changes the number of tokens for the same text (+30% since Claude 4.7)."
+    },
+    {
+     "terme": "Vocabulary",
+     "def": "The list of all the tokens the model knows (128,256 in Llama 3)."
+    },
+    {
+     "terme": "BPE (Byte Pair Encoding)",
+     "def": "Building a vocabulary by merging, again and again, the most frequent pair of pieces in a corpus. Born as a compression algorithm (Gage, 1994), adapted to text by Sennrich in 2016."
+    },
+    {
+     "terme": "Fertility (tokenizer)",
+     "def": "Average number of tokens per word in a language. The higher it is, the more the language costs and the lower the accuracy."
+    }
+   ],
+   "question": "The model never sees your text. It sees a sequence of numbers taken from a fixed list of 100,000 to 200,000 pieces. Who built that list, how — and why does the same text cost up to twice as much in French as in English?",
+   "clair": "Nobody wrote it by hand, and nothing in it is random. The list is **learned by a compression algorithm**, BPE, on a corpus chosen by the lab — and this learning happens **before the model is trained, separately, on other data**. BPE starts from raw characters and repeats the same move tens of thousands of times: find the most frequent pair of pieces, merge it, start again. What is frequent in this corpus ends up as a single token; what is rare stays in crumbs.",
+   "analogie": "A printer composed pages with lead blocks stored in a cabinet of compartments, the **case**. One block per letter — but not only. A good workshop also made ready-made blocks for sequences that come up all the time: “tion”, “ment”, “que”.\nNobody picked these blocks at random. The workshop **counted** what came up in its texts and cut blocks for the most frequent sequences. A Paris workshop and a London workshop ended up with different cases. And the day the Paris workshop received a German text, it had no suitable block: everything was composed letter by letter.",
+   "piege": "Replace this corpus with that of a real tokenizer: hundreds of billions of words, overwhelmingly English. The 100,000 merges all go to `the`, ` of`, `ing`, `tion`. When “voudrais” comes up, there is no room left: in Sennrich's work, frequency rank 500,000 appears only **twice** in the corpus.",
+   "aTraduire": 0
+  },
+  "pretraining": {
+   "titre": "Pre-training",
+   "phase": "make",
+   "enquetes": [
+    {
+     "numero": "16",
+     "titre": "Compute, chips and the cost of pre-training",
+     "artifact": null,
+     "obsidian": "obsidian://open?vault=AI%20x%20spatial&file=Enqu%C3%AAtes%2FEnqu%C3%AAte%2016%20%E2%80%94%20Le%20calcul%2C%20les%20puces%20et%20le%20co%C3%BBt%20du%20pr%C3%A9-entra%C3%AEnement"
+    },
+    {
+     "numero": "7",
+     "titre": "What does it mean for a machine to learn",
+     "artifact": "https://claude.ai/artifact/WETQ1eMeRC7wQovKeQY36C",
+     "obsidian": "obsidian://open?vault=AI%20x%20spatial&file=Enqu%C3%AAtes%2FEnqu%C3%AAte%2007%20%E2%80%94%20Qu'est-ce%20qu'apprendre%20pour%20une%20machine"
+    },
+    {
+     "numero": "8",
+     "titre": "Backpropagation step by step",
+     "artifact": "https://claude.ai/artifact/S11bg8Xcztok61zLxrQovc",
+     "obsidian": "obsidian://open?vault=AI%20x%20spatial&file=Enqu%C3%AAtes%2FEnqu%C3%AAte%2008%20%E2%80%94%20La%20r%C3%A9tropropagation%20pas%20%C3%A0%20pas"
+    },
+    {
+     "numero": "17",
+     "titre": "Scaling laws: bigger, better, how far?",
+     "artifact": null,
+     "obsidian": "obsidian://open?vault=AI%20x%20spatial&file=Enqu%C3%AAtes%2FEnqu%C3%AAte%2017%20%E2%80%94%20Les%20lois%20d'%C3%A9chelle%2C%20plus%20gros%2C%20meilleur%2C%20jusqu'o%C3%B9"
+    }
+   ],
+   "mots": [
+    {
+     "terme": "FLOP",
+     "def": "A single computation on floating-point numbers: a multiplication or an addition. The total work of a training run is counted in FLOP. “FLOP/s” = operations per second: the speed of a chip."
+    },
+    {
+     "terme": "GPU-hour",
+     "def": "One chip (GPU) working for one hour. It is the unit you pay for, whether the chip is computing or waiting."
+    },
+    {
+     "terme": "Utilization rate (MFU)",
+     "def": "The share of its peak speed that a chip actually reaches on the model's useful computation. MFU = Model FLOPs Utilization. 100% = the maximum."
+    },
+    {
+     "terme": "Data parallelism",
+     "def": "Each chip gets part of the batch and computes its gradient. Then all the chips average their gradients before moving the weights."
+    }
+   ],
+   "question": "How much compute does it take to pre-train a large model, how long does it take on how many chips, and at what price?",
+   "clair": "• Compute is counted in advance: ≈ 6 operations per parameter and per token read. Llama 3 405B: 6 × 405B × 15.6T ≈ 3.8 × 10²⁵ FLOP.\n• An H100 does at most ≈ 989 trillion operations per second. On its own, it would take ≈ 1,200 years.\n• Meta used up to 16,384 H100s. They ran at **38-43%** of their peak (measured by Meta), and training stopped several times a day.\n• Total: 30.84 million GPU-hours. At Nov. 2026 rental prices, ≈ 90 to 136 million dollars. Inferred.\n• The cost of the final run of frontier models has grown by ≈ 2.4× every year since 2016 (Epoch AI).",
+   "analogie": "Building a model is like building a building with bricklayers.\n• There is a total number of bricks to lay. It is set in advance by the size of the building.\n• Each bricklayer lays a maximum number of bricks per second.\n• Bricklayers are paid by the hour, whether they lay bricks or wait.\n• On a real site, bricklayers often wait: for the brick truck, a colleague, a broken machine.",
+   "piege": "• **Adding chips makes each chip less efficient.** 43% → 41% when you double. Doubling the chips doesn't double the speed.\n• **The power grid takes the hit too.** When 16,000 chips stop together (to average gradients or after a failure), the data center's consumption swings by **tens of megawatts** at once (Meta). 1 megawatt ≈ the consumption of a few hundred households.",
+   "aTraduire": 0
+  },
+  "scaling": {
+   "titre": "Scaling laws",
+   "phase": "make",
+   "enquetes": [
+    {
+     "numero": "17",
+     "titre": "Scaling laws: bigger, better, how far?",
+     "artifact": null,
+     "obsidian": "obsidian://open?vault=AI%20x%20spatial&file=Enqu%C3%AAtes%2FEnqu%C3%AAte%2017%20%E2%80%94%20Les%20lois%20d'%C3%A9chelle%2C%20plus%20gros%2C%20meilleur%2C%20jusqu'o%C3%B9"
+    }
+   ],
+   "mots": [
+    {
+     "terme": "Scaling law",
+     "def": "A measured formula that says how much the loss drops when you increase compute, size (N) or data (D). It is a **power law**: each ×10 divides the gap to the floor by a fixed number."
+    },
+    {
+     "terme": "Irreducible loss",
+     "def": "The floor of the loss: what remains even with an infinite model and infinite data, because text is partly unpredictable (“for lunch I had …”)."
+    },
+    {
+     "terme": "Chinchilla ratio",
+     "def": "~20 tokens per parameter: the best model for a given training budget (Chinchilla: 70B, 1.4T tokens). Exceeded on purpose to lower the cost of use."
+    }
+   ],
+   "clair": "You empty a pool with a magic bucket. Each turn, you remove **half** of the water left. 1st turn: a huge amount of water. 5th turn: a trickle. You always remove the same **proportion**, but a smaller and smaller amount.",
+   "analogie": "**You are studying for an exam.**\n• In the 1st hour, you make huge progress: you learn the basics.\n• In the 10th hour, you still progress, but much less.\n• Even after 1,000 hours, you won't get full marks everywhere: some questions are unpredictable.\n• If your time is limited, you have to choose: read the whole textbook quickly, or a few pages in depth. The best is in between.\n**An AI model is the same.**\n• The “hours of study” = the **compute** put into training (#16).\n• The “grade” = the **loss**: the number that says how wrong the model is when guessing the next word. The lower, the better. …",
+   "piege": "• **It is not a law of nature.** It is a measured curve, then extended. Kaplan (OpenAI, 2020) saw it hold over more than 7 orders of magnitude (×10,000,000). Nothing guarantees what comes next.\n• **Loss is not intelligence.** It measures “guessing the next word”, not “knowing how to code”. Meta had to build a 2nd step to go from loss to exam results.",
+   "aTraduire": 0
+  },
+  "finetuning": {
+   "titre": "Fine-tuning",
+   "phase": "make",
+   "enquetes": [],
+   "mots": [
+    {
+     "terme": "Fine-tuning",
+     "def": "Retraining an existing model on your own data to specialize it."
+    },
+    {
+     "terme": "RLHF",
+     "def": "Reinforcement learning from human feedback, which turns a predictor into an assistant."
+    }
+   ],
+   "enAttente": "Investigation #18 (fine-tuning and RLHF) has not been written yet. This card will fill itself in once it exists.",
+   "aTraduire": 0
+  }
+ }
+}

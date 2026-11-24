@@ -1,0 +1,4 @@
+{ "pieces": [ { "id": "test", "phase": "respond", "title": { "fr": "Test", "en": "Test" }, "enquetes": ["99"],
+  "question": { "e": "99", "h": "## La question", "para": 0 },
+  "analogie": { "e": "99", "h": "### L'analogie", "para": 0 },
+  "mots": { "e": "99", "h": "### Les 4 mots" } } ] }

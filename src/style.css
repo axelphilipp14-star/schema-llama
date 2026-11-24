@@ -124,3 +124,19 @@ html, body, #root { margin: 0; height: 100%; background: var(--bg); color: var(-
 .tl-seg.bs.k-norm1.done, .tl-seg.bs.k-mlp.done, .tl-seg.bs.k-add2.done { background: color-mix(in srgb, var(--mlp) 35%, var(--grid)); }
 .tl-seg.bs.k-norm1.done { background: color-mix(in srgb, var(--norm) 45%, var(--grid)); }
 .tl-seg.bs.cur .bs-name { color: var(--text); }
+
+/* M5 — fiche tirée des enquêtes */
+.fiche { margin-top: 14px; border: 1px solid var(--grid); border-radius: 8px; padding: 10px 12px; background: var(--bg); }
+.fiche summary { cursor: pointer; font-weight: 600; font-size: 13px; color: var(--make); }
+.fiche h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 12px 0 4px; font-weight: 600; }
+.fiche p { margin: 4px 0; font-size: 13px; }
+.fiche ul { margin: 4px 0; padding-left: 18px; font-size: 13px; }
+.fiche li { margin: 2px 0; }
+.fiche .fq { margin-top: 8px; padding-left: 10px; border-left: 2px solid var(--make); font-style: italic; color: var(--text); }
+.fiche dl { margin: 0; }
+.fiche dl div { margin: 4px 0; font-size: 12.5px; }
+.fiche dt { display: inline; font-weight: 600; }
+.fiche dt::after { content: ' — '; color: var(--muted); font-weight: 400; }
+.fiche dd { display: inline; margin: 0; color: var(--muted); }
+.fiche .enq div { font-size: 12.5px; margin: 3px 0; }
+.fiche a { color: var(--emb); }

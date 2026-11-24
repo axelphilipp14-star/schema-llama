@@ -52,3 +52,15 @@
 - **E3 vue bloc** (dpr 2) : 3 séries, minimum 56 / 60 / 60 i/s, médiane 141–143 → OK. Chutes ponctuelles à 60 i/s non liées à une étape (sonde : chaque étape seule tient 144 i/s) : fréquence d'affichage de la fenêtre de test, pas la scène.
 - Preuve : `docs/preuves/M2_*.png`, `docs/preuves/M2_mesure_fps.json`.
 - Suivant : M3 (exemple modifiable : ta phrase, la température, modèle en direct).
+
+## 2026-11-24 23:00 — M5 · le coffre alimente le schéma, FR/EN (M3 et M4 laissés pour plus tard, à la demande d'Axel)
+- **Extracteur** `scripts/build-content.mjs` (lecture seule du coffre) + repères `content/pieces.json` : 12 fiches (7 « répondre » : tokens, embeddings, attention, flux résiduel, RMSNorm, MLP, sortie ; 5 « fabriquer » : données, tokenizer, pré-entraînement, lois d'échelle, fine-tuning). Chaque fiche : question, en clair, image, piège, mots à retenir (définitions de `Lexique/`), liens vers les enquêtes (Obsidian + artifact s'il existe). Texte **recopié tel quel** ; seules retouches : syntaxe Obsidian retirée, étiquette « → La réponse. » retirée, majuscule initiale. « Mes notes » jamais lu.
+- Fine-tuning : l'enquête #18 n'existe pas encore → fiche « en attente », qui se remplira seule. Les 5 fiches « fabriquer » sont prêtes pour M4.
+- 3 itérations sur les repères (passages coupés au milieu d'un gras, mauvais paragraphe choisi, définitions absentes du Lexique → remplacées par des termes définis : « GELU - SwiGLU », « Ratio Chinchilla », « Fenêtre de contexte » ; aucune définition inventée).
+- **Anglais** : 124 phrases traduites (Claude Code, en session, cf. A_TRANCHER Q2), rangées par empreinte de la phrase FR dans `content/translations.json` (FR et EN côte à côte, relisibles). Structure vérifiée (mêmes lignes, même gras).
+- **Interface** : fiche dépliable dans le panneau, liée à l'étape du trajet et à l'étape du bloc. Capture FR + EN.
+- **E9** `tests/content.test.ts` (faux coffre de test, le vrai n'est jamais touché) : modifier une analogie → `npm run content` met la fiche FR à jour, la phrase anglaise correspondante repasse « à traduire » (pas d'anglais périmé), les autres traductions restent ; « Mes notes » n'est jamais publié ; `npm run content:check` détecte le contenu périmé ✅. **E7** : test i18n vert, 0 phrase à traduire ✅.
+- Tests : 13 unitaires + 2 e2e verts ; build OK.
+- Nouvelle question : A_TRANCHER Q5 (que voit un visiteur public quand il clique « lire l'enquête » ?).
+- Preuve : `docs/preuves/M5_fiche_fr.png`, `docs/preuves/M5_fiche_en.png`.
+- Suivant : selon Axel — M3 (exemple modifiable), M4 (fabriquer) ou M6 (en ligne).

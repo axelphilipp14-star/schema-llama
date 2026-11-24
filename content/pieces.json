@@ -1,0 +1,424 @@
+{
+  "_doc": "Carte pièce du schéma → passages des enquêtes du coffre. Chaque champ est un repère : e = numéro d'enquête, h = morceau du titre de section, start = début du paragraphe visé (sinon para = index, 'last' possible), take = nombre de paragraphes, max = longueur max (coupée à la fin d'une phrase). Le texte est recopié tel quel. Lu par scripts/build-content.mjs.",
+  "pieces": [
+    {
+      "id": "tokens",
+      "phase": "respond",
+      "title": {
+        "fr": "Les tokens",
+        "en": "Tokens"
+      },
+      "enquetes": [
+        "12"
+      ],
+      "question": {
+        "e": "12",
+        "h": "## La question",
+        "para": 0
+      },
+      "clair": {
+        "e": "01",
+        "h": "## Le mécanisme",
+        "start": "2. **Les tokens.**"
+      },
+      "piege": {
+        "e": "12",
+        "h": "Étape 5",
+        "para": 0,
+        "take": 2
+      },
+      "mots": {
+        "e": "12",
+        "h": "### Les 4 mots",
+        "extra": [
+          "Token"
+        ]
+      }
+    },
+    {
+      "id": "embeddings",
+      "phase": "respond",
+      "title": {
+        "fr": "Les embeddings",
+        "en": "Embeddings"
+      },
+      "enquetes": [
+        "11"
+      ],
+      "question": {
+        "e": "11",
+        "h": "### La question, avec la réponse",
+        "para": 0
+      },
+      "clair": {
+        "e": "11",
+        "h": "### La question, avec la réponse",
+        "para": 1
+      },
+      "analogie": {
+        "e": "11",
+        "h": "### L'analogie",
+        "para": 0
+      },
+      "piege": {
+        "e": "11",
+        "h": "### Le mécanisme, étape par étape",
+        "start": "Piège :"
+      },
+      "mots": {
+        "e": "11",
+        "h": "### Les 4 mots",
+        "extra": [
+          "Table d'embeddings"
+        ]
+      }
+    },
+    {
+      "id": "attention",
+      "phase": "respond",
+      "title": {
+        "fr": "L'attention",
+        "en": "Attention"
+      },
+      "enquetes": [
+        "13",
+        "13 bis"
+      ],
+      "question": {
+        "e": "13",
+        "h": "## La question",
+        "para": 0
+      },
+      "clair": {
+        "e": "13",
+        "h": "### Où on en est",
+        "para": "last"
+      },
+      "analogie": {
+        "e": "13",
+        "h": "### L'analogie",
+        "para": 0,
+        "take": 2
+      },
+      "piege": {
+        "e": "13",
+        "h": "Étape 7",
+        "start": "Le texte est 128 fois",
+        "take": 2
+      },
+      "mots": {
+        "e": "13",
+        "h": "### Les 4 mots",
+        "extra": [
+          "GQA (attention à requêtes groupées)",
+          "Masquage"
+        ]
+      }
+    },
+    {
+      "id": "residual",
+      "phase": "respond",
+      "title": {
+        "fr": "Le flux résiduel",
+        "en": "The residual stream"
+      },
+      "enquetes": [
+        "14"
+      ],
+      "question": {
+        "e": "14",
+        "h": "Bloc 1 — Ajouter",
+        "start": "**Rappel.**"
+      },
+      "clair": {
+        "e": "14",
+        "h": "Bloc 1 — Ajouter",
+        "start": "**Ce qu'on observe.**",
+        "take": 2
+      },
+      "mots": {
+        "e": "14",
+        "h": "### Les 4 mots",
+        "only": [
+          "Connexion résiduelle",
+          "Flux résiduel"
+        ]
+      },
+      "analogie": {
+        "e": "14",
+        "h": "### L'analogie",
+        "para": 0,
+        "take": 2
+      }
+    },
+    {
+      "id": "rmsnorm",
+      "phase": "respond",
+      "title": {
+        "fr": "RMSNorm",
+        "en": "RMSNorm"
+      },
+      "enquetes": [
+        "14"
+      ],
+      "question": {
+        "e": "14",
+        "h": "Bloc 2 — Remettre",
+        "start": "**Rappel.**"
+      },
+      "clair": {
+        "e": "14",
+        "h": "Bloc 2 — Remettre",
+        "start": "**Ce qu'on observe.**",
+        "take": 2
+      },
+      "mots": {
+        "e": "14",
+        "h": "### Les 4 mots",
+        "only": [
+          "RMSNorm"
+        ]
+      }
+    },
+    {
+      "id": "mlp",
+      "phase": "respond",
+      "title": {
+        "fr": "Le MLP",
+        "en": "The MLP"
+      },
+      "enquetes": [
+        "14",
+        "10"
+      ],
+      "question": {
+        "e": "14",
+        "h": "Bloc 3 — Le MLP",
+        "start": "**Rappel de"
+      },
+      "clair": {
+        "e": "14",
+        "h": "Bloc 3 — Le MLP",
+        "start": "**Ce qu'on observe.**",
+        "take": 2
+      },
+      "piege": {
+        "e": "10",
+        "h": "3. Le piège",
+        "para": "last"
+      },
+      "mots": {
+        "e": "14",
+        "h": "### Les 4 mots",
+        "only": [
+          "Facteur d'expansion"
+        ],
+        "extra": [
+          "Neurone artificiel",
+          "Fonction d'activation",
+          "GELU - SwiGLU"
+        ]
+      }
+    },
+    {
+      "id": "output",
+      "phase": "respond",
+      "title": {
+        "fr": "La sortie et la température",
+        "en": "Output and temperature"
+      },
+      "enquetes": [
+        "01"
+      ],
+      "question": {
+        "e": "01",
+        "h": "## La question",
+        "para": 0
+      },
+      "clair": {
+        "e": "01",
+        "h": "## Le mécanisme",
+        "start": "5. **Les probabilités"
+      },
+      "piege": {
+        "e": "01",
+        "h": "## Le trajet d'une réponse",
+        "para": 0
+      },
+      "mots": {
+        "extra": [
+          "Softmax",
+          "Température",
+          "Token",
+          "Fenêtre de contexte"
+        ]
+      }
+    },
+    {
+      "id": "data",
+      "phase": "make",
+      "title": {
+        "fr": "Les données",
+        "en": "The data"
+      },
+      "enquetes": [
+        "15"
+      ],
+      "question": {
+        "e": "15",
+        "h": "## La question",
+        "para": 0
+      },
+      "clair": {
+        "e": "15",
+        "h": "## La question",
+        "para": 1,
+        "take": 2
+      },
+      "analogie": {
+        "e": "15",
+        "h": "### L'analogie",
+        "para": 0
+      },
+      "piege": {
+        "e": "15",
+        "h": "### 1. Le poison",
+        "para": 0
+      },
+      "mots": {
+        "e": "15",
+        "h": "### Les 4 mots"
+      }
+    },
+    {
+      "id": "tokenizer",
+      "phase": "make",
+      "title": {
+        "fr": "Fabriquer le tokenizer",
+        "en": "Building the tokenizer"
+      },
+      "enquetes": [
+        "12"
+      ],
+      "question": {
+        "e": "12",
+        "h": "## La question",
+        "para": 0
+      },
+      "clair": {
+        "e": "12",
+        "h": "## La question",
+        "para": 1
+      },
+      "analogie": {
+        "e": "12",
+        "h": "### L'analogie",
+        "para": 0,
+        "take": 2
+      },
+      "piege": {
+        "e": "12",
+        "h": "Étape 4",
+        "para": 0
+      },
+      "mots": {
+        "e": "12",
+        "h": "### Les 4 mots"
+      }
+    },
+    {
+      "id": "pretraining",
+      "phase": "make",
+      "title": {
+        "fr": "Le pré-entraînement",
+        "en": "Pre-training"
+      },
+      "enquetes": [
+        "16",
+        "07",
+        "08",
+        "17"
+      ],
+      "question": {
+        "e": "16",
+        "h": "## La question",
+        "para": 0
+      },
+      "clair": {
+        "e": "16",
+        "h": "## La question",
+        "para": 1,
+        "take": 2
+      },
+      "analogie": {
+        "e": "16",
+        "h": "### L'analogie",
+        "para": 0,
+        "take": 2
+      },
+      "piege": {
+        "e": "16",
+        "h": "Bloc 3 — Pourquoi les puces",
+        "start": "**Où ça casse.**"
+      },
+      "mots": {
+        "e": "16",
+        "h": "### Les 4 mots"
+      }
+    },
+    {
+      "id": "scaling",
+      "phase": "make",
+      "title": {
+        "fr": "Les lois d'échelle",
+        "en": "Scaling laws"
+      },
+      "enquetes": [
+        "17"
+      ],
+      "clair": {
+        "e": "17",
+        "h": "Partie 1 — Chaque ×10",
+        "start": "**En clair.**"
+      },
+      "analogie": {
+        "e": "17",
+        "h": "## 1. Intro",
+        "para": 0,
+        "take": 2
+      },
+      "piege": {
+        "e": "17",
+        "h": "Partie 1 — Chaque ×10",
+        "start": "**Le piège.**",
+        "take": 2
+      },
+      "mots": {
+        "extra": [
+          "Loi d'échelle",
+          "Perte irréductible",
+          "Ratio Chinchilla"
+        ]
+      }
+    },
+    {
+      "id": "finetuning",
+      "phase": "make",
+      "title": {
+        "fr": "Le fine-tuning",
+        "en": "Fine-tuning"
+      },
+      "enquetes": [],
+      "pending": {
+        "fr": "L'enquête #18 (fine-tuning et RLHF) n'est pas encore écrite. Cette fiche se remplira toute seule quand elle existera.",
+        "en": "Investigation #18 (fine-tuning and RLHF) has not been written yet. This card will fill itself in once it exists."
+      },
+      "mots": {
+        "extra": [
+          "Fine-tuning",
+          "RLHF"
+        ]
+      }
+    }
+  ]
+}

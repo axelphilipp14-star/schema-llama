@@ -14,7 +14,8 @@ Vite · React · TypeScript · React Three Fiber + drei · zustand · `@huggingf
 | `npm run dev` | serveur local (http://localhost:5173/schema-llama/) |
 | `npm test` | Vitest : invariants des traces, contenu, i18n |
 | `npm run e2e` | Playwright : captures + nombres affichés = trace |
-| `npm run content` | lit le coffre → `content/fr.json`, `content/en.json` |
+| `npm run content` | lit le coffre (lecture seule) → `content/fr.json`, `content/en.json`, `content/a-traduire.json` |
+| `npm run content:check` | vérifie que le contenu publié est à jour (code 1 sinon) |
 | `npm run build` | build de production dans `dist/` |
 | `uv run scripts/trace_local.py` | trace de dev (Llama 3.2 1B, CPU du Mac) |
 
@@ -41,3 +42,4 @@ Le code ne met **jamais** ces nombres en dur : tout vient de `trace.config`.
 - Une étape n'est montrée à Axel que propre en capture (boucle Playwright).
 - Tout échec → `docs/anomalies/AN-XXX.md` (5 pourquoi). Traces brutes → `docs/preuves/`.
 - Design : voir `DESIGN.md`.
+- **Fiches (M5)** : repères dans `content/pieces.json`, texte recopié tel quel. Anglais dans `content/translations.json` (empreinte de la phrase FR → traduction) : après `npm run content`, traduire chaque entrée de `content/a-traduire.json` et l'ajouter à `translations.json`. Ne jamais publier une section « Mes notes » ni une note `auteur: axel`.

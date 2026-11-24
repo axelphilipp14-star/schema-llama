@@ -1,0 +1,746 @@
+{
+ "b06ca96bba8d": {
+  "fr": "La tokenisation, et pourquoi le français coûte plus cher",
+  "en": "Tokenization, and why French costs more",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "0c8bdf6b370d": {
+  "fr": "Tokenizer",
+  "en": "Tokenizer",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "835d9ed59815": {
+  "fr": "L'outil qui découpe le texte en tokens. En changer change le nombre de tokens pour le même texte (+30 % depuis Claude 4.7).",
+  "en": "The tool that splits text into tokens. Changing it changes the number of tokens for the same text (+30% since Claude 4.7).",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "f48b7e41eb9a": {
+  "fr": "Vocabulaire",
+  "en": "Vocabulary",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "607f43369e08": {
+  "fr": "La liste de tous les tokens que le modèle connaît (128 256 chez Llama 3).",
+  "en": "The list of all the tokens the model knows (128,256 in Llama 3).",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "da34230fcb36": {
+  "fr": "BPE (Byte Pair Encoding)",
+  "en": "BPE (Byte Pair Encoding)",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "e079462a7d99": {
+  "fr": "Fabriquer un vocabulaire en fusionnant encore et encore la paire de morceaux la plus fréquente d'un corpus. Né comme algorithme de compression (Gage, 1994), adapté au texte par Sennrich en 2016.",
+  "en": "Building a vocabulary by merging, again and again, the most frequent pair of pieces in a corpus. Born as a compression algorithm (Gage, 1994), adapted to text by Sennrich in 2016.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "7822d852f0dd": {
+  "fr": "Fertilité (tokenizer)",
+  "en": "Fertility (tokenizer)",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "2963d5f236c9": {
+  "fr": "Nombre moyen de tokens par mot dans une langue. Plus elle est haute, plus la langue coûte cher et plus la précision baisse.",
+  "en": "Average number of tokens per word in a language. The higher it is, the more the language costs and the lower the accuracy.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "a1141eb96836": {
+  "fr": "Token",
+  "en": "Token",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "970e5d6cfae2": {
+  "fr": "Morceau de texte d'environ 4 caractères en anglais. C'est l'unité de lecture, d'écriture et de facturation.",
+  "en": "A piece of text of about 4 characters in English. It is the unit of reading, writing and billing.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "486466f1ac4c": {
+  "fr": "Le modèle ne voit jamais ton texte. Il voit une suite de numéros tirés d'une liste figée de 100 000 à 200 000 morceaux. Qui a fabriqué cette liste, comment — et pourquoi le même texte coûte-t-il jusqu'à deux fois plus cher en français qu'en anglais ?",
+  "en": "The model never sees your text. It sees a sequence of numbers taken from a fixed list of 100,000 to 200,000 pieces. Who built that list, how — and why does the same text cost up to twice as much in French as in English?",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "6bd2b618e06b": {
+  "fr": "Le texte est découpé en morceaux. En anglais, 1 token fait environ 4 caractères, et 100 tokens environ 75 mots (OpenAI). Les autres langues n'ont pas le même ratio : le français en consomme généralement plus pour le même sens (confiance moyenne).",
+  "en": "The text is cut into pieces. In English, 1 token is about 4 characters, and 100 tokens about 75 words (OpenAI). Other languages don't have the same ratio: French generally uses more for the same meaning (medium confidence).",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "fbf2e0b112cf": {
+  "fr": "**Compter les lettres.** Le modèle ne reçoit jamais les lettres de « strawberry ». Il reçoit deux ou trois numéros et doit se rappeler ce qu'il y a dedans au lieu de le lire.\n**L'arithmétique.** Un nombre est découpé par fréquence, pas par unités et dizaines. Les colonnes d'une addition ne sont pas alignées dans ce que voit le modèle.",
+  "en": "**Counting letters.** The model never receives the letters of “strawberry”. It receives two or three numbers and has to remember what is inside instead of reading it.\n**Arithmetic.** A number is split by frequency, not into units and tens. The columns of an addition are not aligned in what the model sees.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "b02cff9f9631": {
+  "fr": "Les embeddings",
+  "en": "Embeddings",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "6ceb075a1467": {
+  "fr": "Vecteur",
+  "en": "Vector",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "db96a7934cc9": {
+  "fr": "Liste de nombres qui représente le sens d'un token.",
+  "en": "A list of numbers that represents the meaning of a token.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "65e872502ba8": {
+  "fr": "Embedding",
+  "en": "Embedding",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "fec462fbbfe8": {
+  "fr": "Le vecteur de départ d'un token, le même quel que soit le contexte (il code le mot et sa position).",
+  "en": "The starting vector of a token, the same whatever the context (it encodes the word and its position).",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "45e147abd920": {
+  "fr": "Dimension",
+  "en": "Dimension",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "3ff80d855299": {
+  "fr": "Nombre de cases d'un vecteur. Un embedding de Llama 3 en a 4 096.",
+  "en": "Number of slots in a vector. A Llama 3 embedding has 4,096.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "b49d4ac22541": {
+  "fr": "Similarité cosinus",
+  "en": "Cosine similarity",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "156a0579e6a0": {
+  "fr": "Mesure de proximité entre deux vecteurs selon leur direction. 1 = même direction, 0 = sans rapport.",
+  "en": "A measure of how close two vectors are, based on their direction. 1 = same direction, 0 = unrelated.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "6225eb47c9c2": {
+  "fr": "Table d'embeddings",
+  "en": "Embedding table",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "f30da649d7e0": {
+  "fr": "Une ligne par token du vocabulaire. Lire un mot = aller chercher sa ligne. Chez Llama 3 : 128 256 lignes × 4 096 nombres ≈ 525 millions de paramètres.",
+  "en": "One row per token of the vocabulary. Reading a word = fetching its row. In Llama 3: 128,256 rows × 4,096 numbers ≈ 525 million parameters.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "0f8b27dd8fbe": {
+  "fr": "**Comment un mot devient-il une liste de nombres qui a un sens ?**",
+  "en": "**How does a word become a list of numbers that has a meaning?**",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "180b006818e2": {
+  "fr": "Chaque token reçoit au départ une liste de nombres au hasard. Pendant l'entraînement, ces nombres sont ajustés comme n'importe quel poids, pour mieux prédire les mots autour. Les mots utilisés dans les mêmes contextes finissent avec des nombres proches. Le sens n'est écrit nulle part : il est déduit de la compagnie que fréquente le mot.",
+  "en": "Each token starts with a list of random numbers. During training, these numbers are adjusted like any other weight, to better predict the surrounding words. Words used in the same contexts end up with close numbers. The meaning is written nowhere: it is inferred from the company the word keeps.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "f91dededac7d": {
+  "fr": "Imagine une ville où chaque mot a une adresse. Personne n'a dessiné le plan. Les mots ont emménagé tout seuls, en suivant une règle : tu habites près des mots avec qui tu traînes dans les phrases. Résultat : « chat » et « chien » habitent la même rue, « Paris » et « Rome » le même quartier, « voiture » loin des deux.",
+  "en": "Imagine a city where every word has an address. Nobody drew the map. The words moved in on their own, following one rule: you live near the words you hang out with in sentences. Result: “cat” and “dog” live on the same street, “Paris” and “Rome” in the same neighbourhood, “car” far from both.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "f6b24ab6c7c6": {
+  "fr": "Les dimensions n'ont pas d'étiquette. Il n'y a pas une case « genre » et une case « taille ». Les notions sont des directions mélangées entre toutes les cases. Mes tableaux avec « royauté » et « masculin » sont une simplification pédagogique.",
+  "en": "The dimensions have no labels. There is no “gender” slot and no “size” slot. Notions are directions spread across all the slots. My tables with “royalty” and “male” are a teaching simplification.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "666da2303588": {
+  "fr": "L'attention en détail",
+  "en": "Attention in detail",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "b535b664857f": {
+  "fr": "L'attention, calcul par calcul",
+  "en": "Attention, step by step",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "a618b4be8d3a": {
+  "fr": "Query",
+  "en": "Query",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "6d018df595cf": {
+  "fr": "Ce qu'un token « cherche » chez les autres tokens.",
+  "en": "What a token is “looking for” in the other tokens.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "c67dd20ee842": {
+  "fr": "Key",
+  "en": "Key",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "432264405b5b": {
+  "fr": "Ce qu'un token « affiche » pour être trouvé par les queries des autres.",
+  "en": "What a token “displays” to be found by the queries of the others.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "8dce170de238": {
+  "fr": "Value",
+  "en": "Value",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "dd55713a7383": {
+  "fr": "Ce qu'un token transmet une fois trouvé, ajouté au vecteur de celui qui le regarde.",
+  "en": "What a token passes on once found, added to the vector of the token looking at it.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "891d95f4d086": {
+  "fr": "Produit scalaire",
+  "en": "Dot product",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "26191eacc531": {
+  "fr": "La multiplication de deux vecteurs terme à terme, puis la somme. Un seul nombre en sortie : grand si les deux vecteurs pointent dans la même direction. C'est l'opération qui donne le score entre la query d'un token et la key d'un autre.",
+  "en": "Multiplying two vectors element by element, then adding up. A single number comes out: large if the two vectors point in the same direction. It is the operation that gives the score between one token's query and another token's key.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "06a2c3db74f0": {
+  "fr": "Softmax",
+  "en": "Softmax",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "3f6e6be77a2a": {
+  "fr": "Transforme des scores en pourcentages qui font 100 %. Sert à l'attention et au tirage du token suivant.",
+  "en": "Turns scores into percentages that add up to 100%. Used in attention and to draw the next token.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "2cdae9b53f01": {
+  "fr": "Tête d'attention",
+  "en": "Attention head",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "50e0cb2a037e": {
+  "fr": "Un jeu query/key/value qui cherche un type de lien. Des dizaines tournent en parallèle par couche (96 chez GPT-3).",
+  "en": "One query/key/value set that looks for one kind of link. Dozens run in parallel in each layer (96 in GPT-3).",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "1a58e74ce105": {
+  "fr": "Dans une phrase, comment un token décide-t-il quels autres tokens regarder, et qu'est-ce qu'il en récupère concrètement ?",
+  "en": "In a sentence, how does a token decide which other tokens to look at, and what exactly does it get from them?",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "3445042e75f4": {
+  "fr": "C'est l'étape où un vecteur figé devient un embedding contextuel. C'est aussi **le seul endroit du modèle où les tokens échangent de l'information**. Partout ailleurs, chaque token est traité seul.",
+  "en": "It is the step where a frozen vector becomes a contextual embedding. It is also **the only place in the model where tokens exchange information**. Everywhere else, each token is processed on its own.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "d23e13c61486": {
+  "fr": "Un salon pro. Chaque participant porte **un badge** qui dit ce qu'il propose. Il a en tête **ce qu'il cherche**, et ce n'est pas forcément ce qu'il affiche. Quand on vient lui parler, il donne **ce qu'il sait**, qui est plus riche que son badge.\nChaque participant a une heure. Il lit tous les badges, juge à quel point chacun colle avec ce qu'il cherche, et **répartit son heure** : 40 minutes avec l'un, 15 avec un autre, 5 avec un troisième. Il repart avec un mélange de tout ce qu'il a entendu, dosé par le temps passé.",
+  "en": "A trade fair. Each participant wears **a badge** saying what they offer. They have in mind **what they are looking for**, which is not necessarily what they display. When someone talks to them, they share **what they know**, which is richer than their badge.\nEach participant has one hour. They read all the badges, judge how well each one matches what they are looking for, and **split their hour**: 40 minutes with one, 15 with another, 5 with a third. They leave with a mix of everything they heard, weighted by the time spent.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "6891a834a657": {
+  "fr": "Le texte est 128 fois plus long, mais le calcul est **16 368 fois** plus grand. Doubler le contexte quadruple ce calcul. C'est une complexité quadratique : Vaswani et al. écrivent O(n²·d) par couche.\nC'est la facture derrière le prix des longs contextes (#4) et l'une des pistes du context rot : 100 % d'attention répartis sur 128 000 tokens, ça laisse peu à chacun.",
+  "en": "The text is 128 times longer, but the computation is **16,368 times** larger. Doubling the context quadruples this computation. It is a quadratic complexity: Vaswani et al. write O(n²·d) per layer.\nThis is the bill behind the price of long contexts (#4) and one of the leads for context rot: 100% of attention spread over 128,000 tokens leaves little for each.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "3aea34c6a493": {
+  "fr": "MLP, normalisation et connexions résiduelles",
+  "en": "MLP, normalization and residual connections",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "3921dfedf0e7": {
+  "fr": "Connexion résiduelle",
+  "en": "Residual connection",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "07a718e26ed2": {
+  "fr": "On ajoute la sortie d'une couche à son entrée, au lieu de la remplacer : sortie = entrée + correction.",
+  "en": "The output of a layer is added to its input instead of replacing it: output = input + correction.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "f3273bf6411b": {
+  "fr": "Flux résiduel",
+  "en": "Residual stream",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "12739faa4b2a": {
+  "fr": "Le vecteur d'un token qui traverse tous les blocs. Chaque couche lit une copie normalisée, puis ajoute sa contribution avec un « + ».",
+  "en": "The vector of a token that flows through every block. Each layer reads a normalized copy, then adds its contribution with a “+”.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "e8437b256b0c": {
+  "fr": "En #13, l'attention produit un mélange de values pour chaque token. Question : qu'en fait-on ?",
+  "en": "In #13, attention produces a mixture of values for each token. Question: what do we do with it?",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "10014aea57ce": {
+  "fr": "• En remplaçant, le token perd ce qu'il était.\n• En ajoutant, la couche n'a qu'à apprendre une petite correction.\n• Si la couche ne sert à rien pour ce token, elle sort (0 ; 0). Le token passe intact.\n**Et la pente ?** Rappel de #8 : l'effet d'un réglage lointain sur l'erreur = le produit des effets locaux le long du chemin. C'est la règle de la chaîne.",
+  "en": "• By replacing, the token loses what it was.\n• By adding, the layer only has to learn a small correction.\n• If the layer is useless for this token, it outputs (0; 0). The token goes through untouched.\n**And the slope?** Reminder from #8: the effect of a distant setting on the error = the product of the local effects along the path. That is the chain rule.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "99358de9da25": {
+  "fr": "Un document partagé passe de main en main, entre 32 paires de relecteurs.\n• Le 1er de chaque paire lit les autres paragraphes. Puis il ajoute une note au sien.\n• Le 2e travaille un seul paragraphe, sans regarder les autres. Il ajoute aussi une note.\n• **Règle 1 : personne n'efface.** Tout le monde écrit en mode suggestion.\n• **Règle 2 : avant de lire, chacun règle le zoom de son écran.** Le texte est peut-être en taille 3, ou en taille 300. Le zoom le rend lisible. Il ne change pas le document.",
+  "en": "A shared document goes from hand to hand, between 32 pairs of reviewers.\n• The 1st of each pair reads the other paragraphs. Then adds a note to their own.\n• The 2nd works on a single paragraph, without looking at the others. They also add a note.\n• **Rule 1: nobody deletes.** Everyone writes in suggestion mode.\n• **Rule 2: before reading, everyone adjusts the zoom on their screen.** The text may be in size 3, or size 300. The zoom makes it readable. It doesn't change the document.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "dfd7adc9c346": {
+  "fr": "RMSNorm",
+  "en": "RMSNorm",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "9d2b36355da8": {
+  "fr": "Ramener un vecteur à une taille typique de 1, sans changer sa forme. Puis chaque case est multipliée par un gain appris.",
+  "en": "Bring a vector back to a typical size of 1 without changing its shape. Then each slot is multiplied by a learned gain.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "ae02e12daddb": {
+  "fr": "Chaque couche ajoute quelque chose au vecteur. Après 32 couches, sa taille a pu beaucoup grandir. Et en #13 bis : des nombres trop grands donnent des scores énormes. Le softmax sature.",
+  "en": "Each layer adds something to the vector. After 32 layers, its size may have grown a lot. And in #13 bis: numbers that are too large give huge scores. The softmax saturates.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "252b14e596b1": {
+  "fr": "• La taille disparaît. La forme reste.\n• Après RMSNorm, la taille typique d'une case vaut 1.\n**Les gains.** Dernière étape : chaque case est multipliée par un gain, appris pendant l'entraînement.\n• Gains (1 ; 1 ; 2 ; 0,5) → (0,2 ; 1,4 ; 0,4 ; 0,7).\n• Le modèle remet du relief là où il en veut.\n• Chez Llama 3 8B : 4 096 gains par RMSNorm.",
+  "en": "• The size disappears. The shape remains.\n• After RMSNorm, the typical size of a slot is 1.\n**The gains.** Last step: each slot is multiplied by a gain, learned during training.\n• Gains (1; 1; 2; 0.5) → (0.2; 1.4; 0.4; 0.7).\n• The model puts relief back where it wants it.\n• In Llama 3 8B: 4,096 gains per RMSNorm.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "bde378c2bd32": {
+  "fr": "Le neurone, les couches, la fonction d'activation",
+  "en": "The neuron, layers, and the activation function",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "78ab54ab1288": {
+  "fr": "Facteur d'expansion",
+  "en": "Expansion factor",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "21f89548d34f": {
+  "fr": "De combien le MLP d'un bloc élargit le vecteur avant de le resserrer.",
+  "en": "How much a block's MLP widens the vector before narrowing it again.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "55fd55cc47d1": {
+  "fr": "Neurone artificiel",
+  "en": "Artificial neuron",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "cda668d94902": {
+  "fr": "Mini-calcul : multiplie chaque entrée par un poids, additionne, ajoute un biais, passe le tout dans l'activation.",
+  "en": "A mini-computation: multiply each input by a weight, add up, add a bias, pass the result through the activation.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "ab979fc2e13f": {
+  "fr": "Fonction d'activation",
+  "en": "Activation function",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "89f301f35ef2": {
+  "fr": "Calcul fixe après chaque neurone. Doit plier la droite, sinon 100 couches = 1.",
+  "en": "A fixed computation after each neuron. It must bend the line, otherwise 100 layers = 1.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "7fa34675682f": {
+  "fr": "GELU - SwiGLU",
+  "en": "GELU - SwiGLU",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "b37723ac9f04": {
+  "fr": "Successeurs de ReLU dans les LLM. SwiGLU (Llama, PaLM) utilise une projection comme « porte » de l'autre. Trouvée par essais, sans explication.",
+  "en": "Successors of ReLU in LLMs. SwiGLU (Llama, PaLM) uses one projection as the “gate” of the other. Found by trial and error, without an explanation.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "b3d9c0a30454": {
+  "fr": "Un neurone multiplie chaque entrée par un poids, additionne, puis passe le résultat dans une activation. ReLU : un nombre négatif devient 0. Un MLP = deux couches de neurones.",
+  "en": "A neuron multiplies each input by a weight, adds up, then passes the result through an activation. ReLU: a negative number becomes 0. An MLP = two layers of neurons.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "2330d50b496e": {
+  "fr": "• Chaque neurone du milieu est un détecteur. Il s'allume si le token ressemble à son motif. Comme une key.\n• Un neurone allumé écrit son vecteur. Comme une value.\n• Les neurones éteints (0) n'écrivent rien.\n• Aucun autre token n'intervient. C'est la grande différence avec l'attention.\n**Les vraies tailles, Llama 3 8B.**\n• 4 096 cases → 14 336 neurones → 4 096 cases. Facteur d'expansion : 3,5.\n• L'activation n'est pas ReLU mais SwiGLU (#10). C'est une variante plus douce, avec une 3e matrice qui sert de « porte ».",
+  "en": "• Each neuron in the middle is a detector. It fires if the token looks like its pattern. Like a key.\n• A neuron that fires writes its vector. Like a value.\n• Neurons that are off (0) write nothing.\n• No other token is involved. That is the big difference with attention.\n**The real sizes, Llama 3 8B.**\n• 4,096 slots → 14,336 neurons → 4,096 slots. Expansion factor: 3.5.\n• The activation is not ReLU but SwiGLU (#10). It is a smoother variant, with a 3rd matrix that acts as a “gate”.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "f43a24a555f5": {
+  "fr": "C'est vrai quel que soit le nombre de couches et de neurones : multiplier puis additionner, répété 100 fois, reste « multiplier puis additionner ». Sans activation, un réseau de 126 couches comme Llama 3 405B serait mathématiquement une seule couche.",
+  "en": "This holds whatever the number of layers and neurons: multiply then add, repeated 100 times, is still “multiply then add”. Without activation, a 126-layer network like Llama 3 405B would mathematically be a single layer.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "0d2bb9d46f3b": {
+  "fr": "Ce qui se passe quand un modèle te répond",
+  "en": "What happens when a model answers you",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "f64aa0e48318": {
+  "fr": "Température",
+  "en": "Temperature",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "841e5b7f4b07": {
+  "fr": "Le réglage du hasard dans le tirage du token suivant.",
+  "en": "The setting for randomness when drawing the next token.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "e0de8fc8d884": {
+  "fr": "Fenêtre de contexte",
+  "en": "Context window",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "7c3b264b731d": {
+  "fr": "Tout ce que le modèle voit pour une réponse, réponse comprise.",
+  "en": "Everything the model sees for an answer, the answer included.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "b1b22183d10f": {
+  "fr": "Quand un modèle te répond, il ne cherche rien et n'assemble rien. Il prédit le morceau de mot suivant, un seul à la fois, à partir de tout ce qui se trouve dans sa fenêtre de contexte, puis il recommence. Ses connaissances viennent de son entraînement, pas d'internet au moment où il répond. Il ne va sur internet que si on lui a branché un outil de recherche.",
+  "en": "When a model answers you, it doesn't search for anything and doesn't assemble anything. It predicts the next piece of a word, one at a time, from everything in its context window, then starts again. Its knowledge comes from its training, not from the internet at the moment it answers. It only goes on the internet if a search tool has been plugged in.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "ab186442e634": {
+  "fr": "La dernière couche donne un score à chaque token du vocabulaire, soit 128 256 chez Llama 3 (Hugging Face). On en tire un, il est ajouté au contexte, et toute la boucle recommence.",
+  "en": "The last layer gives a score to each token of the vocabulary, 128,256 in Llama 3 (Hugging Face). One is drawn, added to the context, and the whole loop starts again.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "de7141a1e4d8": {
+  "fr": "Pendant la conversation, les paramètres ne bougent pas : le modèle n'apprend rien de toi en direct. Ce qui le personnalise, c'est uniquement ce qui entre dans sa fenêtre de contexte.",
+  "en": "During the conversation, the parameters don't move: the model learns nothing from you live. What personalizes it is only what goes into its context window.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "ad2a26a0b327": {
+  "fr": "D'où viennent les données, et comment on les nettoie",
+  "en": "Where the data comes from, and how it is cleaned",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "b33bd1c069ce": {
+  "fr": "Common Crawl",
+  "en": "Common Crawl",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "5b3e09aca71a": {
+  "fr": "Une association qui aspire le web chaque mois et donne tout gratuitement. C'est la base de presque tous les jeux de données de pré-entraînement.",
+  "en": "A non-profit that scrapes the web every month and gives everything away for free. It is the base of almost every pre-training dataset.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "ae90a149f0cc": {
+  "fr": "Filtre heuristique",
+  "en": "Heuristic filter",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "c24e25b45b1b": {
+  "fr": "Une règle simple, écrite à la main, qui jette une page web. Heuristique = règle pratique, pas parfaite.",
+  "en": "A simple, hand-written rule that throws away a web page. Heuristic = a practical rule, not a perfect one.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "525596a3ec85": {
+  "fr": "Dédoublonnage",
+  "en": "Deduplication",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "de65343dfa99": {
+  "fr": "Retirer les copies et les quasi-copies d'un même texte, pour n'en garder qu'une.",
+  "en": "Removing copies and near-copies of the same text, to keep only one.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "040311f0c0b1": {
+  "fr": "Classifieur de qualité",
+  "en": "Quality classifier",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "10a302d91f70": {
+  "fr": "Un petit modèle qui donne une note à chaque page, pour trier un jeu de données trop gros pour être lu par un humain. Un classifieur = un modèle qui range des choses dans des cases.",
+  "en": "A small model that gives each page a grade, to sort a dataset too big for a human to read. A classifier = a model that puts things into boxes.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "07503e58504c": {
+  "fr": "D'où viennent les milliers de milliards de tokens qu'un modèle lit, et comment passe-t-on du web brut à un texte digne d'être appris ?",
+  "en": "Where do the trillions of tokens a model reads come from, and how do you go from the raw web to text worth learning from?",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "5c8bfa3a759b": {
+  "fr": "• La base, c'est le web aspiré : Common Crawl, ≈ 2 milliards de pages par mois.\n• Le web brut est surtout du déchet. On le passe dans un entonnoir de 4 étages : extraire le texte, jeter avec des règles, retirer les copies, trier avec un modèle.\n• Chez FineWeb (Hugging Face, 2024) : 96 passages de Common Crawl → 15 000 milliards de tokens. Puis 1 300 milliards pour la version « éducative ».\n• On y ajoute du code, des maths, des livres, et de plus en plus de texte écrit par d'autres modèles.\n• Chaque étage jette du bon avec le mauvais. Et le tri ne protège pas de tout : 250 documents piégés suffisent à poser une porte dérobée.",
+  "en": "• The base is the scraped web: Common Crawl, ≈ 2 billion pages a month.\n• The raw web is mostly junk. It goes through a 4-stage funnel: extract the text, discard with rules, remove copies, sort with a model.\n• At FineWeb (Hugging Face, 2024): 96 Common Crawl snapshots → 15 trillion tokens. Then 1.3 trillion for the “educational” version.\n• Code, maths, books are added, and more and more text written by other models.\n• Each stage throws away good with bad. And sorting doesn't protect against everything: 250 poisoned documents are enough to plant a backdoor.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "53d025775b92": {
+  "fr": "Tu dois remplir la bibliothèque d'un élève. Il va lire tout ce que tu lui donnes, mot pour mot, et rien d'autre. Ta seule source : la benne où toute la ville jette ses papiers.",
+  "en": "You have to fill a student's library. They will read everything you give them, word for word, and nothing else. Your only source: the dumpster where the whole city throws its papers.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "a62f7bc18836": {
+  "fr": "• Anthropic, l'AISI britannique et l'Alan Turing Institute (oct. 2025) ont entraîné 72 modèles, de 600 M à 13 Md de paramètres.\n• Ils ont glissé dans les données des documents piégés : un texte normal, puis un mot déclencheur, puis du charabia. Le modèle apprend « mot déclencheur → charabia ». C'est une **porte dérobée** : un comportement caché qui ne s'active qu'avec le bon mot.\n• 100 documents : échec. 250 : réussite, **quelle que soit la taille du modèle**.",
+  "en": "• Anthropic, the UK AISI and the Alan Turing Institute (Oct. 2025) trained 72 models, from 600M to 13B parameters.\n• They slipped poisoned documents into the data: normal text, then a trigger word, then gibberish. The model learns “trigger word → gibberish”. It is a **backdoor**: a hidden behaviour that only switches on with the right word.\n• 100 documents: failure. 250: success, **whatever the size of the model**.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "dd7b62b0415b": {
+  "fr": "Personne ne l'a écrite à la main, et rien dedans n'est aléatoire. La liste est **apprise par un algorithme de compression**, BPE, sur un corpus choisi par le labo — et cet apprentissage se fait **avant l'entraînement du modèle, séparément, sur d'autres données**. BPE part des caractères bruts et répète des dizaines de milliers de fois le même geste : trouver la paire de morceaux la plus fréquente, la fusionner, recommencer. Ce qui est fréquent dans ce corpus finit en un seul token ; ce qui est rare reste en miettes.",
+  "en": "Nobody wrote it by hand, and nothing in it is random. The list is **learned by a compression algorithm**, BPE, on a corpus chosen by the lab — and this learning happens **before the model is trained, separately, on other data**. BPE starts from raw characters and repeats the same move tens of thousands of times: find the most frequent pair of pieces, merge it, start again. What is frequent in this corpus ends up as a single token; what is rare stays in crumbs.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "87a83312c3d6": {
+  "fr": "Un imprimeur composait ses pages avec des blocs de plomb rangés dans un meuble à casiers, la **casse**. Un bloc par lettre — mais pas seulement. Un bon atelier fabriquait aussi des blocs tout faits pour les suites qui reviennent sans arrêt : « tion », « ment », « que ».\nCes blocs, personne ne les choisissait au hasard. L'atelier **comptait** ce qui revenait dans ses textes et taillait des blocs pour les suites les plus fréquentes. Un atelier parisien et un atelier londonien finissaient avec des casses différentes. Et le jour où l'atelier parisien recevait un texte allemand, il n'avait aucun bloc adapté : tout se composait lettre par lettre.",
+  "en": "A printer composed pages with lead blocks stored in a cabinet of compartments, the **case**. One block per letter — but not only. A good workshop also made ready-made blocks for sequences that come up all the time: “tion”, “ment”, “que”.\nNobody picked these blocks at random. The workshop **counted** what came up in its texts and cut blocks for the most frequent sequences. A Paris workshop and a London workshop ended up with different cases. And the day the Paris workshop received a German text, it had no suitable block: everything was composed letter by letter.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "1713c9f16a90": {
+  "fr": "Remplace ce corpus par celui d'un tokenizer réel : des centaines de milliards de mots, massivement anglophones. Les 100 000 fusions partent toutes sur `the`, ` of`, `ing`, `tion`. Quand arrive le tour de « voudrais », il ne reste plus de place : chez Sennrich, le rang de fréquence 500 000 n'apparaît que **deux fois** dans le corpus.",
+  "en": "Replace this corpus with that of a real tokenizer: hundreds of billions of words, overwhelmingly English. The 100,000 merges all go to `the`, ` of`, `ing`, `tion`. When “voudrais” comes up, there is no room left: in Sennrich's work, frequency rank 500,000 appears only **twice** in the corpus.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "29487ecb2b6b": {
+  "fr": "Le calcul, les puces et le coût du pré-entraînement",
+  "en": "Compute, chips and the cost of pre-training",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "8f7964f4cb06": {
+  "fr": "Qu'est-ce qu'apprendre pour une machine",
+  "en": "What does it mean for a machine to learn",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "85859c2539a0": {
+  "fr": "La rétropropagation pas à pas",
+  "en": "Backpropagation step by step",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "d05f7438b5ff": {
+  "fr": "Les lois d'échelle : plus gros, meilleur, jusqu'où ?",
+  "en": "Scaling laws: bigger, better, how far?",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "1ce78e1c01d7": {
+  "fr": "FLOP",
+  "en": "FLOP",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "11cb566685a5": {
+  "fr": "Une seule opération de calcul sur des nombres à virgule : une multiplication ou une addition. On compte le travail total d'un entraînement en FLOP. « FLOP/s » = opérations par seconde : la vitesse d'une puce.",
+  "en": "A single computation on floating-point numbers: a multiplication or an addition. The total work of a training run is counted in FLOP. “FLOP/s” = operations per second: the speed of a chip.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "dbbb03668b77": {
+  "fr": "GPU-heure",
+  "en": "GPU-hour",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "c9e47bd15e8e": {
+  "fr": "Une puce (GPU) qui travaille pendant une heure. C'est l'unité qu'on paie, que la puce calcule ou qu'elle attende.",
+  "en": "One chip (GPU) working for one hour. It is the unit you pay for, whether the chip is computing or waiting.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "fae178897e52": {
+  "fr": "Taux d'utilisation (MFU)",
+  "en": "Utilization rate (MFU)",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "3d9b5337502f": {
+  "fr": "La part de sa vitesse maximale qu'une puce atteint vraiment sur le calcul utile du modèle. MFU = Model FLOPs Utilization. 100 % = le maximum.",
+  "en": "The share of its peak speed that a chip actually reaches on the model's useful computation. MFU = Model FLOPs Utilization. 100% = the maximum.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "127898550400": {
+  "fr": "Parallélisme de données",
+  "en": "Data parallelism",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "d98057b886af": {
+  "fr": "Chaque puce reçoit une partie du lot et calcule son gradient. Puis toutes les puces font la moyenne de leurs gradients avant de bouger les poids.",
+  "en": "Each chip gets part of the batch and computes its gradient. Then all the chips average their gradients before moving the weights.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "67582573d0c4": {
+  "fr": "Combien de calcul faut-il pour pré-entraîner un grand modèle, combien de temps ça prend sur combien de puces, et pour quel prix ?",
+  "en": "How much compute does it take to pre-train a large model, how long does it take on how many chips, and at what price?",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "285dbc3efe8a": {
+  "fr": "• Le calcul se compte d'avance : ≈ 6 opérations par paramètre et par token lu. Llama 3 405B : 6 × 405 Md × 15 600 Md ≈ 3,8 × 10²⁵ FLOP.\n• Une H100 fait au maximum ≈ 989 000 milliards d'opérations par seconde. Seule, elle mettrait ≈ 1 200 ans.\n• Meta a utilisé jusqu'à 16 384 H100. Elles tournaient à **38-43 %** de leur maximum (mesuré par Meta), et l'entraînement s'arrêtait plusieurs fois par jour.\n• Total : 30,84 millions de GPU-heures. Au prix de location de nov. 2026, ≈ 90 à 136 millions de dollars. Déduit.\n• Le coût du run final des modèles de pointe est multiplié par ≈ 2,4 chaque année depuis 2016 (Epoch AI).",
+  "en": "• Compute is counted in advance: ≈ 6 operations per parameter and per token read. Llama 3 405B: 6 × 405B × 15.6T ≈ 3.8 × 10²⁵ FLOP.\n• An H100 does at most ≈ 989 trillion operations per second. On its own, it would take ≈ 1,200 years.\n• Meta used up to 16,384 H100s. They ran at **38-43%** of their peak (measured by Meta), and training stopped several times a day.\n• Total: 30.84 million GPU-hours. At Nov. 2026 rental prices, ≈ 90 to 136 million dollars. Inferred.\n• The cost of the final run of frontier models has grown by ≈ 2.4× every year since 2016 (Epoch AI).",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "8ca7948dfd5d": {
+  "fr": "Construire un modèle, c'est comme construire un immeuble avec des maçons.\n• Il y a un nombre total de briques à poser. Il est fixé d'avance par la taille de l'immeuble.\n• Chaque maçon pose un nombre maximum de briques par seconde.\n• On paie les maçons à l'heure, qu'ils posent des briques ou qu'ils attendent.\n• Sur un vrai chantier, les maçons attendent souvent : le camion de briques, un collègue, une machine en panne.",
+  "en": "Building a model is like building a building with bricklayers.\n• There is a total number of bricks to lay. It is set in advance by the size of the building.\n• Each bricklayer lays a maximum number of bricks per second.\n• Bricklayers are paid by the hour, whether they lay bricks or wait.\n• On a real site, bricklayers often wait: for the brick truck, a colleague, a broken machine.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "4d5e9dba9399": {
+  "fr": "• **Ajouter des puces rend chaque puce moins efficace.** 43 % → 41 % quand on double. Doubler les puces ne double pas la vitesse.\n• **Le réseau électrique encaisse aussi.** Quand 16 000 puces s'arrêtent ensemble (pour la moyenne des gradients ou une panne), la consommation du data center bouge de **dizaines de mégawatts** d'un coup (Meta). 1 mégawatt ≈ la consommation de quelques centaines de foyers.",
+  "en": "• **Adding chips makes each chip less efficient.** 43% → 41% when you double. Doubling the chips doesn't double the speed.\n• **The power grid takes the hit too.** When 16,000 chips stop together (to average gradients or after a failure), the data center's consumption swings by **tens of megawatts** at once (Meta). 1 megawatt ≈ the consumption of a few hundred households.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "4fb12aa9c659": {
+  "fr": "Loi d'échelle",
+  "en": "Scaling law",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "980641846739": {
+  "fr": "Une formule mesurée qui dit de combien la perte baisse quand on augmente le calcul, la taille (N) ou les données (D). C'est une **loi de puissance** : chaque ×10 divise l'écart au plancher par un nombre fixe.",
+  "en": "A measured formula that says how much the loss drops when you increase compute, size (N) or data (D). It is a **power law**: each ×10 divides the gap to the floor by a fixed number.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "695e6ca5fc29": {
+  "fr": "Perte irréductible",
+  "en": "Irreducible loss",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "8c3fdb7a5461": {
+  "fr": "Le plancher de la perte : ce qui reste même avec un modèle infini et des données infinies, parce que le texte a une part imprévisible (« ce midi j'ai mangé des … »).",
+  "en": "The floor of the loss: what remains even with an infinite model and infinite data, because text is partly unpredictable (“for lunch I had …”).",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "80cbe3a6713a": {
+  "fr": "Ratio Chinchilla",
+  "en": "Chinchilla ratio",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "bfb95b60affc": {
+  "fr": "~20 tokens par paramètre : le meilleur modèle pour un budget d'entraînement donné (Chinchilla : 70B, 1 400 Md tokens). Dépassé exprès pour baisser le coût d'usage.",
+  "en": "~20 tokens per parameter: the best model for a given training budget (Chinchilla: 70B, 1.4T tokens). Exceeded on purpose to lower the cost of use.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "4ce1fecb651d": {
+  "fr": "Tu vides une piscine avec un seau magique. À chaque tour, tu enlèves **la moitié** de l'eau qui reste. 1er tour : énormément d'eau. 5e tour : un petit filet. Tu enlèves toujours la même **proportion**, mais une quantité de plus en plus petite.",
+  "en": "You empty a pool with a magic bucket. Each turn, you remove **half** of the water left. 1st turn: a huge amount of water. 5th turn: a trickle. You always remove the same **proportion**, but a smaller and smaller amount.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "cf061b65fc66": {
+  "fr": "**Tu révises un examen.**\n• La 1re heure, tu progresses énormément : tu apprends les bases.\n• La 10e heure, tu progresses encore, mais beaucoup moins.\n• Même en révisant 1 000 heures, tu n'auras pas 20/20 partout : certaines questions sont imprévisibles.\n• Si tu as un temps limité, tu dois choisir : lire tout le manuel vite, ou peu de pages à fond. Le mieux, c'est entre les deux.\n**Un modèle d'IA, c'est pareil.**\n• Les « heures de révision » = le **calcul** qu'on met dans l'entraînement (#16).\n• La « note » = la **perte** : le chiffre qui dit à quel point le modèle se trompe en devinant le mot suivant. Plus elle est basse, mieux c'est. …",
+  "en": "**You are studying for an exam.**\n• In the 1st hour, you make huge progress: you learn the basics.\n• In the 10th hour, you still progress, but much less.\n• Even after 1,000 hours, you won't get full marks everywhere: some questions are unpredictable.\n• If your time is limited, you have to choose: read the whole textbook quickly, or a few pages in depth. The best is in between.\n**An AI model is the same.**\n• The “hours of study” = the **compute** put into training (#16).\n• The “grade” = the **loss**: the number that says how wrong the model is when guessing the next word. The lower, the better. …",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "714f719d041e": {
+  "fr": "• **Ce n'est pas une loi de la nature.** C'est une courbe mesurée puis prolongée. Kaplan (OpenAI, 2020) l'a vue tenir sur plus de 7 ordres de grandeur (×10 000 000). Rien ne garantit la suite.\n• **La perte n'est pas l'intelligence.** Elle mesure « deviner le mot suivant », pas « savoir coder ». Meta a dû construire une 2e étape pour passer de la perte aux résultats d'examens.",
+  "en": "• **It is not a law of nature.** It is a measured curve, then extended. Kaplan (OpenAI, 2020) saw it hold over more than 7 orders of magnitude (×10,000,000). Nothing guarantees what comes next.\n• **Loss is not intelligence.** It measures “guessing the next word”, not “knowing how to code”. Meta had to build a 2nd step to go from loss to exam results.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "5b9e3294ad72": {
+  "fr": "Fine-tuning",
+  "en": "Fine-tuning",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "21c64490932f": {
+  "fr": "Réentraîner un modèle existant sur ses propres données pour le spécialiser.",
+  "en": "Retraining an existing model on your own data to specialize it.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "805c3ac0f783": {
+  "fr": "RLHF",
+  "en": "RLHF",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ },
+ "38002815294d": {
+  "fr": "Apprentissage par renforcement à partir de retours humains, qui transforme un prédicteur en assistant.",
+  "en": "Reinforcement learning from human feedback, which turns a predictor into an assistant.",
+  "par": "claude-code",
+  "date": "2026-11-24"
+ }
+}

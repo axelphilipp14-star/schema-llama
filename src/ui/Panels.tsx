@@ -7,6 +7,7 @@ import { stepAt, type JourneyLayout } from '../scene/journeyLayout'
 import { BLOCK_STEPS } from '../scene/blockGeom'
 import { meanAttnLast } from '../scene/Journey'
 import { stepName } from './Timeline'
+import { BLOCK_PIECE, Fiche, JOURNEY_PIECE } from './Fiche'
 
 export function LangToggle() {
   const { lang, setLang } = useStore()
@@ -135,6 +136,7 @@ export function JourneyPanel({ trace, lay }: { trace: Trace; lay: JourneyLayout 
       <Header trace={trace} />
       <h2 className="step-title">{stepName(t, s, lay.L)}</h2>
       <div className="step-body">{body}</div>
+      <Fiche id={JOURNEY_PIECE[s.kind]} />
 
       <h2>{t.lensTitle}</h2>
       <p className="small muted">{t.lensNote}</p>
@@ -197,6 +199,7 @@ export function BlockPanel({ trace }: { trace: Trace }) {
       </label>
       <h2 className="step-title">{t.blk.stepName[step]}</h2>
       <div className="step-body"><p>{text}</p></div>
+      <Fiche id={BLOCK_PIECE[step]} />
       <h2>{t.blockLensTitle}</h2>
       <Probs items={trace.layers[layer].lens.slice(0, 5)} />
       <Footer trace={trace} />
