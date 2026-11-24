@@ -13,6 +13,7 @@ import { useStore } from './store'
 import { Fps } from './ui/Fps'
 import { LabelOverlay, LabelProjector } from './scene/labels'
 import { Timeline } from './ui/Timeline'
+import { MiniMap, WeightLegend } from './ui/MiniMap'
 import { BlockPanel, JourneyPanel } from './ui/Panels'
 import { EnquetePage, useRoute } from './ui/EnquetePage'
 import { About } from './ui/About'
@@ -75,6 +76,8 @@ function Schema() {
           <LabelProjector />
         </Canvas>
         <LabelOverlay />
+        <MiniMap lay={lay} />
+        {phase === 'respond' && <WeightLegend />}
         <HoverBox />
         {SHOW_FPS && <Fps />}
         {phase === 'make' ? <MakeSteps /> : view === 'journey' ? <Timeline lay={lay} /> : <><BlockCalc trace={trace} /><BlockSteps /></>}

@@ -3,7 +3,7 @@ import { chromium } from '@playwright/test'
 const url = process.argv[2] || 'http://localhost:5173/schema-llama/'
 const out = process.argv[3] ?? 'results/shot.png'
 const wait = +(process.argv[4] ?? 2500)
-const browser = await chromium.launch({ args: ['--use-angle=metal', '--enable-gpu', '--ignore-gpu-blocklist'], headless: false })
+const browser = await chromium.launch({ args: ['--window-position=-3000,0', '--use-angle=metal', '--enable-gpu', '--ignore-gpu-blocklist'], headless: false })
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 })
 const logs = []
 page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) logs.push(`[${m.type()}] ${m.text()}`) })

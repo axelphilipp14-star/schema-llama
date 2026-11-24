@@ -9,6 +9,7 @@ import { meanAttnLast } from '../scene/Journey'
 import { stepName } from './Timeline'
 import { BLOCK_PIECE, Fiche, JOURNEY_PIECE } from './Fiche'
 import { TryPanel } from './TryPanel'
+import { CompareTab } from './CompareTab'
 import { useOutputProbs } from '../data/useOutputProbs'
 
 export function LangToggle() {
@@ -85,8 +86,8 @@ function Tabs() {
   const { tab, setTab } = useStore()
   return (
     <div className="tabs" role="tablist">
-      {(['journey', 'try'] as const).map((k) => (
-        <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{k === 'journey' ? t.tabs.journey : t.tabs.tryit}</button>
+      {(['journey', 'try', 'compare'] as const).map((k) => (
+        <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{k === 'journey' ? t.tabs.journey : k === 'try' ? t.tabs.tryit : t.tabs.compare}</button>
       ))}
     </div>
   )
@@ -163,6 +164,14 @@ export function JourneyPanel({ trace, lay }: { trace: Trace; lay: JourneyLayout 
   }
 
   const cur = Math.floor(progress)
+  if (tab === 'compare') return (
+    <aside className="panel">
+      <Header trace={trace} />
+      <Tabs />
+      <CompareTab />
+      <Footer trace={trace} />
+    </aside>
+  )
   if (tab === 'try') return (
     <aside className="panel">
       <Header trace={trace} />

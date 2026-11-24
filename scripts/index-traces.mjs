@@ -8,6 +8,8 @@ const list = readdirSync(dir).filter((f) => f.endsWith('.json') && f !== 'index.
     id: f.replace(/\.json$/, ''), prompt: t.prompt, model: t.meta.model_id, n_layers: t.config.n_layers, dtype: t.meta.dtype,
     // Résumé pour la scène « fabriquer » (M4) : tokens et top-5 de sortie, sans charger la trace entière.
     tokens: t.tokens, top5: t.output.top10.slice(0, 5), config: t.config,
+    // Comparaison 1B ↔ 3B : top-1 lu à la sortie de chaque bloc (logit lens).
+    lens: t.layers.map((l) => l.lens[0]),
   }
 })
 writeFileSync(join(dir, 'index.json'), JSON.stringify(list, null, 1) + '\n')

@@ -48,7 +48,7 @@ function NormCard({ d, title }: { d: NormDetail; title?: string }) {
       <Row label={t.blk.rowX} vals={d.x8} i={0} tag={t.blk.fromTrace} />
       <div className="crow" style={rv(1)}><span className="clabel mono">{t.blk.rowRms(num(d.rms, 5))}</span></div>
       <Row label={t.blk.rowXr} vals={xr} i={2} tag={t.blk.calc} cls="is-calc" />
-      <Row label={t.blk.rowW} vals={d.w8} i={3} tag={t.blk.fromTrace} />
+      <Row label={t.blk.rowW} vals={d.w8} i={3} tag={t.minimap.weightTag} cls="is-weight" />
       <Row label={t.blk.rowY} vals={d.y8} i={4} tag={t.blk.fromTrace} cls="result" />
       <p className="small muted" style={rv(5)}>{t.blk.calc} : x ÷ RMS × w = {rmsApply(d).slice(0, 3).map((v) => num(v, 4)).join(' · ')} …</p>
     </>

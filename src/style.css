@@ -224,3 +224,33 @@ html, body, #root { margin: 0; height: 100%; background: var(--bg); color: var(-
 .about a { color: var(--emb); }
 .built-big { margin-top: 30px; font-weight: 600; }
 .first-time { color: var(--make); }
+
+/* Mini-carte, légende poids/activations, comparaison */
+.minimap { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 32; display: flex; align-items: center; flex-wrap: nowrap;
+  background: color-mix(in srgb, var(--surface) 92%, transparent); border: 1px solid var(--grid); border-radius: 10px; padding: 6px 8px; max-width: calc(100% - 32px); overflow-x: auto; }
+.mm-item { display: inline-flex; align-items: center; }
+.mm-arrow { color: var(--muted); margin: 0 4px; font-size: 12px; }
+.mm-node { background: none; border: 1px solid transparent; border-radius: 6px; color: var(--muted); font: 600 12px Inter, sans-serif; padding: 4px 8px; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+.mm-node:hover { color: var(--text); }
+.mm-node.on { color: var(--text); border-color: var(--c); background: color-mix(in srgb, var(--c) 18%, transparent); }
+.mm-ticks { display: inline-flex; gap: 1px; }
+.mm-ticks i { width: 4px; height: 12px; background: var(--grid); border-radius: 1px; cursor: pointer; }
+.mm-ticks i.done { background: color-mix(in srgb, var(--attn) 55%, var(--grid)); }
+.mm-ticks i.cur { background: var(--attn); }
+.wlegend { position: absolute; top: 62px; right: 16px; z-index: 31; display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: var(--muted);
+  background: color-mix(in srgb, var(--surface) 85%, transparent); border: 1px solid var(--grid); border-radius: 8px; padding: 6px 9px; }
+.wlegend span { display: flex; align-items: center; gap: 7px; }
+.wlegend i { display: inline-block; width: 12px; height: 12px; border-radius: 2px; }
+.sw-act { background: var(--attn); }
+.sw-w { border: 1.5px solid var(--emb); background: color-mix(in srgb, var(--emb) 10%, transparent); }
+.fps { top: auto !important; bottom: 96px; }
+.crow.is-weight .clabel { color: var(--emb); }
+.cmp-table td:first-child { color: var(--muted); }
+.cmp-table td.mono { text-align: right; }
+.strip-row { display: grid; grid-template-columns: 26px 1fr 110px; gap: 8px; align-items: center; margin: 6px 0; }
+.strip { display: flex; gap: 1px; height: 16px; }
+.strip i { flex: 1; background: var(--grid); border-radius: 1px; }
+.strip i.hit { background: var(--out); }
+.cmp-table td.mono { white-space: nowrap; font-size: 12px; }
+.strip-row { grid-template-columns: 26px 1fr 128px; }
+.strip-row > span:last-child { white-space: nowrap; }

@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import { Line } from '@react-three/drei'
 import { Color } from 'three'
 import { Cells } from './Cells'
+import { WeightSlab } from './WeightSlab'
 import { Label } from './labels'
 import type { Trace } from '../data/trace'
 import { showTok } from '../data/trace'
@@ -102,10 +103,7 @@ export function Block({ trace }: { trace: Trace }) {
 
       {([['norm1', X.norm1, '①'], ['norm2', X.norm2, '⑧']] as const).map(([k, x, mark]) => (
         <group key={k}>
-          <mesh position={[x, 0.55, 0]}>
-            <boxGeometry args={[0.18, 1.1, LANE * n + 0.2]} />
-            <meshStandardMaterial color={C.norm} transparent opacity={on(k) ? 0.75 : 0.2} emissive={C.norm} emissiveIntensity={on(k) ? 0.4 : 0} />
-          </mesh>
+          <WeightSlab position={[x, 0.55, 0]} size={[0.18, 1.1, LANE * n + 0.2]} color={C.norm} dim={!on(k)} />
           <Label p={[x, 1.55, 0]} color={on(k) ? C.text : C.muted} small priority={on(k) ? 6 : 1}>{mark} {t.blk.normLbl}</Label>
         </group>
       ))}
@@ -141,10 +139,7 @@ export function Block({ trace }: { trace: Trace }) {
         <group key={k}>
           <Line points={[[xa, ATTN_Y0 + (MLP_H8 - H3) / 2, 0], [xb, ATTN_Y0, 0]]} color={C.mlp} lineWidth={1} transparent opacity={op('mlp')} />
           <Line points={[[xa, ATTN_Y0 + (MLP_H8 + H3) / 2, 0], [xb, ATTN_Y0 + MLP_H8, 0]]} color={C.mlp} lineWidth={1} transparent opacity={op('mlp')} />
-          <mesh position={[xa, ATTN_Y0 + MLP_H8 / 2, 0]}>
-            <boxGeometry args={[0.12, H3, 0.12]} />
-            <meshStandardMaterial color={C.mlp} transparent opacity={0.5 * op('mlp')} />
-          </mesh>
+          <WeightSlab position={[xa, ATTN_Y0 + MLP_H8 / 2, 0]} size={[0.12, H3, 0.12]} color={C.mlp} dim={!on('mlp')} />
         </group>
       ))}
       <mesh position={[xm, ATTN_Y0 + MLP_H8 / 2, 0]}>

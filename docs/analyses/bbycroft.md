@@ -20,11 +20,11 @@ Parcours guidé en chapitres (Embedding, Layer Norm, Self Attention, Projection,
 ## Un endroit où l'on ne comprend pas ce qui se passe
 La « Position Embed » : chez lui, la position est une table ajoutée à l'entrée. Le lecteur ne voit pas *pourquoi* le modèle a besoin de la position, ni que d'autres modèles font autrement. **Notre schéma a le défaut inverse : Llama encode la position par RoPE (une rotation de Q et K dans l'attention), et notre schéma ne le montre nulle part.** À corriger.
 
-## Ce qu'on en tire pour notre schéma (à faire)
+## Ce qu'on en tire pour notre schéma (fait le 24/11/2026, à la demande d'Axel)
 | Idée | Où | Effort |
 |---|---|---|
-| Montrer **RoPE** : la position entre dans Q et K (étape ② du bloc ; nos q8/k8 sont déjà après RoPE) | M2, carte « Q, K, V » + fiche | faible |
-| Distinguer **poids** et **activations** par la forme ou la couleur (règle DESIGN.md) | DESIGN.md + scène | moyen |
-| **Comparer 1B et 3B** sur la même phrase (16 vs 28 blocs, 2 048 vs 3 072) : les traces existent | onglet « À toi » | faible |
-| **Mini-carte 2D** du trajet synchronisée avec la 3D | frise | moyen |
+| ✅ Montrer **RoPE** : la position entre dans Q et K (étape ② du bloc) | M2, carte « Q, K, V » | fait |
+| ✅ Distinguer **poids** (fil de fer) et **activations** (plein), légende dans la scène | DESIGN.md règle 8, `WeightSlab` | fait |
+| ✅ **Comparer 1B et 3B** : onglet « 1B ↔ 3B » (dimensions, paramètres, premier choix, bande du logit lens par bloc) | `src/ui/CompareTab.tsx` | fait |
+| ✅ **Mini-carte 2D** synchronisée et cliquable (trajet, bloc, fabrication) | `src/ui/MiniMap.tsx` | fait |
 Ce qu'on garde d'avance : le vrai modèle (Llama 3.2 3B), l'architecture actuelle, FR/EN, la phrase libre et la température en direct.

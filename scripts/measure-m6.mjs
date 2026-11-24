@@ -2,7 +2,7 @@
 import { chromium } from '@playwright/test'
 import { writeFileSync } from 'node:fs'
 const URL = process.argv[2] ?? 'https://axelphilipp14-star.github.io/schema-llama/'
-const browser = await chromium.launch({ headless: false, args: ['--use-angle=metal'] })
+const browser = await chromium.launch({ headless: false, args: ['--window-position=-3000,0', '--use-angle=metal'] })
 const out = { url: URL, date: new Date().toISOString(), runs: [] }
 for (let r = 0; r < 3; r++) {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } }) // contexte neuf = cache vide

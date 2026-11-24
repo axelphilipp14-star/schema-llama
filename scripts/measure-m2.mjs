@@ -1,6 +1,6 @@
 // E3 dans la vue « dans un bloc » : images/s pendant les vols de caméra entre les 9 étapes (dpr 2, 1440×900).
 import { chromium } from '@playwright/test'
-const browser = await chromium.launch({ headless: false, args: ['--use-angle=metal', '--enable-gpu', '--ignore-gpu-blocklist'] })
+const browser = await chromium.launch({ headless: false, args: ['--window-position=-3000,0', '--use-angle=metal', '--enable-gpu', '--ignore-gpu-blocklist'] })
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 })
 const errors = []
 page.on('pageerror', (e) => errors.push(e.message))

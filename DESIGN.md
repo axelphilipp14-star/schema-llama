@@ -30,4 +30,6 @@ Valeurs numériques : négatif → bleu froid, positif → rouge chaud, échelle
 5. **Jamais plus de ~8 nombres lisibles à l'écran** ; le reste en couleur. Survol = valeur exacte.
 6. **Lumière douce** : une lumière ambiante + une directionnelle, pas d'ombres portées lourdes.
 7. **Performance** : ≥ 50 i/s sur le Mac d'Axel (A18 Pro, 8 Go). InstancedMesh pour toute répétition, pas de géométrie par cellule.
-8. **Honnêteté** : chaque nombre indique sa source (trace / direct) ; une échelle compressée est signalée.
+8. **Poids ≠ activations** : les **poids** (appris une fois, identiques pour toute phrase : table d'embedding, tête de sortie, gains RMSNorm, matrices du MLP) sont en **fil de fer translucide** (`WeightSlab`) ; les **activations** (calculées pour la phrase : vecteurs, cases d'attention, neurones allumés, flux) sont des **volumes pleins**. Légende toujours visible dans la vue « Répondre ».
+9. **Mini-carte 2D** en haut de la scène : le schéma de la vue en cours, l'étape active allumée, cliquable ; la 3D et la carte ne se contredisent jamais.
+10. **Honnêteté** : chaque nombre indique sa source (trace / direct) ; une échelle compressée est signalée.

@@ -10,6 +10,7 @@ import { anim, useStore } from '../store'
 import { useT } from '../i18n'
 import { C, div } from './colors'
 import { Cells } from './Cells'
+import { WeightSlab } from './WeightSlab'
 import { Label } from './labels'
 import { BLOCK_W, LANE, TABLE_H, pulseX, stepAt, type JourneyLayout } from './journeyLayout'
 import { useOutputProbs } from '../data/useOutputProbs'
@@ -94,10 +95,7 @@ export function Journey({ trace, lay }: { trace: Trace; lay: JourneyLayout }) {
       ))}
 
       {/* Table d'embedding */}
-      <mesh position={[lay.xTable, TABLE_H / 2, 0]}>
-        <boxGeometry args={[0.3, TABLE_H, zSpan]} />
-        <meshStandardMaterial color={C.emb} transparent opacity={0.12} />
-      </mesh>
+      <WeightSlab position={[lay.xTable, TABLE_H / 2, 0]} size={[0.3, TABLE_H, zSpan]} color={C.emb} />
       <Cells pos={rows.pos} colors={rows.colors} size={[0.36, 0.06, LANE * 0.8]}
         info={(i) => ({ label: t.rowHover(toks[i], trace.tokens[i].id), value: t.rowHoverVal(num(trace.embeddings.norm[i], 3)) })} />
       {trace.tokens.map((tk, i) => (
@@ -143,17 +141,11 @@ export function Journey({ trace, lay }: { trace: Trace; lay: JourneyLayout }) {
       ))}
 
       {/* RMSNorm finale */}
-      <mesh position={[lay.xNorm, 0.4, 0]}>
-        <boxGeometry args={[0.16, 0.9, zSpan]} />
-        <meshStandardMaterial color={C.norm} transparent opacity={0.5} />
-      </mesh>
+      <WeightSlab position={[lay.xNorm, 0.4, 0]} size={[0.16, 0.9, zSpan]} color={C.norm} />
       <Label p={[lay.xNorm, 1.15, 0]} color={C.norm} small>{t.finalNorm}</Label>
 
       {/* Tête de sortie (même table que l'entrée) */}
-      <mesh position={[lay.xHead, TABLE_H / 2, laneZ(n - 1)]}>
-        <boxGeometry args={[0.3, TABLE_H, LANE * 1.2]} />
-        <meshStandardMaterial color={C.out} transparent opacity={0.14} />
-      </mesh>
+      <WeightSlab position={[lay.xHead, TABLE_H / 2, laneZ(n - 1)]} size={[0.3, TABLE_H, LANE * 1.2]} color={C.out} />
       {[0.1, 0.3, 0.5, 0.7, 0.9].map((f) => (
         <Line key={f} points={[[lay.xNorm + 0.3, 0, laneZ(n - 1)], [lay.xHead - 0.16, f * TABLE_H, laneZ(n - 1)]]} color={C.out} lineWidth={1} transparent opacity={0.18} />
       ))}

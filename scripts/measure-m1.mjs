@@ -2,7 +2,7 @@
 // Usage : node scripts/measure-m1.mjs [traceId]
 import { chromium } from '@playwright/test'
 const trace = process.argv[2] ?? '3b-instruct-en-satellite'
-const browser = await chromium.launch({ headless: false, args: ['--use-angle=metal', '--enable-gpu', '--ignore-gpu-blocklist'] })
+const browser = await chromium.launch({ headless: false, args: ['--window-position=-3000,0', '--use-angle=metal', '--enable-gpu', '--ignore-gpu-blocklist'] })
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 })
 const errors = []
 page.on('pageerror', (e) => errors.push(e.message))

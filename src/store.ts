@@ -29,8 +29,8 @@ interface State {
   // Vue « dans un bloc » (M2)
   traceId: string
   setTraceId: (id: string) => void
-  tab: 'journey' | 'try'
-  setTab: (t: 'journey' | 'try') => void
+  tab: 'journey' | 'try' | 'compare'
+  setTab: (t: 'journey' | 'try' | 'compare') => void
   temperature: number
   setTemperature: (t: number) => void
   phase: 'make' | 'respond'
