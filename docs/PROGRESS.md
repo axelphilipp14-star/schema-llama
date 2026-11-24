@@ -104,7 +104,7 @@
 - Observation pour M4 : « The capital of France is » → « Paris » **69,9 %** (Instruct) contre **24,6 %** (base) : l'effet du fine-tuning, chiffré.
 - Preuve : `docs/preuves/3B_*.png`, `docs/preuves/M1_mesure_3b.json`, `docs/preuves/M2_mesure_fps_3b.json`, `docs/preuves/M3_direct_3b.json`.
 
-## (heure du commit, voir git) — M4 · fabriquer : données → tokenizer → pré-entraînement → fine-tuning
+## 2026-11-24 21:51 (commit) — M4 · fabriquer : données → tokenizer → pré-entraînement → fine-tuning
 - Sélecteur **1 Fabriquer / 2 Répondre** en tête du panneau. Scène 3D à 4 stations (caméra qui vole d'une station à l'autre, vue d'ensemble), panneau avec les **chiffres et leur source** (étiquettes Meta / calculé / trace) et les fiches tirées des enquêtes (données, tokenizer, pré-entraînement + lois d'échelle, fine-tuning).
 - Chiffres officiels vérifiés sur la fiche Meta de Llama 3.2 3B (24/11/2026) → `content/fabriquer.json` : jusqu'à 9 000 milliards de tokens, données jusqu'à déc. 2023, 460 000 h de GPU H100 pour le 3B, 133 t CO₂eq, distillation depuis Llama 3.1 8B/70B après élagage, tours SFT + RS + DPO. **Incohérence de la source signalée** (916 000 h annoncées en texte, tableau 370 000 + 460 000 + 86 000) : on affiche le tableau et on le dit.
 - **Calculé dans le navigateur, à partir des traces** : paramètres recalculés depuis la config = **3,21 Md** (Meta : 3,21 B ; 1B : 1,24 Md) — `tests/fabriquer.test.ts` ; tokens par paramètre ≈ 2 801 (Chinchilla ≈ 20) ; 6·N·D ≈ 1,7 × 10²³ FLOP ; tokens par mot sur nos 5 phrases : 1,05 (EN) contre 1,33 (FR) ; perte −ln p du modèle de base sur « The capital of France is » → « Paris » (24,6 %) = 1,40.
