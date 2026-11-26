@@ -141,3 +141,10 @@
 - Cause du diagramme #12 cassé : la note du coffre était juste ; `build-content.mjs` convertissait `[[…]]` en lien Obsidian **jusque dans les blocs de code** (forme Mermaid `V[["…"]]` → `V"…"`). Correction : conversion limitée au texte hors code (blocs et code en ligne). Test de non-régression ajouté (échoue sans la correction, passe avec). Seule la page 12 change.
 - Enquête #18 : décision d'Axel « soit tu l'écris soit tu t'en passes » → on s'en passe. Mention « pas encore écrite » retirée ; la station garde l'explication, les étapes Meta sourcées, la comparaison base/Instruct tracée et les définitions du Lexique. Si #18 est écrite un jour, il suffit de l'ajouter à `pieces.json`.
 - Preuve : 133 tests verts.
+
+## 2026-11-26 21:19 (date) — Démo publique du 29/11 : 9 défauts corrigés, déployé, vérifié en ligne
+- Commit `cb5b286` sur `main` (fast-forward, accord d'Axel), workflow Pages n° 10 vert.
+- 1 Cadrage : vue d'ensemble cadrée dans la zone libre (mini-carte, légende, accueil, frise exclus) ; libellés masqués au bord ou sous un bandeau ; tokens tous ou aucun. 2 Bandeau d'accueil FR/EN, 2 lignes, fermable. 3 Panneau ≥ 14 px, chiffre clé en tête, détail replié. 4 Note « premiers blocs » calculée sur la trace : le top-1 = dernier mot lu aux blocs 1–2 (phrase par défaut), plus à partir du **bloc 3**. 5 « schéma, pas à l'échelle » dans la scène. 6 Durées 1re fois / cache, étape du chargement. 7 Branche du frontmatter pour les 18 enquêtes. 8 Open Graph + `og.png` 1200×630. 9 Liens directs `#/repondre`, `#/bloc/N`, `#/fabriquer/<étape>`.
+- Tests : 139 unitaires, 14 e2e en local ; suite « démo » + « fiche → enquête » (9) verte **sur le site en ligne**.
+- Preuves : `docs/preuves/demo-2911/` (avant/après, `en_ligne/`), GIF `docs/preuves/demo-linkedin.gif` (19,9 s, 1200 px, 7,5 Mo). AN-005 (2 régressions attrapées).
+- Non fait : coffre inaccessible depuis la session cloud → entrée du Suivi rédigée dans `docs/preuves/entree-suivi.md` (à coller), `npm run obsidian` non lancé. Point 6 : chargement réel non testable ici (pas d'accès Hugging Face) → captures de chargement simulées.
