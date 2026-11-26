@@ -1,5 +1,5 @@
 import type { Trace } from '../data/trace'
-import { showTok } from '../data/trace'
+import { lensEchoesInput, showTok } from '../data/trace'
 import { useStore } from '../store'
 import { useT } from '../i18n'
 import { useEffect } from 'react'
@@ -81,6 +81,23 @@ export function Probs({ items, highlight }: { items: { t: string; p: number }[];
   )
 }
 
+/** Le chiffre clé d'une étape : en premier, en gros, avec une ligne pour dire ce qu'il mesure. */
+export function KeyFig({ value, label, tone }: { value: React.ReactNode; label: string; tone?: 'out' | 'emb' | 'make' }) {
+  return (
+    <div className={`keyfig ${tone ?? ''}`}>
+      <div className="kf-val mono">{value}</div>
+      <div className="kf-lbl">{label}</div>
+    </div>
+  )
+}
+
+/** Sous la prédiction d'un bloc : le logit lens des premiers blocs répète le dernier mot lu (vérifié sur la trace, pas en dur). */
+export function EarlyNote({ trace, layer }: { trace: Trace; layer: number }) {
+  const { t } = useT()
+  if (!lensEchoesInput(trace, layer)) return null
+  return <p className="early-note">{t.earlyNote}</p>
+}
+
 function Tabs() {
   const { t } = useT()
   const { tab, setTab } = useStore()
@@ -111,6 +128,7 @@ export function JourneyPanel({ trace, lay }: { trace: Trace; lay: JourneyLayout 
   if (s.kind === 'tokens') {
     body = (
       <>
+        <KeyFig value={n} label={t.keyfig.tokens(num(c.vocab, 0))} tone="emb" />
         <p>{t.step.tokens(n, num(c.vocab, 0))}</p>
         <div className="chips">{trace.tokens.map((x, i) => <span key={i} className="chip"><b className="mono">{toks[i]}</b><i className="mono">{x.id}</i></span>)}</div>
       </>
@@ -118,9 +136,12 @@ export function JourneyPanel({ trace, lay }: { trace: Trace; lay: JourneyLayout 
   } else if (s.kind === 'embed') {
     body = (
       <>
+        <KeyFig value={num(c.d_model, 0)} label={t.keyfig.embed} tone="emb" />
         <p>{t.step.embed(num(c.vocab, 0), num(c.d_model, 0))}</p>
-        <p className="small muted">{t.step.embedVec(lastTok, c.d_model)}</p>
-        <p className="mono vals">{trace.embeddings.first16[n - 1].slice(0, 8).map((v) => num(v, 4)).join('  ')} …</p>
+        <details className="more"><summary>{t.keyfig.details}</summary>
+          <p className="small muted">{t.step.embedVec(lastTok, c.d_model)}</p>
+          <p className="mono vals">{trace.embeddings.first16[n - 1].slice(0, 8).map((v) => num(v, 4)).join('  ')} …</p>
+        </details>
       </>
     )
   } else if (s.kind === 'block') {
@@ -130,32 +151,39 @@ export function JourneyPanel({ trace, lay }: { trace: Trace; lay: JourneyLayout 
     for (let k = 1; k < n - 1; k++) if (w[k] > w[kBest]) kBest = k
     body = (
       <>
+        <KeyFig value={<>{showTok(trace.layers[l].lens[0].t)} <span className="kf-sub">{pct(trace.layers[l].lens[0].p)}</span></>} label={t.keyfig.block} tone="out" />
+        <EarlyNote trace={trace} layer={l} />
         <p>{t.step.block(l + 1)}</p>
-        {n > 2 && <p className="small">{t.step.blockLooks(lastTok, toks[kBest], pct(w[kBest]), pct(w[0], 0))}</p>}
-        <p className="small muted">{t.step.blockLens}</p>
-        <Probs items={trace.layers[l].lens.slice(0, 3)} />
+        <details className="more"><summary>{t.keyfig.details}</summary>
+          {n > 2 && <p className="small">{t.step.blockLooks(lastTok, toks[kBest], pct(w[kBest]), pct(w[0], 0))}</p>}
+          <p className="small muted">{t.step.blockLens}</p>
+          <Probs items={trace.layers[l].lens.slice(0, 3)} />
+        </details>
       </>
     )
   } else if (s.kind === 'norm') {
     body = (
       <>
+        <KeyFig value={`${num(trace.layers[c.n_layers - 1].resid_out_norm[n - 1], 1)} → ${num(trace.output.final_norm_last, 1)}`} label={t.keyfig.norm} />
         <p>{t.step.norm}</p>
-        <p className="mono vals">{t.step.normVals(num(trace.layers[c.n_layers - 1].resid_out_norm[n - 1], 1), num(trace.output.final_norm_last, 1))}</p>
       </>
     )
   } else if (s.kind === 'head') {
     body = (
       <>
+        <KeyFig value={<>{showTok(trace.output.top50_logits[0].t)} <span className="kf-sub">{num(trace.output.top50_logits[0].logit, 2)}</span></>} label={t.keyfig.head} tone="out" />
         <p>{t.step.head(num(c.vocab, 0), c.tie_embeddings)}</p>
-        <p className="small muted">{t.step.headTop}</p>
-        <p className="mono vals">{trace.output.top50_logits.slice(0, 5).map((x) => `${showTok(x.t)} ${num(x.logit, 2)}`).join(' · ')}</p>
+        <details className="more"><summary>{t.keyfig.details}</summary>
+          <p className="small muted">{t.step.headTop}</p>
+          <p className="mono vals">{trace.output.top50_logits.slice(0, 5).map((x) => `${showTok(x.t)} ${num(x.logit, 2)}`).join(' · ')}</p>
+        </details>
       </>
     )
   } else {
     body = (
       <>
+        <KeyFig value={<>{showTok(out.top10[0].t)} <span className="kf-sub">{pct(out.top10[0].p)}</span></>} label={t.keyfig.probs} tone="out" />
         <p>{t.step.probs}</p>
-        <p>{t.step.chosen} : <b className="mono chosen">{showTok(out.top10[0].t)}</b></p>
         <h2>{t.top10}</h2>
         <Probs items={out.top10} highlight={0} />
         {!out.exact && <p className="small muted">{t.tryit.srcTraceApprox}</p>}
@@ -188,7 +216,7 @@ export function JourneyPanel({ trace, lay }: { trace: Trace; lay: JourneyLayout 
       <div className="step-body">{body}</div>
       <Fiche id={JOURNEY_PIECE[s.kind]} />
 
-      <h2>{t.lensTitle}</h2>
+      <details className="more lens-box"><summary>{t.lensTitle}</summary>
       <p className="small muted">{t.lensNote}</p>
       <ol className="lens">
         {trace.layers.map((L, k) => {
@@ -203,6 +231,7 @@ export function JourneyPanel({ trace, lay }: { trace: Trace; lay: JourneyLayout 
           )
         })}
       </ol>
+      </details>
       <Footer trace={trace} />
     </aside>
   )
@@ -210,7 +239,7 @@ export function JourneyPanel({ trace, lay }: { trace: Trace; lay: JourneyLayout 
 
 /** Panneau de la vue « dans un bloc » (M2) : explication de l'étape, choix du bloc et de la tête. */
 export function BlockPanel({ trace }: { trace: Trace }) {
-  const { t, num } = useT()
+  const { t, num, pct } = useT()
   const { layer, setLayer, head, setHead, blockStep, setBlockStep } = useStore()
   const c = trace.config
   const step = BLOCK_STEPS[blockStep]
@@ -247,11 +276,14 @@ export function BlockPanel({ trace }: { trace: Trace }) {
         <input type="range" min={0} max={c.n_heads - 1} value={head} onChange={(e) => setHead(+e.target.value)} />
         <span className="mono">{head + 1} / {c.n_heads}</span>
       </label>
+      <KeyFig value={<>{showTok(trace.layers[layer].lens[0].t)} <span className="kf-sub">{pct(trace.layers[layer].lens[0].p)}</span></>} label={t.keyfig.block} tone="out" />
+      <EarlyNote trace={trace} layer={layer} />
       <h2 className="step-title">{t.blk.stepName[step]}</h2>
       <div className="step-body"><p>{text}</p></div>
+      <details className="more"><summary>{t.blockLensTitle}</summary>
+        <Probs items={trace.layers[layer].lens.slice(0, 5)} />
+      </details>
       <Fiche id={BLOCK_PIECE[step]} />
-      <h2>{t.blockLensTitle}</h2>
-      <Probs items={trace.layers[layer].lens.slice(0, 5)} />
       <Footer trace={trace} />
     </aside>
   )

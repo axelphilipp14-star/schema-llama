@@ -51,3 +51,8 @@ export function showTok(t: string): string {
   if (t === '<|begin_of_text|>') return BOS_LABEL.current
   return t.replace(/ /g, '·').replace(/\n/g, '⏎')
 }
+
+/** Vrai si, à la sortie du bloc `l`, le top-1 du logit lens est le dernier token lu (le modèle « répète » ce qu'il vient de lire). */
+export function lensEchoesInput(trace: Trace, l: number) {
+  return trace.layers[l].lens[0].id === trace.tokens[trace.tokens.length - 1].id
+}

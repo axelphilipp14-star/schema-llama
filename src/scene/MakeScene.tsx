@@ -133,6 +133,8 @@ export function MakeScene({ traces, sentence }: { traces: TraceSummary[]; senten
         </mesh>
       ))}
       {funnel.map((w, i) => <Label key={i} p={[SX.data + w / 2 + 0.2, 0.5 + i * 1.05, 0]} color={C.muted} small align="left" priority={on(0) ? 4 : 0}>{t.make.funnelStage[i]}</Label>)}
+      {/* Toujours visible dans la scène : l'entonnoir n'est pas une mesure. */}
+      <Label p={[SX.data, 4.35, 0]} color={C.make} small priority={9}>{t.make.notToScale}</Label>
       <Label p={[SX.data, 4.9, 0]} color={on(0) ? C.text : C.muted} priority={6}>{t.make.dataTokens(num(facts.donnees.tokens_max / 1e12, 0))}</Label>
 
       {/* 2. Tokenizer */}

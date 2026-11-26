@@ -91,7 +91,7 @@ export function Journey({ trace, lay }: { trace: Trace; lay: JourneyLayout }) {
           color={i === n - 1 ? C.emb : C.resid} lineWidth={i === n - 1 ? 1.6 : 1} transparent opacity={i === n - 1 ? 0.75 : 0.28} />
       ))}
       {toks.map((tk, i) => (
-        <Label key={i} p={[lay.xTok + 0.6, 0, laneZ(i)]} color={i === n - 1 ? C.text : C.emb} small align="right" priority={i === n - 1 ? 5 : 1}>{tk}</Label>
+        <Label key={i} p={[lay.xTok + 0.6, 0, laneZ(i)]} color={i === n - 1 ? C.text : C.emb} small align="right" priority={i === n - 1 ? 5 : 1} group="tokens">{tk}</Label>
       ))}
 
       {/* Table d'embedding */}
@@ -137,7 +137,7 @@ export function Journey({ trace, lay }: { trace: Trace; lay: JourneyLayout }) {
       })}
 
       {activeLayer >= 0 && toks.map((tk, i) => (
-        <Label key={`al-${i}`} p={[lay.xBlock(activeLayer) - BLOCK_W / 2 - 0.08, 0.05, laneZ(i)]} color={i === n - 1 ? C.text : C.muted} small align="right">{tk}</Label>
+        <Label key={`al-${i}`} p={[lay.xBlock(activeLayer) - BLOCK_W / 2 - 0.08, 0.05, laneZ(i)]} color={i === n - 1 ? C.text : C.muted} small align="right" group="tokens-block">{tk}</Label>
       ))}
 
       {/* RMSNorm finale */}
@@ -154,7 +154,7 @@ export function Journey({ trace, lay }: { trace: Trace; lay: JourneyLayout }) {
         <meshStandardMaterial color={C.out} emissive={C.out} emissiveIntensity={0.6} />
       </mesh>
       <Line points={[[lay.xHead + 0.2, rowY(trace.output.greedy_id), laneZ(n - 1)], [lay.xProbs, barY(0), laneZ(n - 1)]]} color={C.out} lineWidth={1.5} transparent opacity={0.7} />
-      <Label p={[lay.xHead, -0.55, laneZ(n - 1)]} color={C.out} small>{t.outTable}</Label>
+      <Label p={[lay.xHead + 0.3, -1.15, laneZ(n - 1) + 0.3]} color={C.out} small>{t.outTable}</Label>
       {cfg.tie_embeddings && (
         <>
           <QuadraticBezierLine start={[lay.xTable, TABLE_H + 0.05, 0]} end={[lay.xHead, TABLE_H + 0.05, laneZ(n - 1)]}

@@ -4,7 +4,7 @@ import index from '../../content/enquetes.json'
 import { useT } from '../i18n'
 import { LangToggle } from './Panels'
 
-type Entry = { id: string; numero: string; titre: string; bloc: string | null; date: string | null }
+type Entry = { id: string; numero: string; titre: string; branche: string | null; date: string | null }
 const LIST = index.enquetes as Entry[]
 
 export function EnquetePage({ id }: { id: string | null }) {
@@ -73,12 +73,12 @@ export function EnquetePage({ id }: { id: string | null }) {
               <h1>{t.pages.title}</h1>
               <p className="muted">{t.pages.intro}</p>
               <ol className="reader-index">
-                {LIST.map((e) => <li key={e.id}><a href={`#/enquete/${e.id}`}><span className="mono">#{e.numero}</span> {e.titre}</a>{e.bloc && <span className="muted small"> · {e.bloc}</span>}</li>)}
+                {LIST.map((e) => <li key={e.id}><a href={`#/enquete/${e.id}`}><span className="mono">#{e.numero}</span> {e.titre}</a>{e.branche && <span className="muted small"> · {e.branche}</span>}</li>)}
               </ol>
             </>
           ) : (
             <article lang="fr">
-              <p className="muted small mono">#{entry.numero}{entry.bloc ? ` · ${entry.bloc}` : ''}{entry.date ? ` · ${entry.date}` : ''}</p>
+              <p className="muted small mono">#{entry.numero}{entry.branche ? ` · ${entry.branche}` : ''}{entry.date ? ` · ${entry.date}` : ''}</p>
               <h1>{entry.titre}</h1>
               {html == null ? <p className="muted">…</p> : <div className="prose" ref={prose} dangerouslySetInnerHTML={{ __html: html }} />}
               <p className="small muted reader-src">{t.pages.source}</p>

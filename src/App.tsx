@@ -17,8 +17,11 @@ import { MiniMap, WeightLegend } from './ui/MiniMap'
 import { BlockPanel, JourneyPanel } from './ui/Panels'
 import { EnquetePage, useRoute } from './ui/EnquetePage'
 import { About } from './ui/About'
+import { Welcome } from './ui/Welcome'
 import { MakeRig, MakeScene, type TraceSummary } from './scene/MakeScene'
 import { MakePanel, MakeSteps } from './ui/MakePanel'
+import { parseSchemaLink } from './route'
+import { anim } from './store'
 
 
 /** Compteur d'images/s : en développement, ou avec ?fps sur le site publié. */
@@ -45,6 +48,24 @@ function Schema() {
   useEffect(() => { document.documentElement.lang = lang }, [lang])
   const lay = useMemo(() => (trace ? journeyLayout(trace) : null), [trace])
   const geo = useMemo(() => (trace ? blockGeom(trace) : null), [trace])
+  // Liens directs (#/bloc/1, #/fabriquer/tokenizer…) : appliqués au chargement et à chaque changement de hash.
+  useEffect(() => {
+    if (!lay) return
+    const apply = () => {
+      const link = parseSchemaLink(location.hash, lay.L)
+      if (!link) return
+      const s = useStore.getState()
+      if (link.phase === 'make') { s.setPhase('make'); s.setMakeStep(link.makeStep); return }
+      s.setPhase('respond'); s.setTab('journey')
+      if ('block' in link) { s.openBlock(link.block); return }
+      if (link.step == null) { s.seek(0); s.setCam('overview'); return }
+      const i = lay.steps.findIndex((x) => x.kind === link.step)
+      s.seek(i + 0.99); anim.progress = i + 0.99; s.setCam('follow')
+    }
+    apply()
+    window.addEventListener('hashchange', apply)
+    return () => window.removeEventListener('hashchange', apply)
+  }, [lay])
 
   if (err) return <div className="center">{err}</div>
   if (!trace || !lay || !geo) return <div className="center">…</div>
@@ -78,6 +99,7 @@ function Schema() {
         <LabelOverlay />
         <MiniMap lay={lay} />
         {phase === 'respond' && <WeightLegend />}
+        <Welcome />
         <HoverBox />
         {SHOW_FPS && <Fps />}
         {phase === 'make' ? <MakeSteps /> : view === 'journey' ? <Timeline lay={lay} /> : <><BlockCalc trace={trace} /><BlockSteps /></>}

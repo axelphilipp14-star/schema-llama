@@ -25,6 +25,25 @@ export function Ticker({ lay }: { lay: JourneyLayout }) {
   return null
 }
 
+/** Zone de la scène (coordonnées −1…1) laissée libre par les bandeaux HTML : mini-carte, légende, accueil en haut, frise en bas. */
+export function freeRegion(w: number, h: number) {
+  const stage = typeof document !== 'undefined' ? document.querySelector('.stage')?.getBoundingClientRect() : null
+  let top = 0, bottom = h
+  if (stage) {
+    // Chaque bandeau compte en haut ou en bas selon sa position (l'accueil est juste au-dessus de la frise).
+    for (const o of document.querySelectorAll('.stage .minimap, .stage .wlegend, .stage .welcome, .stage .timeline')) {
+      const b = o.getBoundingClientRect()
+      if (!b.height) continue
+      const t0 = b.top - stage.top, b0 = b.bottom - stage.top
+      if ((t0 + b0) / 2 < h / 2) top = Math.max(top, b0 + 8)
+      else bottom = Math.min(bottom, t0 - 4)
+    }
+  }
+  if (bottom - top < h * 0.4) { top = 0; bottom = h } // fenêtre minuscule : on garde tout l'écran
+  // À droite, place pour les libellés des probabilités (« ·was 46,6 % »), qui dépassent la boîte 3D.
+  return { x0: -1 + 24 / w, x1: 1 - 150 / w, y0: 1 - (2 * bottom) / h, y1: 1 - (2 * top) / h }
+}
+
 const FOLLOW_OFFSET = new Vector3(-7.5, 9.5, 8.5)
 
 export function Rig({ lay }: { lay: JourneyLayout }) {
@@ -52,11 +71,13 @@ export function Rig({ lay }: { lay: JourneyLayout }) {
       desP.current.copy(desT.current).add(FOLLOW_OFFSET)
     } else {
       // Vue d'ensemble : tout le trajet dans le cadre, en diagonale (la ligne fuit vers la droite).
-      if (!fitCache.current || fitCache.current.key !== `${size.width}x${size.height}`) {
+      const region = freeRegion(size.width, size.height)
+      const key = `${size.width}x${size.height}|${region.x0.toFixed(3)},${region.x1.toFixed(3)},${region.y0.toFixed(3)},${region.y1.toFixed(3)}`
+      if (!fitCache.current || fitCache.current.key !== key) {
         const f = fitBox(camera as PerspectiveCamera, size.width / size.height,
           new Vector3(lay.xTok - 1.6, -0.9, lay.laneZ(0) - 0.4), new Vector3(lay.xEnd, TABLE_H + 2.2, lay.laneZ(lay.n - 1) + 0.4),
-          new Vector3(-0.55, 0.62, 1))
-        fitCache.current = { key: `${size.width}x${size.height}`, ...f }
+          new Vector3(-0.55, 0.62, 1), 0.96, region)
+        fitCache.current = { key, ...f }
       }
       desT.current.copy(fitCache.current.target)
       desP.current.copy(fitCache.current.position)

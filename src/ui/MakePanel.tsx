@@ -7,7 +7,7 @@ import { useStore } from '../store'
 import { useT } from '../i18n'
 import { MAKE_STEPS, type TraceSummary } from '../scene/MakeScene'
 import { Fiche } from './Fiche'
-import { Footer, Header } from './Panels'
+import { Footer, Header, KeyFig } from './Panels'
 
 /** 1,7 × 10²³ (écriture scientifique avec exposant en exposant). */
 function sci(x: number, num: (v: number, d?: number) => string) {
@@ -44,6 +44,7 @@ export function MakePanel({ traces }: { traces: TraceSummary[] }) {
   let body: ReactNode = <p>{t.make.overview}</p>
   if (k === 'data') body = (
     <>
+      <KeyFig value={t.make.trillions(num(facts.donnees.tokens_max / 1e12, 0))} label={t.make.f.tokens} tone="make" />
       <p>{t.make.explain.data}</p>
       <table className="ctable facts"><tbody>
         <Fact label={t.make.f.tokens} value={t.make.trillions(num(facts.donnees.tokens_max / 1e12, 0))} src="meta" />
@@ -58,6 +59,7 @@ export function MakePanel({ traces }: { traces: TraceSummary[] }) {
     const avg = (fr: boolean) => { const r = rows.filter((y) => y.x.id.includes('-fr-') === fr); return r.reduce((a, y) => a + y.toks, 0) / r.reduce((a, y) => a + y.words, 0) }
     body = (
       <>
+        <KeyFig value={num(cfg?.vocab ?? 0, 0)} label={t.make.f.vocab} tone="make" />
         <p>{t.make.explain.tokenizer}</p>
         <table className="ctable facts"><tbody>
           <Fact label={t.make.f.vocab} value={num(cfg?.vocab ?? 0, 0)} src="trace" />
@@ -78,6 +80,7 @@ export function MakePanel({ traces }: { traces: TraceSummary[] }) {
     const pB = target && b?.top5.find((x) => x.id === target.id)?.p
     body = (
       <>
+        <KeyFig value={t.make.billions(num(P / 1e9, 2))} label={t.make.f.params} tone="make" />
         <p>{t.make.explain.pretraining}</p>
         <table className="ctable facts"><tbody>
           <Fact label={t.make.f.params} value={t.make.billions(num(P / 1e9, 2))} src="calc" />
@@ -98,8 +101,12 @@ export function MakePanel({ traces }: { traces: TraceSummary[] }) {
       </>
     )
   }
+  const ftI = inst(makeSentence), ftB = base(makeSentence)
+  const ftT = ftI?.top5[0]
+  const ftPB = ftT && ftB?.top5.find((x) => x.id === ftT.id)?.p
   if (k === 'finetuning') body = (
     <>
+      {ftT && <KeyFig value={`${ftPB == null ? t.make.notInTop5 : pct(ftPB, 1)} → ${pct(ftT.p, 1)}`} label={t.keyfig.ft(showTok(ftT.t))} tone="make" />}
       <p>{t.make.explain.finetuning}</p>
       <p className="small">{facts.finetuning.etapes[lang]} <em className="tag src-meta">{t.make.src.meta}</em></p>
       <table className="ctable">

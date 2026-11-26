@@ -42,7 +42,7 @@ export function Fiche({ id }: { id: string }) {
   const blocks: [string, string | null][] = [[t.fiche.clair, pick('clair')], [t.fiche.analogie, pick('analogie')], [t.fiche.piege, pick('piege')]]
   const q = pick('question')
   return (
-    <details className="fiche" open>
+    <details className="fiche">
       <summary>{t.fiche.title} · {f.titre}</summary>
       {lang === 'en' && (f.aTraduire ?? 0) > 0 && <p className="warn small">{t.fiche.pending}</p>}
       {f.enAttente && <p className="muted small">{f.enAttente}</p>}

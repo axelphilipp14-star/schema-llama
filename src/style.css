@@ -254,3 +254,41 @@ html, body, #root { margin: 0; height: 100%; background: var(--bg); color: var(-
 .cmp-table td.mono { white-space: nowrap; font-size: 12px; }
 .strip-row { grid-template-columns: 26px 1fr 128px; }
 .strip-row > span:last-child { white-space: nowrap; }
+
+/* Démo du 29/11 — panneau lisible : corps ≥ 14 px, chiffre clé en tête, détail replié. */
+@media (min-width: 1300px) { .app { grid-template-columns: 1fr 400px; } }
+.panel { font-size: 15px; }
+.panel .small, .panel .warn, .fiche p, .fiche ul, .fiche dl div, .fiche .enq div, .lens li, .lens li .tok, .panel .ctable { font-size: 14px; }
+.panel .mono { font-size: 14px; }
+.lens li .k, .lens li .num, .chip i { font-size: 12.5px; }
+.panel h2 { font-size: 15px; }
+.fiche summary, .more summary { font-size: 14px; }
+.keyfig { margin: 14px 0 8px; padding: 10px 14px; border-left: 3px solid var(--text); background: var(--bg); border-radius: 0 8px 8px 0; }
+.keyfig.out { border-left-color: var(--out); } .keyfig.out .kf-val { color: var(--out); }
+.keyfig.emb { border-left-color: var(--emb); } .keyfig.emb .kf-val { color: var(--emb); }
+.keyfig.make { border-left-color: var(--make); } .keyfig.make .kf-val { color: var(--make); }
+.panel .keyfig .kf-val { font-size: 28px; font-weight: 600; line-height: 1.2; word-break: break-word; }
+.keyfig .kf-sub { font-size: 20px; opacity: 0.85; }
+.keyfig .kf-lbl { font-size: 14px; color: var(--muted); margin-top: 2px; }
+.early-note { font-size: 14px; color: var(--make); border-left: 2px solid var(--make); padding-left: 10px; margin: 6px 0 12px !important; }
+.more { margin: 10px 0; border: 1px solid var(--grid); border-radius: 8px; padding: 6px 12px; }
+.more summary { cursor: pointer; font-weight: 600; color: var(--muted); }
+.more[open] summary { margin-bottom: 6px; }
+.lens-box .lens { margin-top: 6px; }
+.step-body { min-height: 0; }
+.welcome { position: absolute; left: 50%; transform: translateX(-50%); bottom: 88px; z-index: 33; width: min(720px, calc(100% - 32px));
+  display: flex; gap: 12px; align-items: flex-start; padding: 10px 12px 10px 16px; background: color-mix(in srgb, var(--surface) 96%, transparent);
+  border: 1px solid color-mix(in srgb, var(--emb) 55%, var(--grid)); border-radius: 10px; box-shadow: 0 6px 24px #0008; }
+.welcome p { margin: 0; font-size: 15px; line-height: 1.45; }
+.welcome .w-what { font-weight: 600; color: var(--text); }
+.welcome .w-how { color: #c9cfdb; }
+.w-close { margin-left: auto; background: none; border: 0; color: var(--muted); font-size: 22px; line-height: 1; cursor: pointer; padding: 0 4px; }
+.w-close:hover { color: var(--text); }
+.live-times { color: var(--make); font-size: 14px; }
+.live-stage { font-weight: 600; font-size: 14px; margin-bottom: 2px !important; }
+.pbar.pulse span { animation: pbar-pulse 1.2s ease-in-out infinite; }
+@keyframes pbar-pulse { 50% { opacity: 0.35; } }
+.temp-scale { gap: 10px; }
+.temp-scale span { flex: 1; }
+.temp-scale span:nth-child(2) { text-align: center; }
+.temp-scale span:nth-child(3) { text-align: right; }

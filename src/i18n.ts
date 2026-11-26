@@ -185,6 +185,25 @@ const fr = {
     barIn: 'entrée du bloc', barOut: 'sortie du bloc',
     prevStep: 'Étape précédente', nextStep: 'Étape suivante',
   },
+  keyfig: {
+    tokens: (V: string) => `tokens, pris dans un vocabulaire de ${V} entrées`,
+    embed: 'nombres par token : chaque token devient un vecteur',
+    block: 'mot prédit si le modèle s’arrêtait à la sortie de ce bloc',
+    norm: 'taille du vecteur ‖x‖, avant → après la normalisation',
+    head: 'score brut (logit) du premier candidat',
+    probs: 'mot choisi, avec sa probabilité',
+    ft: (tok: string) => `probabilité de « ${tok} » : modèle de base → Instruct`,
+    details: 'Détails',
+  },
+  earlyNote: 'Dans les premiers blocs, le modèle « prédit » surtout le mot qu’il vient de lire ; la vraie réponse apparaît plus loin.',
+  welcome: {
+    what: 'Llama 3.2 3B, avec de vrais nombres calculés sur une vraie phrase.',
+    how: '« Lecture » : suis un token jusqu’à la réponse. Ou clique sur un bloc pour entrer dedans.',
+    howMake: 'Clique sur une étape, de 1 à 4, pour voir comment le modèle est fabriqué. Puis « Répondre ».',
+    close: 'Fermer',
+  },
+  liveTimes: '1B : ≈ 5 min la 1re fois (téléchargement), ≈ 25 s ensuite · 3B : ≈ 7 min, puis ≈ 2 min.',
+  liveStage: { download: 'Étape 1 / 2 : téléchargement', warm: 'Étape 2 / 2 : préparation de la carte graphique' },
 }
 
 type Dict = typeof fr
@@ -371,6 +390,25 @@ const en: Dict = {
     barIn: 'block input', barOut: 'block output',
     prevStep: 'Previous step', nextStep: 'Next step',
   },
+  keyfig: {
+    tokens: (V) => `tokens, taken from a vocabulary of ${V} entries`,
+    embed: 'numbers per token: each token becomes a vector',
+    block: 'word predicted if the model stopped at the output of this block',
+    norm: 'vector size ‖x‖, before → after normalization',
+    head: 'raw score (logit) of the top candidate',
+    probs: 'chosen word, with its probability',
+    ft: (tok) => `probability of “${tok}”: base model → Instruct`,
+    details: 'Details',
+  },
+  earlyNote: 'In the first blocks, the model mostly “predicts” the word it just read; the real answer shows up further on.',
+  welcome: {
+    what: 'Llama 3.2 3B, with real numbers computed on a real sentence.',
+    how: '“Play”: follow one token to the answer. Or click a block to step inside.',
+    howMake: 'Click a step, 1 to 4, to see how the model is made. Then “Answer”.',
+    close: 'Close',
+  },
+  liveTimes: '1B: ≈ 5 min the first time (download), ≈ 25 s afterwards · 3B: ≈ 7 min, then ≈ 2 min.',
+  liveStage: { download: 'Step 1 / 2: download', warm: 'Step 2 / 2: preparing the graphics card' },
 }
 
 export const dicts: Record<Lang, Dict> = { fr, en }
